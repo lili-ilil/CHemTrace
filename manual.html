@@ -90,7 +90,7 @@ try{ var m = localStorage.getItem("smp-metal"); if(m === "Hg" || m === "Pb" || m
 
       <section id="intended">
         <h2>Intended use and limits</h2>
-        <p class="lead">CHemTrace gives an overview of the whole system: soil, air, groundwater, rivers and lakes together. Use it to form assumptions and a first plan of where to act and what to measure. The detail belongs in specialised models and site investigations; the platform hands its inputs to them (see <a href="#further">Take it further</a>). Version 0.12.1 is a research prototype: transparent and documented, but not yet reviewed by independent experts.</p>
+        <p class="lead">CHemTrace gives an overview of the whole system: soil, air, groundwater, rivers and lakes together. Use it to form assumptions and a first plan of where to act and what to measure. The detail belongs in specialised models and site investigations; the platform hands its inputs to them (see <a href="#further">Take it further</a>). Version 0.12.3 is a research prototype: transparent and documented, but not yet reviewed by independent experts.</p>
         <ol class="steps">
           <li><b>Overview here.</b> Follow the release through all compartments, see where most of it ends up and which result is close to a Swiss limit.</li>
           <li><b>First plan.</b> Rank the places to act and the measurements that narrow the range most (spread map, mass budget, uncertainty drivers).</li>
@@ -239,14 +239,15 @@ try{ var m = localStorage.getItem("smp-metal"); if(m === "Hg" || m === "Pb" || m
           <li><b>Set the source.</b> Pick your site on the site map and click <b>Fill inputs from this site</b>, or click <b>Move source</b> on the spread map and then click the place. Presets use an illustrative place.</li>
           <li><b>Set the groundwater flow direction.</b> This matters most. Read it from your canton's groundwater map (water-table contours), the FOEN hydrogeological map 1:100,000 or your own wells. Then click <b>Set direction</b> and click a point downstream of the source, or type the direction in degrees on the Groundwater tab. Until you do, a dashed arrow from the terrain stands in and the page says so.</li>
           <li><b>Move the time slider</b> (1–100 years) or press <b>Play</b>.</li>
-          <li><b>Read the colours.</b> Red: above the standard at the best estimate. Amber: at least 10% of the uncertainty runs are above it. The source area turns red or amber when its topsoil is above a Swiss soil value. The dashed amber line is the runoff path that eroded soil follows.</li>
+          <li><b>Read the colours.</b> Red: above the standard at the best estimate. Amber: at least 10% of the uncertainty runs are above it. The source area turns red or amber when its topsoil is above a Swiss soil value. The dashed amber line is the runoff path that eroded soil follows; a red dot marks where it reaches a stream, an open circle where it collects without one. The green arrow is the groundwater direction: solid if you set it, dashed for the terrain stand-in. The blue dotted arrow is the wind.</li>
           <li><b>Read "Where to act"</b> below the map. It gives the soil concentration at the source, the mass washed downslope, and how far and wide the groundwater zone reaches.</li>
         </ol>
         <h3>Support layers</h3>
         <ul>
-          <li><b>Cantonal groundwater protection</b> (geodienste.ch): blue S1–S3 zones around drinking-water wells and springs, pink protected aquifer areas (Au). If the red or amber zone touches a blue zone, act first there. Coverage and terms vary by canton.</li>
-          <li><b>Hydrogeological map 1:100,000</b> (FOEN): water-table contours and flow arrows, where the map exists. Use it to set the direction.</li>
-          <li><b>Tracer tests</b> (FOEN): measured flow paths, mostly in karst.</li>
+          <li><b>Cantonal groundwater protection</b> (geodienste.ch): blue S1–S3 zones around drinking-water wells and springs, pink protected aquifer sectors (Au). If the red or amber zone touches a blue zone, act first there. Coverage and terms vary by canton.</li>
+          <li><b>Hydrogeological map 1:100,000</b> (FOEN): aquifers, water-table contours and flow arrows, on the 8 sheets that exist. Use it to set the direction.</li>
+          <li><b>Tracer tests</b> (FOEN InfoTracer): where tracer tests were run since 1984, mostly in karst. The layer shows injection points only; the canton holds the results.</li>
+          <li>Click <b>Support layers</b> beside the map to open the panel over the right side of the map; close it with × or Esc. When you switch a layer on, its legend and a link to its source appear under it, and the button shows how many layers are on.</li>
           <li><b>Open this place in map.geo.admin.ch</b> opens the federal viewer at the source with these layers.</li>
         </ul>
         <h3>Things to know</h3>
@@ -482,16 +483,23 @@ try{ var m = localStorage.getItem("smp-metal"); if(m === "Hg" || m === "Pb" || m
           <li>Site data is on a 1 km grid and describes the area, not a parcel.</li>
           <li>Swiss limit values change. Check the current text on <a href="https://www.fedlex.admin.ch" target="_blank" rel="noopener">fedlex.admin.ch</a> before using them in a report.</li>
         </ul>
-        <h3>Data behind the map</h3>
+        <h3>Data and map layers</h3>
         <div class="tbl-wrap"><table>
-          <thead><tr><th>Dataset</th><th>Provider</th><th>Used for</th></tr></thead>
+          <thead><tr><th>Layer</th><th>Provider</th><th>Used for</th></tr></thead>
           <tbody>
-            <tr><td><a href="https://opendatadocs.meteoswiss.ch/c-climate-data/c7-spatial-climate-normals" target="_blank" rel="noopener">Climate normals 1991–2020</a></td><td>MeteoSwiss</td><td>Precipitation, temperature</td></tr>
-            <tr><td><a href="https://ccsols.ch/de/boeden-kartieren/kartenerstellung/hinweiskarten-fuer-bodeneigenschaften/" target="_blank" rel="noopener">Soil property maps</a> (CC BY 4.0)</td><td>Competence Centre for Soils (KOBO)</td><td>Soil pH, clay, organic carbon</td></tr>
-            <tr><td><a href="https://www.bafu.admin.ch/de/geochemischer-bodenatlas-der-schweiz" target="_blank" rel="noopener">Geochemical soil atlas</a></td><td>FOEN, Agroscope</td><td>Background As, Pb, Hg; antimony, iron, calcium classes</td></tr>
-            <tr><td><a href="https://opendata.swiss/en/dataset/hydrogeologische-karte-der-schweiz-grundwasservorkommen-1-500000" target="_blank" rel="noopener">Hydrogeological map 1:500,000</a></td><td>swisstopo, FOEN</td><td>Aquifer and bedrock type</td></tr>
-            <tr><td><a href="https://ckan.opendata.swiss/dataset/arealstatistik-aktueller-stand-csv/resource/e0240bd6-d2c7-4292-9cd3-71b1c9b63be8" target="_blank" rel="noopener">Land-use statistics</a></td><td>Federal Statistical Office (BFS)</td><td>Land use</td></tr>
-            <tr><td><a href="https://www.swisstopo.admin.ch/" target="_blank" rel="noopener">Base map and elevation</a></td><td>swisstopo</td><td>Map tiles, elevation</td></tr>
+            <tr><td><a href="https://map.geo.admin.ch/?lang=en&amp;bgLayer=ch.swisstopo.pixelkarte-grau" target="_blank" rel="noopener">National map, grey</a></td><td>swisstopo</td><td>Background of the site map and the spread map</td></tr>
+            <tr><td><a href="https://opendatadocs.meteoswiss.ch/c-climate-data/c7-spatial-climate-normals" target="_blank" rel="noopener">Climate normals 1991–2020</a></td><td>MeteoSwiss</td><td>Precipitation and temperature at the site</td></tr>
+            <tr><td><a href="https://ccsols.ch/de/boeden-kartieren/kartenerstellung/hinweiskarten-fuer-bodeneigenschaften/" target="_blank" rel="noopener">Soil property maps (CC BY 4.0)</a></td><td>Competence Centre for Soils (KOBO)</td><td>Soil pH, clay and organic carbon</td></tr>
+            <tr><td><a href="https://www.bafu.admin.ch/de/geochemischer-bodenatlas-der-schweiz" target="_blank" rel="noopener">Geochemical soil atlas</a></td><td>FOEN, Agroscope</td><td>Background As, Pb, Hg; antimony, iron and calcium classes</td></tr>
+            <tr><td><a href="https://opendata.swiss/en/dataset/hydrogeologische-karte-der-schweiz-grundwasservorkommen-1-500000" target="_blank" rel="noopener">Hydrogeological map 1:500,000</a></td><td>swisstopo, FOEN</td><td>Aquifer and bedrock type at the site</td></tr>
+            <tr><td><a href="https://ckan.opendata.swiss/dataset/arealstatistik-aktueller-stand-csv/resource/e0240bd6-d2c7-4292-9cd3-71b1c9b63be8" target="_blank" rel="noopener">Land-use statistics</a></td><td>Federal Statistical Office (BFS)</td><td>Land use, forest and sealed shares</td></tr>
+            <tr><td><a href="https://map.geo.admin.ch/?lang=en&amp;layers=ch.bafu.luftreinhaltung-feinstaub_pm10,ch.bafu.luftreinhaltung-feinstaub_pm25" target="_blank" rel="noopener">PM10 and PM2.5 annual maps (2023–2025)</a></td><td>FOEN</td><td>Background fine dust at the site</td></tr>
+            <tr><td><a href="https://www.bafu.admin.ch/en/national-air-pollution-monitoring-network-nabel" target="_blank" rel="noopener">NABEL air monitoring network (2024)</a></td><td>FOEN, Empa</td><td>Background Pb in air and in dust deposition</td></tr>
+            <tr><td><a href="https://api3.geo.admin.ch/services/sdiservices.html" target="_blank" rel="noopener">Height and profile service</a></td><td>swisstopo</td><td>Elevation, slope, runoff path and terrain direction</td></tr>
+            <tr><td><a href="https://map.geo.admin.ch/?lang=en&amp;layers=ch.swisstopo.vec25-gewaessernetz_referenz" target="_blank" rel="noopener">Stream network (VECTOR25)</a></td><td>swisstopo</td><td>Where the runoff reaches a stream, and its name</td></tr>
+            <tr><td><a href="https://www.geodienste.ch/services/planerischer_gewaesserschutz" target="_blank" rel="noopener">Groundwater protection zones and sectors</a></td><td>Cantons via geodienste.ch</td><td>Support layer: wells and springs to protect</td></tr>
+            <tr><td><a href="https://www.bafu.admin.ch/en/groundwater-maps" target="_blank" rel="noopener">Hydrogeological map 1:100,000</a></td><td>FOEN</td><td>Support layer: aquifers, water-table contours, flow direction</td></tr>
+            <tr><td><a href="https://www.bafu.admin.ch/en/infotracer-central-coordination-service-for-tracer-tests" target="_blank" rel="noopener">Groundwater tracer tests (InfoTracer)</a></td><td>FOEN</td><td>Support layer: where tracer tests were run</td></tr>
           </tbody>
         </table></div>
         <p class="back"><a href="index.html">← Back to the platform</a></p>
@@ -500,7 +508,7 @@ try{ var m = localStorage.getItem("smp-metal"); if(m === "Hg" || m === "Pb" || m
     </main>
   </div>
 
-  <footer>CHemTrace · screening estimates for contaminants in Switzerland (now As, Hg and Pb). Map data © swisstopo; climate data: Source MeteoSwiss; soil maps © KOBO (CC BY 4.0); soil atlas © FOEN/Agroscope; land use © BFS.<span class="copy">© 2026 Li-Ling T. ETH Zürich · Version 0.12.1, 30 October 2026 · Contact: <a href="mailto:litail@ethz.ch">litail@ethz.ch</a></span></footer>
+  <footer>CHemTrace · screening estimates for contaminants in Switzerland (now As, Hg and Pb). Map data © swisstopo; climate data: Source MeteoSwiss; soil maps © KOBO (CC BY 4.0); soil atlas © FOEN/Agroscope; land use © BFS.<span class="copy">© 2026 Li-Ling T. ETH Zürich · Version 0.12.3, 31 October 2026 · Contact: <a href="mailto:litail@ethz.ch">litail@ethz.ch</a></span></footer>
 </div>
 </body>
 </html>

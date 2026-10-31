@@ -278,7 +278,7 @@
     </div>
     <aside class="intended" aria-label="Intended use">
       <p><b>Intended use.</b> An overview of the whole system: where the metal goes, which place to act on first and what to measure, so you can form assumptions and a first plan. Check that plan with site data and the specialised models under <a href="#further">Take it further</a>. Also for teaching and comparing scenarios. <b>Not for</b> deciding under the AltlV whether a site must be investigated further or remediated, designing remediation, predicting concentrations or arrival times at a specific well, or individual health-risk assessments. Several defaults are assumptions that experts have not yet reviewed.</p>
-      <p class="imeta"><a href="manual.html#intended">Intended use and limits</a> · <a href="assumptions.html">All assumptions</a> · <a href="validation.html">Validation</a> · Version 0.12.1, 30 October 2026 · Feedback: <a href="mailto:litail@ethz.ch">litail@ethz.ch</a></p>
+      <p class="imeta"><a href="manual.html#intended">Intended use and limits</a> · <a href="assumptions.html">All assumptions</a> · <a href="validation.html">Validation</a> · Version 0.12.3, 31 October 2026 · Feedback: <a href="mailto:litail@ethz.ch">litail@ethz.ch</a></p>
     </aside>
     <div class="res-grid" id="resGrid"></div>
     <div class="spread" id="spread">
@@ -293,24 +293,62 @@
         <div class="ctl"><label class="ctl-label" for="spLim">Standard for groundwater</label><select id="spLim"><option value="tbdv">Drinking-water limit (TBDV)</option><option value="altl">AltlV concentration value (Annex 1)</option></select></div>
       </div>
       <div class="sp-body">
-        <div class="sp-map2" id="spMap2" role="region" aria-label="Spread map"></div>
+        <div class="sp-mapwrap">
+          <div class="sp-map2" id="spMap2" role="region" aria-label="Spread map"></div>
+          <div class="sp-drawer" id="spDrawer" role="region" aria-labelledby="spDrawerTitle">
+            <div class="sp-drawer-hd"><h4 id="spDrawerTitle">Support layers</h4><button type="button" class="sp-drawer-x" id="spDrawerX" aria-label="Close support layers">×</button></div>
+              <fieldset class="sp-layers" id="spLayers"><legend class="sr-only">Support layers</legend>
+                <label><input type="checkbox" data-ov="cant" autocomplete="off"><span>Cantonal groundwater protection <small>Protection zones around drinking-water wells and springs, and protected aquifer sectors. Coverage and terms vary by canton.</small></span></label>
+                <div class="lyr-leg" id="leg-cant" hidden>
+                  <ul>
+                    <li><i style="--c:#000080"></i>S1: catchment right around the well or spring</li>
+                    <li><i style="--c:#0060E6"></i>S2: inner protection zone</li>
+                    <li><i style="--c:#73ADFF"></i>S3: outer protection zone</li>
+                    <li><i class="hatch" style="--c:#3388FF"></i>Sh, Sm: zones in karst and fractured rock; Zu: inflow area</li>
+                    <li><i class="stripe" style="--c:#9EE5F3"></i>Protection area: kept free for future wells</li>
+                    <li><i style="--c:#FF7F7F"></i>Au: protected sector over usable groundwater</li>
+                    <li><i style="--c:#FFDABF"></i>Ao: protected sector for surface waters</li>
+                    <li><i class="dashed" style="--c:#3388FF"></i>Dashed outline: planned, not yet in force</li>
+                  </ul>
+                  <a class="src" href="https://www.geodienste.ch/services/planerischer_gewaesserschutz" target="_blank" rel="noopener">Source: cantons via geodienste.ch ↗</a>
+                </div>
+                <label><input type="checkbox" data-ov="hk100" autocomplete="off"><span>Hydrogeological map 1:100,000 <small>FOEN; aquifers, water-table contours and flow arrows where mapped</small></span></label>
+                <div class="lyr-leg" id="leg-hk100" hidden>
+                  <ul>
+                    <li><i class="ramp" style="background:linear-gradient(90deg,#9AC6C5,#575F8F)"></i>Blue shades: gravel and sand aquifers in the valleys</li>
+                    <li><i class="ramp" style="background:linear-gradient(90deg,#FDD8A9,#C4E2C9)"></i>Yellow, orange, green: bedrock, grouped by permeability</li>
+                    <li><i class="ln"></i>Dark-blue lines with numbers: water-table height (m a.s.l.); arrows: flow direction</li>
+                  </ul>
+                  <p>Only 8 map sheets exist (e.g. Basel, Biel, Lake Constance); elsewhere the layer is empty. Full legend: click a feature in map.geo.admin.ch (link below).</p>
+                  <a class="src" href="https://www.bafu.admin.ch/en/groundwater-maps" target="_blank" rel="noopener">Source: FOEN groundwater maps ↗</a>
+                </div>
+                <label><input type="checkbox" data-ov="tracer" autocomplete="off"><span>Tracer tests <small>FOEN; where groundwater tracer tests were run, mainly in karst</small></span></label>
+                <div class="lyr-leg" id="leg-tracer" hidden>
+                  <ul>
+                    <li><i class="tr"></i>Injection point of a past tracer test (InfoTracer database, since 1984)</li>
+                  </ul>
+                  <p>It shows where tracer was put in, not where it came out; the canton holds the results.</p>
+                  <a class="src" href="https://www.bafu.admin.ch/en/infotracer-central-coordination-service-for-tracer-tests" target="_blank" rel="noopener">Source: FOEN InfoTracer ↗</a>
+                </div>
+                <label><input type="checkbox" id="spTerrDir" checked autocomplete="off"><span>Terrain direction arrow <small>a stand-in, not a measurement</small></span></label>
+                <a id="spGeoLink" href="https://map.geo.admin.ch" target="_blank" rel="noopener">Open this place in map.geo.admin.ch ↗</a>
+              </fieldset>
+          </div>
+        </div>
         <div class="sp-side">
+          <button type="button" class="sp-layers-btn" id="spLayersBtn" aria-expanded="false" aria-controls="spDrawer"><span class="chev" aria-hidden="true">‹</span><span>Support layers<small>Protection zones, hydrogeology, tracer tests</small></span><span class="cnt" id="spLayersCnt"></span></button>
           <ul class="sp-legend" aria-label="Map legend">
             <li><i class="lg-fill crit"></i>Above the standard (best estimate)</li>
             <li><i class="lg-fill warn"></i>Possibly above (at least 10% of runs)</li>
             <li><i class="lg-box"></i>Source area: red or amber if the topsoil is above a Swiss value</li>
+            <li><i class="lg-pt rel"></i>Release point</li>
             <li><i class="lg-path"></i>Runoff path for eroded soil</li>
+            <li><i class="lg-pt reach"></i>Where the runoff reaches a stream</li>
+            <li><i class="lg-pt collect"></i>Where the runoff collects (no stream nearby)</li>
             <li><i class="lg-arrow"></i>Groundwater direction you set</li>
             <li><i class="lg-arrow dash"></i>Terrain direction (stand-in only)</li>
             <li><i class="lg-arrow wind"></i>Prevailing wind, blowing towards (air releases)</li>
           </ul>
-          <fieldset class="sp-layers" id="spLayers"><legend>Support layers</legend>
-            <label><input type="checkbox" data-ov="cant"><span>Cantonal groundwater protection <small>Blue: S1–S3 zones around wells and springs. Pink: protected aquifer areas (Au). Via geodienste.ch; coverage and terms vary by canton.</small></span></label>
-            <label><input type="checkbox" data-ov="hk100"><span>Hydrogeological map 1:100,000 <small>FOEN; water-table contours and flow arrows where mapped</small></span></label>
-            <label><input type="checkbox" data-ov="tracer"><span>Tracer tests <small>FOEN; measured flow paths, mainly in karst</small></span></label>
-            <label><input type="checkbox" id="spTerrDir" checked><span>Terrain direction arrow <small>a stand-in, not a measurement</small></span></label>
-            <a id="spGeoLink" href="https://map.geo.admin.ch" target="_blank" rel="noopener">Open this place in map.geo.admin.ch ↗</a>
-          </fieldset>
         </div>
       </div>
       <div class="sp-act"><h4>Where to act in year <span id="spActT">10</span></h4><ul class="trap" id="spAct"></ul></div>
@@ -500,7 +538,7 @@
     </ul>
   </section>
 
-  <footer>Built from literature and Swiss federal sources, checked October 2026. Explore mode is qualitative: flow weights and mobility levels are indicative. Advanced mode gives screening estimates from documented equations and does not replace a site investigation. Map data © swisstopo; climate data: Source MeteoSwiss; soil maps © KOBO (CC BY 4.0); soil atlas © FOEN/Agroscope; land use © BFS.<span class="copy">© 2026 Li-Ling T. ETH Zürich · Version 0.12.1, 30 October 2026 · Contact: <a href="mailto:litail@ethz.ch">litail@ethz.ch</a></span></footer>
+  <footer>Built from literature and Swiss federal sources, checked October 2026. Explore mode is qualitative: flow weights and mobility levels are indicative. Advanced mode gives screening estimates from documented equations and does not replace a site investigation. Map data © swisstopo; climate data: Source MeteoSwiss; soil maps © KOBO (CC BY 4.0); soil atlas © FOEN/Agroscope; land use © BFS.<span class="copy">© 2026 Li-Ling T. ETH Zürich · Version 0.12.3, 31 October 2026 · Contact: <a href="mailto:litail@ethz.ch">litail@ethz.ch</a></span></footer>
 </div>
 <script>
 window.addEventListener("load", function(){
