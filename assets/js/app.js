@@ -972,7 +972,7 @@ const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 const SUPS = {"-":"⁻","0":"⁰","1":"¹","2":"²","3":"³","4":"⁴","5":"⁵","6":"⁶","7":"⁷","8":"⁸","9":"⁹"};
 // results are screening estimates, often uncertain by a factor of 10: show two significant figures, not more
 const NF = new Intl.NumberFormat("en-US", {maximumSignificantDigits:2});
-const APP_VERSION = "0.12.3", APP_DATE = "2026-10-31";
+const APP_VERSION = "0.12.5", APP_DATE = "2026-10-31";
 function fmt(v){
   if(v == null || isNaN(v)) return "–";
   if(!isFinite(v)) return "∞";
