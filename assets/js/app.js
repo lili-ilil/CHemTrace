@@ -972,7 +972,7 @@ const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 const SUPS = {"-":"⁻","0":"⁰","1":"¹","2":"²","3":"³","4":"⁴","5":"⁵","6":"⁶","7":"⁷","8":"⁸","9":"⁹"};
 // results are screening estimates, often uncertain by a factor of 10: show two significant figures, not more
 const NF = new Intl.NumberFormat("en-US", {maximumSignificantDigits:2});
-const APP_VERSION = "0.12.1", APP_DATE = "2026-10-30";
+const APP_VERSION = "0.12.3", APP_DATE = "2026-10-31";
 function fmt(v){
   if(v == null || isNaN(v)) return "–";
   if(!isFinite(v)) return "∞";
@@ -2543,6 +2543,7 @@ function initSpreadMap(){
     SP.mode = ""; $("#spMap2").classList.remove("picking"); renderForm(); refreshAll(); saveAdv();
   });
   document.querySelectorAll("#spLayers input[data-ov]").forEach(cb => cb.addEventListener("change", () => {
+    const leg = document.getElementById("leg-" + cb.dataset.ov); if(leg) leg.hidden = !cb.checked;
     if(cb.dataset.ov === "cant"){ cantWms(cb.checked); return; }
     const l = SP.ov[cb.dataset.ov]; if(l){ if(cb.checked) l.addTo(SP.map); else SP.map.removeLayer(l); }
   }));
@@ -2559,6 +2560,19 @@ function initSpreadMap(){
     if(a === "home"){ INP.srcE = ""; INP.srcN = ""; SP.fitKey = ""; renderForm(); refreshAll(); saveAdv(); }
   });
 }
+/* Support layers drawer: opens to the left over the map when the button beside the map is clicked */
+(function(){
+  const dr = $("#spDrawer"), btn = $("#spLayersBtn"); if(!dr || !btn) return;
+  const set = open => {
+    dr.classList.toggle("open", open); btn.setAttribute("aria-expanded", String(open));
+    if(open){ const f = dr.querySelector("input"); if(f) f.focus({preventScroll:true}); if(window.innerWidth <= 860) dr.scrollIntoView({block:"nearest", behavior:reduceMotion ? "auto" : "smooth"}); }
+  };
+  btn.addEventListener("click", () => set(!dr.classList.contains("open")));
+  $("#spDrawerX").addEventListener("click", () => { set(false); btn.focus(); });
+  dr.addEventListener("keydown", e => { if(e.key === "Escape"){ set(false); btn.focus(); } });
+  const count = () => { const n = [...dr.querySelectorAll("input[data-ov]")].filter(x => x.checked).length; $("#spLayersCnt").textContent = n ? `${n} on` : ""; };
+  dr.addEventListener("change", count); count();
+})();
 function setSpreadPlay(on){
   SP.playing = on; clearInterval(SP.timer);
   $("#spPlay").innerHTML = on ? "❚❚ Pause" : "▶ Play"; $("#spPlay").setAttribute("aria-pressed", String(on));
@@ -2683,7 +2697,8 @@ function drawSpread(){
   // runoff path
   if(T && T.path.length > 1 && soilLike(I)){
     LF.polyline(T.path.map(([E, N]) => toLL(E, N)), {renderer:SP.canvas, color:warn, weight:4, opacity:0.9, dashArray:"6 5"}).bindTooltip("Runoff path: eroded soil washes this way").addTo(SP.draw);
-    const end = T.path[T.path.length - 1]; LF.circleMarker(toLL(end[0], end[1]), {renderer:SP.canvas, radius:5, color:warn, weight:2, fillColor:cssVar("--surface"), fillOpacity:1}).bindTooltip(T.stop === "stream" ? "Reaches the stream here" : "Collects here").addTo(SP.draw);
+    const end = T.path[T.path.length - 1];
+    LF.circleMarker(toLL(end[0], end[1]), T.stop === "stream" ? {renderer:SP.canvas, radius:6, color:"#fff", weight:2, fillColor:crit, fillOpacity:1} : {renderer:SP.canvas, radius:5, color:warn, weight:2, fillColor:"#fff", fillOpacity:1}).bindTooltip(T.stop === "stream" ? "Reaches the stream here" : "Collects here").addTo(SP.draw);
     T.path.forEach(([E, N]) => fit.push(toLL(E, N)));
   }
   LF.circleMarker(toLL(s.E, s.N), {renderer:SP.canvas, radius:4, color:ink, weight:2, fillColor:cssVar("--metal"), fillOpacity:1}).bindTooltip("Release point").addTo(SP.draw);
@@ -2700,15 +2715,17 @@ function drawSpread(){
     c.fitL = zl;
     if(zl > 0) fit.push(toLL(...c.world(zl, 0)), toLL(...c.world(zl / 2, zw)), toLL(...c.world(zl / 2, -zw)));
   }
-  // direction arrows: yours solid, terrain dashed (support)
-  const arrow = (az, len, style) => { const a = az * Math.PI / 180, e = [s.E + len * Math.sin(a), s.N + len * Math.cos(a)], hd = len * 0.22;
+  // direction arrows: yours solid, terrain dashed (support); green with a white halo, wind blue and dotted
+  const arrow = (az, len, style, halo) => { const a = az * Math.PI / 180, e = [s.E + len * Math.sin(a), s.N + len * Math.cos(a)], hd = len * 0.22;
     const wing = d => { const b = (az + 180 + d) * Math.PI / 180; return toLL(e[0] + hd * Math.sin(b), e[1] + hd * Math.cos(b)); };
-    LF.polyline([toLL(s.E, s.N), toLL(e[0], e[1])], Object.assign({renderer:SP.canvas, weight:3}, style)).addTo(SP.draw);
-    LF.polyline([wing(-28), toLL(e[0], e[1]), wing(28)], Object.assign({renderer:SP.canvas, weight:3}, style)).addTo(SP.draw); };
-  const alen = Math.max(120, Math.min(1500, c && c.ok && c.fitL ? c.fitL * 0.45 : 300));
-  if(dir && dir.src === "user") arrow(dir.az, alen, {color:ink, opacity:0.95});
+    const draw = st => { const o = Object.assign({renderer:SP.canvas, weight:3, interactive:false}, st);
+      LF.polyline([toLL(s.E, s.N), toLL(e[0], e[1])], o).addTo(SP.draw); LF.polyline([wing(-28), toLL(e[0], e[1]), wing(28)], o).addTo(SP.draw); };
+    if(halo) draw(Object.assign({}, style, {color:"#fff", opacity:0.9, weight:(style.weight || 3) + 4}));
+    draw(style); };
+  const alen = Math.max(120, Math.min(1500, c && c.ok && c.fitL ? c.fitL * 0.45 : 300)), dirC = cssVar("--dir");
+  if(dir && dir.src === "user") arrow(dir.az, alen, {color:dirC, opacity:1, weight:4}, true);
   if(I.medium === "air" && I.windFrom !== "") arrow((Number(I.windFrom) + 180) % 360, Math.max(alen * 0.9, 1.3 * Math.sqrt(num(I.footprint) * 1e6 / Math.PI)), {color:cssVar("--water-deep"), opacity:0.9, dashArray:"2 6"});
-  if(T && $("#spTerrDir").checked) arrow(T.planeAz, alen * 0.8, {color:ink, opacity:0.55, dashArray:"5 6"});
+  if(T && $("#spTerrDir").checked) arrow(T.planeAz, alen * 0.8, {color:dirC, opacity:0.85, dashArray:"6 7"}, true);
   const df0 = I.medium === "air" ? depFrame(FRAMES[FRAMES.length - 1]) : null;
   const fk = `${Math.round(s.E)},${Math.round(s.N)},${dir ? Math.round(dir.az) : "-"},${c && c.ok ? Number((c.fitL || 0).toPrecision(1)) : 0},${I.medium},${df0 ? Number(df0.rP.toPrecision(1)) : 0}`;
   if(df0 && df0.rP > 0){ const rr = df0.rP * 1.1; fit.push(toLL(s.E + rr, s.N + rr), toLL(s.E - rr, s.N - rr)); }
@@ -2735,7 +2752,7 @@ function renderSpreadAct(c, f, t, soilTxt){
     if(dk > 0) L.push(`<b>Downslope:</b> ${fmt(dk)} kg washed off by year ${t}${T ? ` along the ${fmt(Math.round(T.pathLen / 10) * 10)} m runoff path${T.stop === "stream" ? " to the stream" : ""}` : ""}. Sample the field edge and where the path flattens.`);
   }
   if(c && c.why === "river") L.push("A river release follows the river, not the land: see the mass budget for where it settles.");
-  else if(c && c.why === "karst") L.push("<b>Karst:</b> water runs through conduits to springs, often kilometres away within days, so a plume shape would mislead. Turn on <b>FOEN tracer tests</b> to see measured flow paths, and sample springs after heavy rain.");
+  else if(c && c.why === "karst") L.push("<b>Karst:</b> water runs through conduits to springs, often kilometres away within days, so a plume shape would mislead. Turn on <b>Tracer tests</b> to see where tracer tests were run nearby; their results (which springs the water reached, and how fast) are held by the canton. Sample springs after heavy rain.");
   else if(c && c.why === "nodir") L.push("<b>Groundwater:</b> set the flow direction to draw where the plume goes.");
   else if(f){
     const pre = c.dir.src === "user" ? "" : " (direction from terrain, not yet set by you)";
