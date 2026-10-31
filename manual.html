@@ -1,0 +1,506 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>User Manual · CHemTrace</title>
+<meta name="description" content="How to use CHemTrace: Explore mode, Advanced mode, the site map, reading results, the spread map, the mass budget, and ten examples to try.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%2316232A'/%3E%3Cpath d='M5 23C10 9 15 27 25 10' stroke='%23fff' stroke-width='3' fill='none' stroke-linecap='round'/%3E%3Ccircle cx='25' cy='10' r='3.4' fill='%23E2B33C'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="assets/css/styles.css">
+<script>
+try{ var t = localStorage.getItem("smp-theme"); if(t === "dark" || t === "light") document.documentElement.setAttribute("data-theme", t); }catch(e){}
+try{ var m = localStorage.getItem("smp-metal"); if(m === "Hg" || m === "Pb" || m === "As") document.documentElement.setAttribute("data-metal", m); }catch(e){}
+</script>
+<style>
+.man{display:grid; grid-template-columns:220px minmax(0,1fr); gap:36px; align-items:start}
+.toc{position:sticky; top:16px; display:flex; flex-direction:column; gap:2px; font-size:13.5px; border-left:2px solid var(--rule); padding-left:12px}
+.toc b{font-family:var(--f-mono); font-size:11px; font-weight:500; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-3); margin-bottom:6px}
+.toc a{text-decoration:none; color:var(--ink-2); padding-block:3px}
+.toc a:hover{color:var(--ink)}
+.man-body{display:flex; flex-direction:column; gap:34px; min-width:0; max-width:820px}
+.man-body section{display:flex; flex-direction:column; gap:12px; scroll-margin-top:16px}
+.man-body h2{font-size:clamp(22px, 2.4vw, 28px); font-weight:800; font-stretch:112%; border-top:2px solid var(--ink); padding-top:12px}
+.man-body h3{font-size:17px; font-weight:700; margin-top:6px}
+.man-body p, .man-body li{font-size:15px; color:var(--ink)}
+.man-body ul, .man-body ol{margin:0; padding-left:22px; display:flex; flex-direction:column; gap:5px}
+.man-body li ul{margin-top:5px}
+.man-body code{font-family:var(--f-mono); font-size:13px; background:var(--chip); padding:1px 5px; border-radius:2px}
+.man-body .tbl-wrap table{min-width:560px}
+.man-body .lead{font-size:16.5px; color:var(--ink-2)}
+.tag{font-family:var(--f-mono); font-size:12px; color:var(--ink-3)}
+.ex{background:var(--surface); border:1px solid var(--rule); border-left:4px solid var(--metal); border-radius:4px; padding:14px 18px; display:flex; flex-direction:column; gap:8px}
+.ex h3{margin:0}
+.ex dl{margin:0; display:grid; grid-template-columns:150px minmax(0,1fr); gap:6px 14px; font-size:14.5px}
+.ex dt{font-weight:600}
+.ex dd{margin:0}
+.swatch{display:inline-block; width:11px; height:11px; border-radius:2px; vertical-align:-1px; margin-right:6px}
+.back{font-size:14px}
+@media (max-width: 860px){ .man{grid-template-columns:minmax(0,1fr)} .toc{position:static; border-left:0; padding-left:0; flex-direction:row; flex-wrap:wrap; gap:6px 14px} .toc b{width:100%} }
+@media (max-width: 520px){ .ex dl{grid-template-columns:minmax(0,1fr)} .ex dt{margin-top:4px} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="title-block">
+      <span class="kicker">Contaminants in Swiss landscapes · now As · Hg · Pb, more in progress</span>
+      <h1>User Manual</h1>
+      <p class="lede">How to use CHemTrace, with ten examples you can try in a few minutes.</p>
+    </div>
+    <a class="btn" href="index.html">Open the platform</a>
+  </header>
+
+  <div class="man">
+    <nav class="toc" aria-label="Contents">
+      <b>Contents</b>
+      <a href="#what">What the platform does</a>
+      <a href="#intended">Intended use and limits</a>
+      <a href="#explore">Explore mode</a>
+      <a href="#advanced">Advanced mode</a>
+      <a href="#map">Pick a site from the map</a>
+      <a href="#results">Reading the results</a>
+      <a href="#spreadmap">Where to act: the spread map</a>
+      <a href="#budget">Where the metal ends up</a>
+      <a href="#forms">Which forms, in which phase</a>
+      <a href="#drivers">What drives the uncertainty</a>
+      <a href="#airsurf">Air and the land surface</a>
+      <a href="#lakes">Lakes and the redox ladder</a>
+      <a href="#further">Take it further</a>
+      <a href="#examples">Examples to try</a>
+      <a href="#tips">Tips, limits and data</a>
+      <a href="validation.html">Validation →</a>
+      <a href="assumptions.html">Assumptions →</a>
+    </nav>
+
+    <main class="man-body">
+      <section id="what">
+        <h2>What the platform does</h2>
+        <p class="lead">CHemTrace shows how contaminants move through a Swiss landscape: arsenic (As), mercury (Hg) and lead (Pb) today, with more contaminants being added. It also gives screening estimates for a release at a real Swiss site. It has two modes:</p>
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>Mode</th><th>Made for</th><th>What you do</th><th>What you get</th></tr></thead>
+          <tbody>
+            <tr><td><b>Explore</b></td><td>Learning, teaching, a first look</td><td>Point at parts of an animated landscape</td><td>The metal's forms, where it moves next, its threat to people, how to trap it</td></tr>
+            <tr><td><b>Advanced</b></td><td>Researchers and consultants</td><td>Enter a release and site data, or click a place on the map</td><td>Concentrations compared with Swiss limits, uncertainty ranges, measured Swiss benchmarks, recommended measures, a copyable report</td></tr>
+          </tbody>
+        </table></div>
+        <p>Results are screening-level estimates. They do not replace a site investigation.</p>
+        <p>Choose a metal in the Metal menu at the top right and a mode with the Explore and Advanced buttons; the page colour follows the metal. The site remembers your metal, mode, theme and inputs in your browser.</p>
+        <p><b>Contact and feedback:</b> Li-Ling T., ETH Zürich, <a href="mailto:litail@ethz.ch">litail@ethz.ch</a>. More contaminants are being added; suggestions for which ones matter most to you are welcome.</p>
+      </section>
+
+      <section id="intended">
+        <h2>Intended use and limits</h2>
+        <p class="lead">CHemTrace gives an overview of the whole system: soil, air, groundwater, rivers and lakes together. Use it to form assumptions and a first plan of where to act and what to measure. The detail belongs in specialised models and site investigations; the platform hands its inputs to them (see <a href="#further">Take it further</a>). Version 0.12.1 is a research prototype: transparent and documented, but not yet reviewed by independent experts.</p>
+        <ol class="steps">
+          <li><b>Overview here.</b> Follow the release through all compartments, see where most of it ends up and which result is close to a Swiss limit.</li>
+          <li><b>First plan.</b> Rank the places to act and the measurements that narrow the range most (spread map, mass budget, uncertainty drivers).</li>
+          <li><b>Detail elsewhere.</b> Check the top priority with site data and a specialised model: PHREEQC for chemistry, HYDRUS-1D for the soil profile, MODFLOW 6 for the plume.</li>
+        </ol>
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>Use it for</th><th>Use it with care for</th><th>Do not use it for</th></tr></thead>
+          <tbody><tr>
+            <td>An overview of a site and its pathways; a first plan of where to act and what to measure; comparing scenarios; preparing input for specialised models; teaching and outreach</td>
+            <td>Preliminary plausibility checks by consultants, next to measured data, with the version and inputs recorded (Copy inputs, Copy report)</td>
+            <td>Deciding under the AltlV whether a site must be investigated further or remediated; remediation design; concentrations or arrival times at a specific well; individual health-risk assessments; expert or legal reports</td>
+          </tr></tbody>
+        </table></div>
+        <ul>
+          <li><b>Precision.</b> Results are shown with two significant figures because they are often uncertain by a factor of 10 or more. Read the 90% range first.</li>
+          <li><b>Assumptions.</b> Several defaults were set by the developer without a published source. The <a href="assumptions.html">assumptions page</a> lists every one, and says which need expert review.</li>
+          <li><b>Validation.</b> The model matches 8 of 17 published Swiss benchmarks and 5 partly; arrival times in groundwater, antimony seepage and mercury loss from topsoil do not match. See the <a href="validation.html">validation page</a>.</li>
+          <li><b>Swiss law.</b> Contaminated-site decisions rest on measured soil, eluate and groundwater data. Check limit values against the current text on fedlex.admin.ch.</li>
+        </ul>
+      </section>
+
+
+      <section id="explore">
+        <h2>Explore mode</h2>
+        <p class="lead">Explore mode is a field guide. It shows a cross-section from glacier to lake; point at any part to learn what the metal does there.</p>
+        <p><b>The landscape.</b> It contains atmosphere, glacier, bedrock and ore veins, forest soil, farmland and gardens, a contaminated site, village, industry, wastewater plant (ARA), river, lake, lake sediment and groundwater. The contaminated site changes with the metal: a mine dump for arsenic, a waste canal for mercury, a shooting-range berm for lead.</p>
+        <p><b>The moving dots</b> show where the metal travels:</p>
+        <ul>
+          <li>Filled circle: dissolved in water</li>
+          <li>Filled square: bound to particles</li>
+          <li>Ring: gas</li>
+          <li>Thicker line: larger flow (indicative only, not calculated)</li>
+        </ul>
+        <p><b>The side panel.</b> Hover over a part to preview it (tap on a phone). Click to pin it, and use the back button to return to the metal profile. For each part the panel shows:</p>
+        <ul>
+          <li>mobility</li>
+          <li>the forms you will find</li>
+          <li>what happens there</li>
+          <li>what changes in the current scenario</li>
+          <li>where the metal moves next and where it comes from (both clickable)</li>
+          <li>the threat to people</li>
+          <li>where and how to trap it</li>
+          <li>a Swiss example</li>
+          <li>the model inputs that matter</li>
+        </ul>
+        <p><b>Scenario switches</b> change the chemistry: Redox (Oxic or Reducing), Soil and water pH (Calcareous or Acidic) and Water regime (Base flow, Snowmelt or Storm). After each switch, the flows that change light up for a few seconds, red where more metal moves and green where less, with the factor (for example ×5), and a note below the profile lists the largest changes. Pause stops the animation.</p>
+        <p><b>Try this:</b> choose lead and switch Soil and water pH to Acidic: leaching from farmland to groundwater rises about five-fold. Then choose arsenic, set Redox to Reducing and hover over Groundwater. Then choose mercury and hover over the Lake to see methylation.</p>
+      </section>
+
+      <section id="advanced">
+        <h2>Advanced mode: entering a scenario</h2>
+        <p class="lead">Advanced mode turns a release into numbers. Describe what was released, where, and the site; results update as you type.</p>
+        <ol>
+          <li>Click <b>Advanced</b> in the controls row.</li>
+          <li>Choose a starting point:
+            <ul>
+              <li><b>Swiss site preset</b> (Visp, Swiss Plateau, Jura karst, Ticino), then <b>Apply preset</b></li>
+              <li><b>Load example</b>, one ready-made case per metal</li>
+              <li><b>Pick a site on the map</b> (next section)</li>
+            </ul>
+          </li>
+          <li>Change the inputs in the seven tabs.</li>
+        </ol>
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>Tab</th><th>What you set</th><th>Matters most for</th></tr></thead>
+          <tbody>
+            <tr><td><b>Release</b></td><td>Where it is released (soil, air, road traffic for lead, groundwater, river, glacier melt), chemical form, amount, duration, area or footprint, assessment horizon</td><td>Every result: form and amount come first</td></tr>
+            <tr><td><b>Site &amp; climate</b></td><td>Precipitation, infiltration share, elevation, background fine dust (PM10, PM2.5)</td><td>Leaching to groundwater; snow cover; air quality context</td></tr>
+            <tr><td><b>Air &amp; surface</b></td><td>Release height, wind speed and prevailing direction, particle sizes, forest and sealed shares, drainage, snow, Hg⁰ emission from soil, blown dust, background deposition and air</td><td>How much of an air release lands nearby and where it goes next; the deposition zone on the spread map</td></tr>
+            <tr><td><b>Soil</b></td><td>pH, organic carbon, iron oxides, phosphate, water regime, mixing depth, background, erosion, measured Kd</td><td>pH for lead; iron and waterlogging for arsenic; organic carbon for mercury</td></tr>
+            <tr><td><b>Groundwater</b></td><td>Aquifer type, depth to water table, hydraulic conductivity, gradient, redox, background</td><td>Groundwater concentration and travel time</td></tr>
+            <tr><td><b>River &amp; lake</b></td><td>Discharge, suspended sediment, lake trophic state, season, bottom-water oxygen (or estimate it from the trophic state), dissolved organic carbon, pH, sulfate, wetlands; for Hg, the escape of Hg⁰ gas from lake water</td><td>River results; mercury methylation; forms in lake water</td></tr>
+            <tr><td><b>Budget &amp; floods</b></td><td>Groundwater path to the river, fast-path share, lake residence time, lake trapping, flood soil loss, flood delivery, floodplain deposition</td><td>The mass budget: where the metal sits after 1–100 years</td></tr>
+            <tr><td><b>Redox (optional)</b></td><td>Switch on the redox ladder if you have water chemistry: days of topsoil saturation, oxygen, nitrate, sulfate and organic carbon in the water reaching the aquifer, extra organic carbon from the release, manganese oxides</td><td>Replaces the water regime and aquifer redox choices with calculated ones; matters most for arsenic and for releases rich in organic carbon (landfill leachate, manure)</td></tr>
+            <tr><td><b>Exposure</b></td><td>Land use, drinking water from the aquifer, child body weight, soil ingestion, bioavailability, fish</td><td>Land use decides which Swiss limits apply</td></tr>
+          </tbody>
+        </table></div>
+        <p>A few details:</p>
+        <ul>
+          <li>Fields marked optional can stay empty; the page then uses its default.</li>
+          <li>An invalid value turns red with a message, and the last valid value is kept.</li>
+          <li><b>Conditions from your inputs</b> shows the redox and pH state worked out from your inputs. It also drives the landscape animation.</li>
+          <li><b>Copy inputs</b> and <b>Paste inputs</b> share a scenario as text with a colleague.</li>
+        </ul>
+      </section>
+
+      <section id="map">
+        <h2>Pick a site from the map</h2>
+        <p class="lead">One click on a place in Switzerland fills the site inputs from national datasets.</p>
+        <ol>
+          <li>In Advanced mode, click the map. You can zoom with + and − or the scroll wheel. You can also type LV95 coordinates (E and N) and click <b>Look up</b>.</li>
+          <li>Read the site table. It lists:
+            <ul>
+              <li>elevation, precipitation and mean temperature</li>
+              <li>soil pH, clay and organic carbon</li>
+              <li>aquifer, bedrock and land use</li>
+              <li>natural background of As, Pb and Hg, plus classes for antimony, iron and calcium</li>
+            </ul>
+            Notes appear for crystalline bedrock (natural arsenic possible), calcareous soil and karst.
+          </li>
+          <li>Click <b>Fill inputs from this site</b>. This sets precipitation, soil pH, organic carbon, iron oxides, background As, Pb and Hg, aquifer type with hydraulic conductivity and porosity, and land use.</li>
+          <li>Change anything you know better from your own site data.</li>
+        </ol>
+        <p>Good to know:</p>
+        <ul>
+          <li>Values come from a 1 km grid. They describe the area, not a single parcel.</li>
+          <li>Built-up areas have no organic-carbon map, so that input keeps its previous value there.</li>
+          <li>Settlements are set to Garden or playground, which applies the strictest limits. Change it to Industrial if that fits.</li>
+          <li>To find LV95 coordinates for an address, right-click it on <a href="https://map.geo.admin.ch" target="_blank" rel="noopener">map.geo.admin.ch</a>.</li>
+        </ul>
+      </section>
+
+      <section id="results">
+        <h2>Reading the results</h2>
+        <p class="lead">Each result card shows the best estimate, a status label, the uncertainty range, and the Swiss value it is compared with.</p>
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>Label</th><th>Example labels</th><th>Meaning</th></tr></thead>
+          <tbody>
+            <tr><td><span class="pill crit">Red</span></td><td>Exceeds remediation value, Exceeds TBDV, Exceeds AltlV</td><td>The best estimate is above a Swiss limit or health reference point</td></tr>
+            <tr><td><span class="pill warn">Orange</span></td><td>Above guide value, Possible exceedance, Exceeds if it arrives, Fast paths likely, Matrix flow only</td><td>Needs checking: at least 10% of uncertainty runs exceed, or the metal may not reach the receptor within the horizon</td></tr>
+            <tr><td><span class="pill ok">Green</span></td><td>Below TBDV, Below AltlV, Below Swiss values</td><td>Below the relevant value in almost all runs</td></tr>
+            <tr><td><span class="pill info">Grey</span></td><td>Info, Estimated, Published fit</td><td>No limit to compare; supporting numbers</td></tr>
+          </tbody>
+        </table></div>
+        <p>What else is on a card:</p>
+        <ul>
+          <li><b>Uncertainty bar.</b> The grey band is the 90% range from 400 model runs with varied inputs. The dot is the median and the red tick is the limit.</li>
+          <li><b>% of runs above</b> is the chance of exceeding the limit, given the uncertainty.</li>
+          <li><b>Measured</b> shows what was measured at comparable Swiss sites, so you can check the model.</li>
+          <li>The two small grey lines name the limit used and show how the number was calculated.</li>
+        </ul>
+        <p>Around the cards:</p>
+        <ul>
+          <li><b>On the landscape</b>, badges (✓, ?, !) mark each affected part and a pulsing ring marks the release point.</li>
+          <li><b>The side panel</b> shows a run summary with key results and first actions. Hover over a part of the landscape to see “Your scenario here”.</li>
+          <li><b>Where and how to trap it</b> lists measures that follow from your results.</li>
+          <li><b>Copy report</b> puts a text summary on your clipboard for notes or e-mail.</li>
+          <li><b>Screening equations and assumptions</b> at the bottom of the results lists every formula and default.</li>
+        </ul>
+      </section>
+
+      <section id="spreadmap">
+        <h2>Where to act: the spread map</h2>
+        <p class="lead">Below the result cards, a map shows where the metal is above the Swiss standard at each point in time, so you can decide where to remove or cover soil, which wells and springs to protect, and where to monitor.</p>
+        <ol>
+          <li><b>Set the source.</b> Pick your site on the site map and click <b>Fill inputs from this site</b>, or click <b>Move source</b> on the spread map and then click the place. Presets use an illustrative place.</li>
+          <li><b>Set the groundwater flow direction.</b> This matters most. Read it from your canton's groundwater map (water-table contours), the FOEN hydrogeological map 1:100,000 or your own wells. Then click <b>Set direction</b> and click a point downstream of the source, or type the direction in degrees on the Groundwater tab. Until you do, a dashed arrow from the terrain stands in and the page says so.</li>
+          <li><b>Move the time slider</b> (1–100 years) or press <b>Play</b>.</li>
+          <li><b>Read the colours.</b> Red: above the standard at the best estimate. Amber: at least 10% of the uncertainty runs are above it. The source area turns red or amber when its topsoil is above a Swiss soil value. The dashed amber line is the runoff path that eroded soil follows.</li>
+          <li><b>Read "Where to act"</b> below the map. It gives the soil concentration at the source, the mass washed downslope, and how far and wide the groundwater zone reaches.</li>
+        </ol>
+        <h3>Support layers</h3>
+        <ul>
+          <li><b>Cantonal groundwater protection</b> (geodienste.ch): blue S1–S3 zones around drinking-water wells and springs, pink protected aquifer areas (Au). If the red or amber zone touches a blue zone, act first there. Coverage and terms vary by canton.</li>
+          <li><b>Hydrogeological map 1:100,000</b> (FOEN): water-table contours and flow arrows, where the map exists. Use it to set the direction.</li>
+          <li><b>Tracer tests</b> (FOEN): measured flow paths, mostly in karst.</li>
+          <li><b>Open this place in map.geo.admin.ch</b> opens the federal viewer at the source with these layers.</li>
+        </ul>
+        <h3>Things to know</h3>
+        <ul>
+          <li>The <b>Standard for groundwater</b> menu switches between the drinking-water limit (TBDV) and the AltlV concentration value.</li>
+          <li>Lead and mercury barely move in groundwater, so their zones stay at the source. Arsenic and antimony travel further, fastest in fractured rock.</li>
+          <li>In karst no plume is drawn, because conduits carry water to springs kilometres away within days. Use the tracer-test layer and sample springs.</li>
+          <li>Terrain needs an internet connection to swisstopo. Without it, set the direction yourself.</li>
+          <li>At a location you set, the slope there scales the default erosion. You can overwrite it on the Soil tab.</li>
+        </ul>
+      </section>
+
+      <section id="budget">
+        <h2>Where the metal ends up: the mass budget</h2>
+        <p class="lead">The result cards give concentrations. The mass budget answers a different question: of every kilogram released, how much sits where after a given time?</p>
+        <ol>
+          <li>Below the result cards, choose the <b>time since the release started</b>: 1, 5, 10, 25, 50 or 100 years.</li>
+          <li>Choose <b>Floods</b>: none, one extreme flood in year 1, or extreme floods about every 30 or every 10 years (the last stands for more frequent extremes under climate change).</li>
+          <li>Read the rows. Each is a place: topsoil, washed downslope, floodplain, below the root zone, groundwater (dissolved or held on aquifer sediment), lake water, lake sediment, carried downstream, carried away in air, or other losses. The rows add up to 100%.</li>
+        </ol>
+        <ul>
+          <li><b>Bars</b> show the best estimate; the thin line on each bar is the 90% range from 400 runs.</li>
+          <li><b>The notes below the rows</b> give the travel times used, how floods were counted, and what is not included.</li>
+          <li><b>The first line of "Where and how to trap it"</b> now names the place holding the most metal, because that is where trapping works best.</li>
+          <li>Flood size, flood delivery to the river and floodplain deposition are assumptions you can change on the <b>Budget &amp; floods</b> tab.</li>
+        </ul>
+        <p>Expect most of a soil release to stay in the topsoil for decades: lead and mercury bind strongly. River releases end up mostly in lake sediment within a year. Floods move far more soil, and its metal, to the river than a normal year does.</p>
+      </section>
+
+      <section id="forms">
+        <h2>Which forms, in which phase: five scenarios</h2>
+        <p class="lead">The mass budget says where the metal is. This panel says in which chemical form, and whether it is in soil and sediment, in water or in air, under five sets of conditions.</p>
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>Scenario</th><th>What changes on top of your inputs</th><th>Matters most for</th></tr></thead>
+          <tbody>
+            <tr><td><b>1. Today as entered</b></td><td>Nothing</td><td>The reference</td></tr>
+            <tr><td><b>2. Waterlogged, reducing soil</b></td><td>Soil permanently waterlogged; aquifer anoxic</td><td>Arsenic turns to As(III) and leaches more; mercury methylates</td></tr>
+            <tr><td><b>3. Acidified soil</b></td><td>Soil pH 1.5 units lower</td><td>Lead loses its carbonates and leaches more</td></tr>
+            <tr><td><b>4. Extreme floods every ~10 years</b></td><td>1-in-10-year floods with your flood settings</td><td>More metal on particles in rivers, lakes and floodplains</td></tr>
+            <tr><td><b>5. Anoxic lake bottom and wetlands</b></td><td>Lake bottom water permanently anoxic; many wetlands</td><td>Methylmercury and sulfides in the lake</td></tr>
+          </tbody>
+        </table></div>
+        <ul>
+          <li>The panel uses the year you chose in the mass budget.</li>
+          <li>Each row shows three phases. The number is the share of all released metal in that phase; the bar and list show which forms make up that phase.</li>
+          <li><b>Biggest change from today</b> names the form or phase that shifts most compared with scenario 1.</li>
+          <li>If a scenario matches your inputs already, for example your soil is already waterlogged, the row says "Same as today".</li>
+          <li>The form shares come from indicative rules, for example arsenic mainly as As(V) when oxic and As(III) when waterlogged, or methylmercury as a few percent of lake mercury. Read them as orders of magnitude; the rules are listed under "Screening equations and assumptions".</li>
+        </ul>
+      </section>
+
+      <section id="drivers">
+        <h2>What drives the uncertainty</h2>
+        <p class="lead">Each range comes from 400 runs in which uncertain inputs vary. This panel shows which of them moves a chosen result most.</p>
+        <ul>
+          <li>Pick a result, or a budget share, in the <b>Result</b> menu.</li>
+          <li>Longer bars mean a stronger link. The number is a rank correlation from −1 to +1. "Raises the result" means a higher input value gives a higher result.</li>
+          <li><b>Measure first</b> names the input to measure to narrow the range most, and how.</li>
+          <li>Enter a measured value (for example a measured Kd) and run again: that input's bar shrinks because its spread is narrower.</li>
+        </ul>
+      </section>
+
+      <section id="airsurf">
+        <h2>Air and the land surface</h2>
+        <p class="lead">For releases to air and roads, the platform follows the metal from the stack or road to the ground, and from the ground back to air or water.</p>
+        <ul>
+          <li><b>Size decides distance.</b> The emission is split into gas, fine, coarse and large particles, from the chemical form unless you enter your own shares. Large dust lands within a few hundred metres, fine particles and Hg⁰ travel tens to thousands of kilometres. Rain washes particles out, so wetter sites keep more nearby.</li>
+          <li><b>Release height and wind.</b> A higher stack spreads the metal further and thinner. Set the prevailing wind on the Air &amp; surface tab to turn the deposition zone on the spread map downwind; the totals stay the same.</li>
+          <li><b>Most exposed point.</b> Deposition and air concentration are reported where they are highest beyond 100 m from the source, with the nearest NABEL station added as background, and compared with the LRV limits.</li>
+          <li><b>Forests, snow, sealed ground.</b> Forests catch more fine dust and take up Hg⁰ through their leaves, which reaches the soil with the autumn litter. Snow holds what lands on it until melt; much of the mercury returns to air first. Rain on roofs and roads drains to streams, treatment plants or road shoulders, as you set it.</li>
+          <li><b>Back to air.</b> Mercury in topsoil slowly returns to air as Hg⁰, and wind lifts a little dust from bare ground.</li>
+          <li><b>Roads and glaciers.</b> Road traffic (lead only for now) is calculated from traffic, road length and an emission factor; most of it stays within 5 m of the road. Glacier melt releases metal deposited from air in 1950–1990 into the glacier stream.</li>
+          <li><b>Air quality.</b> PM10 and PM2.5 annual means come from the FOEN maps when you fill inputs from the map. They are context: the dust people already breathe before the release.</li>
+        </ul>
+        <p><b>Try this:</b> lead, Swiss Plateau preset, release to air, PbO dust, 3,000 kg/yr, release height 15 m, prevailing wind from the southwest. The spread map at 50 years shows topsoil above the VBBo guide value up to about 330 m from the stack, stretching to the northeast.</p>
+      </section>
+
+      <section id="lakes">
+        <h2>Lakes and the redox ladder</h2>
+        <p class="lead">Two process groups that change which form a metal takes. Both are screening rules, not lake or reactive-transport models.</p>
+        <ul>
+          <li><b>Lake trophic state.</b> More nutrients mean more algae, whose decay uses up oxygen at the lake bottom. With bottom-water oxygen on <b>Estimate from trophic state</b>, a nutrient-poor lake is oxic and a moderately or very nutrient-rich lake has seasonal anoxia. The trophic state also adds to the methylation index.</li>
+          <li><b>Season.</b> Summer means a stratified lake: seasonal anoxia is active at the bottom and sunlight is strong at the surface. Winter means a mixed, oxic lake. The season changes the methylation index and the forms in lake water. The mass budget always runs the seasonal cycle month by month.</li>
+          <li><b>Mercury and sunlight.</b> In lake water, sunlight turns dissolved Hg(II) into Hg⁰ gas that escapes to air, and breaks down methylmercury. The default escape is 10% of the lake-water Hg per year, twice as fast from May to September. It appears in the mass budget as "Escaped from lake water as Hg⁰ gas".</li>
+          <li><b>Redox ladder.</b> Bacteria burn organic carbon with oxygen first, then nitrate, then manganese and iron oxides, then sulfate. The ladder compares the organic carbon in the water with these electron acceptors. Surplus carbon dissolves the oxides near the source over time; once they are used up, sulfate is reduced. The step reached by the budget year becomes the aquifer redox state and is shown as a result with its electron balance. Use it when you have data; otherwise keep it off and choose the states on the Soil and Groundwater tabs.</li>
+        </ul>
+        <p><b>Try this:</b> arsenic, Swiss Plateau preset, Redox tab: switch the ladder on and set extra organic carbon from the release to 500 mg C/L (landfill leachate). The aquifer turns sulfidic within a year, and the Groundwater tab shows the calculated state greyed out.</p>
+      </section>
+
+      <section id="further">
+        <h2>Take it further: specialised models</h2>
+        <p class="lead">Once the overview points to a priority, check it with a model built for that detail. The panel under the results downloads starting files filled with your current inputs.</p>
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>Download</th><th>Program</th><th>Answers</th><th>You still need</th></tr></thead>
+          <tbody>
+            <tr><td>Input file (.pqi)</td><td>PHREEQC 3 (USGS, free), database minteq.v4.dat</td><td>Speciation, mineral solubility and sorption on iron oxides at the source, and a 1D column to the water table or receptor. Compare its dissolved concentration and Kd with the screening values in the file header.</td><td>Major ions, alkalinity, Eh; organic-matter binding for Hg and Pb</td></tr>
+            <tr><td>Parameter sheet (.csv)</td><td>HYDRUS-1D (PC-Progress, free version)</td><td>Water and metal through the unsaturated soil with real weather. Each row names the HYDRUS dialog field and the value to enter.</td><td>Texture or van Genuchten parameters, daily weather, measured Kd</td></tr>
+            <tr><td>Python script (.py)</td><td>MODFLOW 6 with transport, run through FloPy (USGS, free)</td><td>Flow and plume in plan view: concentration at the well, spring or river over time and the area above the limit.</td><td>Water-table map, boundaries, pumping, K field; a conduit model for karst</td></tr>
+            <tr><td>JSON</td><td>Any</td><td>All inputs and results of the run, for records or rerunning it with <code>SMP.run</code>.</td><td>–</td></tr>
+          </tbody>
+        </table></div>
+        <ul>
+          <li>Lines and rows marked <b>ASSUMED</b> are placeholders, for example the major ions in PHREEQC or the loam hydraulic parameters in HYDRUS. Replace them.</li>
+          <li>HYDRUS is offered for soil and air releases, MODFLOW for releases that reach groundwater. For a river release, PHREEQC describes the river water; for lake mass balances, a box model such as AQUASIM (Eawag) is the next step.</li>
+          <li>Seepage that the screening expects to take longer than the horizon still enters the MODFLOW run at once, so you see the plume once it has arrived. The script says so when it runs.</li>
+        </ul>
+      </section>
+
+      <section id="examples">
+        <h2>Examples to try</h2>
+        <p class="lead">Ten scenarios with the results you should see. For each: choose the metal, pick the site preset and click <b>Apply preset</b>, then change only the fields listed. The tab name is in brackets.</p>
+
+        <div class="ex">
+          <h3>1. Lead from an incinerator stack</h3>
+          <dl>
+            <dt>Metal and preset</dt><dd>Lead, Swiss Plateau</dd>
+            <dt>Set</dt><dd>[Release] Air (stack or chimney), PbO and other Pb dust, Continuous, 50 kg/yr for 30 years, footprint 5 km². [Exposure] Agriculture.</dd>
+            <dt>You should see</dt><dd>About 5% of the release lands within the footprint. Deposition at the most exposed point is about 5 µg/(m²·d) including background, against the LRV limit of 100. Topsoil stays near its background of about 30 mg/kg, and erosion is the main loss path.</dd>
+            <dt>Then try</dt><dd>[Air &amp; surface] release height 5 m and prevailing wind from the southwest, 50% of the time. Deposition at the most exposed point rises to about 125 µg/(m²·d) and exceeds the limit; lead in air there is about 210 ng/m³, below the 500 ng/m³ limit.</dd>
+          </dl>
+        </div>
+
+        <div class="ex">
+          <h3>2. Arsenic from old orchard spraying</h3>
+          <dl>
+            <dt>Metal and preset</dt><dd>Arsenic, Visp</dd>
+            <dt>Set</dt><dd>[Release] Soil surface, arsenate, Single event, 20 kg, area 5,000 m², mixing depth 20 cm. [Exposure] Garden or playground.</dd>
+            <dt>You should see</dt><dd>Topsoil about 25 mg/kg, below the 50 mg/kg garden remediation value. Seepage is about 14 µg/L, marked Possible exceedance.</dd>
+            <dt>Then try</dt><dd>[Soil] water regime Periodically waterlogged: seepage triples to about 45 µg/L. [Exposure] relative bioavailability 40%: the child dose falls in proportion.</dd>
+          </dl>
+        </div>
+
+        <div class="ex">
+          <h3>3. Mercury in factory wastewater</h3>
+          <dl>
+            <dt>Metal and preset</dt><dd>Mercury, Visp</dd>
+            <dt>Set</dt><dd>[Release] River, Hg(II) salt, 5 kg/yr. [River &amp; lake] discharge 40 m³/s, suspended sediment 100 mg/L, lake bottom water Seasonal anoxia. [Exposure] fish About monthly.</dd>
+            <dt>You should see</dt><dd>Dissolved mercury about 0.002 µg/L, below the GSchV value of 0.01. About 95% travels on particles, roughly 4.3 kg/yr settles in the lake, and the methylation index is 4.5/10 (seasonal anoxia in a moderately nutrient-rich lake).</dd>
+            <dt>Then try</dt><dd>Discharge 2 m³/s: dissolved mercury is about 0.006 µg/L and about 24% of runs exceed. Permanent anoxia with many wetlands: the methylation index rises.</dd>
+          </dl>
+        </div>
+
+        <div class="ex">
+          <h3>4. Shooting range on karst</h3>
+          <dl>
+            <dt>Metal and preset</dt><dd>Lead, Jura karst</dd>
+            <dt>Set</dt><dd>[Release] Soil surface, Metallic Pb (ammunition), Continuous, 200 kg/yr for 40 years, area 400 m², mixing depth 50 cm. [Exposure] Agriculture.</dd>
+            <dt>You should see</dt><dd>Topsoil about 36,000 mg/kg, far above the remediation value. Lead in seepage about 51 µg/L. Antimony in seepage about 5,000 µg/L, far above its 10 µg/L limit. A Fast paths likely warning appears.</dd>
+            <dt>Then try</dt><dd>[Soil] pH 4.8: lead seepage jumps to about 355 µg/L.</dd>
+          </dl>
+        </div>
+
+        <div class="ex">
+          <h3>5. Mercury in a garden, worse case</h3>
+          <dl>
+            <dt>Metal</dt><dd>Mercury</dd>
+            <dt>Set</dt><dd>Click <b>Load example: Visp garden</b>, then change the mass released to 2 kg.</dd>
+            <dt>You should see</dt><dd>Topsoil about 25 mg/kg, against a remediation value of 2. A child eating garden soil takes in about 110% of the tolerable weekly intake.</dd>
+          </dl>
+        </div>
+
+        <div class="ex">
+          <h3>6. Where the metal is after one year</h3>
+          <dl>
+            <dt>Metal and preset</dt><dd>Lead, Swiss Plateau</dd>
+            <dt>Set</dt><dd>[Release] Soil surface, Pb²⁺ salt, Continuous, 50 kg/yr for 100 years. [Exposure] Agriculture. In the mass budget choose <b>1 yr</b> and <b>No floods</b>.</dd>
+            <dt>You should see</dt><dd>More than 99% still in the topsoil, about 0.02% washed downslope, about 0.002% in lake sediment, and nothing in groundwater yet.</dd>
+            <dt>Then try</dt><dd>Floods: <b>One extreme flood in year 1</b>. The topsoil keeps more than 99%, 0.25% washes downslope, and about 0.08% reaches lake sediment, about 50 times more than without the flood. Then <b>100 yr</b> with no floods: about 98% is still in the topsoil and 1.8% has washed downslope. Finally set [Release] to River: within one year about 82% is in lake sediment, 12% has passed downstream and 6% is still dissolved in the lake.</dd>
+          </dl>
+        </div>
+
+        <div class="ex">
+          <h3>7. An arsenic plume in fractured rock</h3>
+          <dl>
+            <dt>Metal and preset</dt><dd>Arsenic. Click <b>Load example: mine-dump seepage</b> (Ticino, release straight to groundwater).</dd>
+            <dt>Set</dt><dd>On the spread map, click <b>Set direction</b> and click a point downhill of Astano.</dd>
+            <dt>You should see</dt><dd>Year 1: groundwater above the 10 µg/L drinking-water limit up to about 150 m downstream. Year 10: about 370 m, with the amber zone reaching about 640 m. Year 100: the red zone stays about 370 m long, because a steady source plume stops growing once dispersion balances the inflow, and the amber zone reaches about 880 m.</dd>
+            <dt>Then try</dt><dd>Turn on <b>Cantonal groundwater protection</b> to see whether wells or springs lie in the zone. Switch the standard to the AltlV value (50 µg/L): the zones shrink.</dd>
+          </dl>
+        </div>
+
+        <div class="ex">
+          <h3>8. Real places from the map</h3>
+          <p>Type these coordinates, click <b>Look up</b>, then <b>Fill inputs from this site</b>, and rerun any scenario above.</p>
+          <div class="tbl-wrap"><table>
+            <thead><tr><th>Place</th><th>E</th><th>N</th><th>What it shows</th></tr></thead>
+            <tbody>
+              <tr><td>Visp</td><td class="num">2634000</td><td class="num">1127500</td><td>Dry valley, soil pH 7.3, productive gravel aquifer</td></tr>
+              <tr><td>La Chaux-de-Fonds</td><td class="num">2553000</td><td class="num">1217000</td><td>Karst, high natural lead and mercury background</td></tr>
+              <tr><td>Zürich</td><td class="num">2683000</td><td class="num">1248000</td><td>Moraine aquifer, settlement</td></tr>
+              <tr><td>Bern</td><td class="num">2600000</td><td class="num">1200000</td><td>Productive gravel aquifer, low arsenic background</td></tr>
+              <tr><td>Lugano</td><td class="num">2717000</td><td class="num">1096000</td><td>On the lake; land values come from the nearest cell</td></tr>
+            </tbody>
+          </table></div>
+        </div>
+
+        <div class="ex">
+          <h3>9. Lead beside a busy road</h3>
+          <dl>
+            <dt>Metal and preset</dt><dd>Lead, Swiss Plateau</dd>
+            <dt>Set</dt><dd>[Release] Road traffic, 1,000 m, 20,000 vehicles/day, traffic period Leaded petrol era, 30 years, horizon 55 years. [Exposure] Agriculture. [Budget &amp; floods] 25 years.</dd>
+            <dt>You should see</dt><dd>A release of about 86 kg/yr. Topsoil in the 5 m strip beside the road reaches about 300 mg/kg, above the VBBo trigger value of 200. After 25 years about 27% is in that strip, 23% further from the road, 36% has been carried away in air and about 7% is caught in drains and treatment.</dd>
+            <dt>Then try</dt><dd>Traffic period Today: the release falls to about 0.65 kg/yr and the topsoil to about 34 mg/kg.</dd>
+          </dl>
+        </div>
+
+        <div class="ex">
+          <h3>10. Mercury from a stack in the mountains</h3>
+          <dl>
+            <dt>Metal and preset</dt><dd>Mercury, Jura karst</dd>
+            <dt>Set</dt><dd>[Release] Air (stack or chimney), Hg(II) salt, 1 kg/yr for 30 years, footprint 10 km². [Air &amp; surface] release height 50 m. [Site &amp; climate] elevation 1,600 m. [Exposure] Forest. [Budget &amp; floods] 10 years.</dd>
+            <dt>You should see</dt><dd>About 7% lands within the footprint, 55% within 50 km and 38% travels further, mostly as Hg⁰. About 1.4% has returned to air from snow and soil after 10 years.</dd>
+            <dt>Then try</dt><dd>Elevation 500 m: with little snow, only about 0.24% returns to air.</dd>
+          </dl>
+        </div>
+      </section>
+
+      <section id="tips">
+        <h2>Tips, limits and data sources</h2>
+        <p class="lead">The biggest gain in accuracy comes from entering a measured Kd or leaching-test result for your soil.</p>
+        <h3>Tips</h3>
+        <ul>
+          <li>Read <b>% of runs above</b> rather than the single number. It tells you how likely an exceedance is.</li>
+          <li>For arsenic in gardens, set a realistic relative bioavailability (often 30–50%). Otherwise even natural background is flagged by the strict EFSA reference point.</li>
+          <li>The Water regime buttons also change river results in Advanced mode: snowmelt and storm raise discharge and suspended sediment.</li>
+          <li>Use <b>Copy inputs</b> to save a scenario as text, and <b>Paste inputs</b> to load it again.</li>
+          <li>Researchers can rerun any scenario from the browser console with <code>SMP.run("Pb", {…})</code>. The <a href="validation.html#reproduce">validation page</a> shows how.</li>
+        </ul>
+        <h3>Limits</h3>
+        <ul>
+          <li>Results are screening estimates from simple, documented equations. There is no full chemical speciation. Fast paths to groundwater are flagged in the results and can be tested in the mass budget with the fast-path share.</li>
+          <li>The <a href="validation.html">validation page</a> shows where the model matches Swiss measurements and where it does not.</li>
+          <li>Site data is on a 1 km grid and describes the area, not a parcel.</li>
+          <li>Swiss limit values change. Check the current text on <a href="https://www.fedlex.admin.ch" target="_blank" rel="noopener">fedlex.admin.ch</a> before using them in a report.</li>
+        </ul>
+        <h3>Data behind the map</h3>
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>Dataset</th><th>Provider</th><th>Used for</th></tr></thead>
+          <tbody>
+            <tr><td><a href="https://opendatadocs.meteoswiss.ch/c-climate-data/c7-spatial-climate-normals" target="_blank" rel="noopener">Climate normals 1991–2020</a></td><td>MeteoSwiss</td><td>Precipitation, temperature</td></tr>
+            <tr><td><a href="https://ccsols.ch/de/boeden-kartieren/kartenerstellung/hinweiskarten-fuer-bodeneigenschaften/" target="_blank" rel="noopener">Soil property maps</a> (CC BY 4.0)</td><td>Competence Centre for Soils (KOBO)</td><td>Soil pH, clay, organic carbon</td></tr>
+            <tr><td><a href="https://www.bafu.admin.ch/de/geochemischer-bodenatlas-der-schweiz" target="_blank" rel="noopener">Geochemical soil atlas</a></td><td>FOEN, Agroscope</td><td>Background As, Pb, Hg; antimony, iron, calcium classes</td></tr>
+            <tr><td><a href="https://opendata.swiss/en/dataset/hydrogeologische-karte-der-schweiz-grundwasservorkommen-1-500000" target="_blank" rel="noopener">Hydrogeological map 1:500,000</a></td><td>swisstopo, FOEN</td><td>Aquifer and bedrock type</td></tr>
+            <tr><td><a href="https://ckan.opendata.swiss/dataset/arealstatistik-aktueller-stand-csv/resource/e0240bd6-d2c7-4292-9cd3-71b1c9b63be8" target="_blank" rel="noopener">Land-use statistics</a></td><td>Federal Statistical Office (BFS)</td><td>Land use</td></tr>
+            <tr><td><a href="https://www.swisstopo.admin.ch/" target="_blank" rel="noopener">Base map and elevation</a></td><td>swisstopo</td><td>Map tiles, elevation</td></tr>
+          </tbody>
+        </table></div>
+        <p class="back"><a href="index.html">← Back to the platform</a></p>
+      </section>
+
+    </main>
+  </div>
+
+  <footer>CHemTrace · screening estimates for contaminants in Switzerland (now As, Hg and Pb). Map data © swisstopo; climate data: Source MeteoSwiss; soil maps © KOBO (CC BY 4.0); soil atlas © FOEN/Agroscope; land use © BFS.<span class="copy">© 2026 Li-Ling T. ETH Zürich · Version 0.12.1, 30 October 2026 · Contact: <a href="mailto:litail@ethz.ch">litail@ethz.ch</a></span></footer>
+</div>
+</body>
+</html>

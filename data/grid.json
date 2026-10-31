@@ -1,0 +1,149 @@
+{
+ "crs": "EPSG:2056",
+ "x0": 2483000,
+ "y1": 1298000,
+ "res": 1000,
+ "ncols": 353,
+ "nrows": 225,
+ "layers": [
+  {
+   "name": "precip",
+   "type": "u16",
+   "scale": 1,
+   "offset": 0,
+   "nodata": 65535,
+   "byteOffset": 0
+  },
+  {
+   "name": "temp",
+   "type": "i16",
+   "scale": 10,
+   "offset": 0,
+   "nodata": -32768,
+   "byteOffset": 158852
+  },
+  {
+   "name": "ph",
+   "type": "u8",
+   "scale": 20,
+   "offset": 0,
+   "nodata": 0,
+   "byteOffset": 317704
+  },
+  {
+   "name": "clay",
+   "type": "u8",
+   "scale": 1,
+   "offset": 0,
+   "nodata": 255,
+   "byteOffset": 397132
+  },
+  {
+   "name": "soc",
+   "type": "u16",
+   "scale": 1,
+   "offset": 0,
+   "nodata": 65535,
+   "byteOffset": 476560
+  },
+  {
+   "name": "atl_As",
+   "type": "u8",
+   "scale": 1,
+   "offset": 0,
+   "nodata": 0,
+   "byteOffset": 635412
+  },
+  {
+   "name": "atl_Pb",
+   "type": "u8",
+   "scale": 1,
+   "offset": 0,
+   "nodata": 0,
+   "byteOffset": 714840
+  },
+  {
+   "name": "atl_Hg",
+   "type": "u8",
+   "scale": 1,
+   "offset": 0,
+   "nodata": 0,
+   "byteOffset": 794268
+  },
+  {
+   "name": "atl_Sb",
+   "type": "u8",
+   "scale": 1,
+   "offset": 0,
+   "nodata": 0,
+   "byteOffset": 873696
+  },
+  {
+   "name": "atl_Fe",
+   "type": "u8",
+   "scale": 1,
+   "offset": 0,
+   "nodata": 0,
+   "byteOffset": 953124
+  },
+  {
+   "name": "atl_Ca",
+   "type": "u8",
+   "scale": 1,
+   "offset": 0,
+   "nodata": 0,
+   "byteOffset": 1032552
+  },
+  {
+   "name": "hydro",
+   "type": "u8",
+   "scale": 1,
+   "offset": 0,
+   "nodata": 0,
+   "byteOffset": 1111980
+  },
+  {
+   "name": "rock",
+   "type": "u8",
+   "scale": 1,
+   "offset": 0,
+   "nodata": 0,
+   "byteOffset": 1191408
+  },
+  {
+   "name": "lu4",
+   "type": "u8",
+   "scale": 1,
+   "offset": 0,
+   "nodata": 0,
+   "byteOffset": 1270836
+  },
+  {
+   "name": "lu_set",
+   "type": "u8",
+   "scale": 1,
+   "offset": 0,
+   "nodata": 255,
+   "byteOffset": 1350264
+  },
+  {
+   "name": "pm10",
+   "type": "u16",
+   "scale": 10,
+   "offset": 0,
+   "nodata": 65535,
+   "byteOffset": 1429692,
+   "source": "FOEN annual mean maps 2023-2025, mean of 100 m cells"
+  },
+  {
+   "name": "pm25",
+   "type": "u16",
+   "scale": 10,
+   "offset": 0,
+   "nodata": 65535,
+   "byteOffset": 1588544,
+   "source": "FOEN annual mean maps 2023-2025, mean of 100 m cells"
+  }
+ ],
+ "generated": "2026-10-28"
+}

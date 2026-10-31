@@ -1,0 +1,516 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>CHemTrace</title>
+<meta name="description" content="CHemTrace follows contaminants through Swiss landscapes: what forms they take, where they go, how they reach people and where to trap them, with a screening calculator for Swiss sites. Arsenic, mercury and lead now; more contaminants are being added.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%2316232A'/%3E%3Cpath d='M5 23C10 9 15 27 25 10' stroke='%23fff' stroke-width='3' fill='none' stroke-linecap='round'/%3E%3Ccircle cx='25' cy='10' r='3.4' fill='%23E2B33C'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="assets/vendor/leaflet/leaflet.css">
+<link rel="stylesheet" href="assets/css/styles.css">
+<script src="assets/vendor/leaflet/leaflet.js" defer></script>
+<script src="assets/js/app.js" defer></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="title-block">
+      <span class="kicker">Contaminants in Swiss landscapes · now As · Hg · Pb, more in progress</span>
+      <h1>CHemTrace</h1>
+      <p class="lede">Trace contaminants through glacier, rock, soil, air, river, lake and groundwater in Switzerland: which form they take, where they move next, how they reach people, and where they can be trapped. Arsenic, mercury and lead are available now; more contaminants are being added.</p>
+    </div>
+    <div class="ctl">
+      <label class="ctl-label" for="metalSel">Metal</label>
+      <div class="metal-pick">
+        <span class="msym" id="metalSym" aria-hidden="true">As</span>
+        <select id="metalSel">
+          <option value="As">Arsenic · Z 33</option>
+          <option value="Hg">Mercury · Z 80</option>
+          <option value="Pb">Lead · Z 82</option>
+        </select>
+      </div>
+    </div>
+  </header>
+
+  <nav class="jump" aria-label="Sections">
+    <a href="#explorer">Explorer</a><a href="#inputs">Inputs for a professional run</a><a href="#limits">Swiss reference values</a><a href="#data">Swiss data to connect</a><a href="#roadmap">From explainer to model</a><a href="#sources">Sources</a><a href="manual.html"><b>User manual</b></a><a href="validation.html">Validation</a><a href="assumptions.html">Assumptions</a>
+  </nav>
+
+  <div class="controls" id="explorer">
+    <div class="ctl"><span class="ctl-label" id="lblMode">Mode</span>
+      <div class="seg" role="radiogroup" aria-labelledby="lblMode" id="modeSeg">
+        <button role="radio" aria-checked="true" data-mode="explore" id="mExplore">Explore</button>
+        <button role="radio" aria-checked="false" data-mode="advanced" id="mAdv">Advanced</button>
+      </div></div>
+    <div class="ctl" id="ctlDerived" hidden><span class="ctl-label">Conditions from your inputs</span><span class="derived" id="derivedTxt"></span></div>
+    <div class="ctl" id="ctlRedox"><span class="ctl-label" id="lblRedox">Redox</span>
+      <div class="seg" role="radiogroup" aria-labelledby="lblRedox" data-key="redox">
+        <button role="radio" aria-checked="true" data-v="oxic" id="rdOx">Oxic</button>
+        <button role="radio" aria-checked="false" data-v="reducing" id="rdRed">Reducing</button>
+      </div></div>
+    <div class="ctl" id="ctlPh"><span class="ctl-label" id="lblPh">Soil &amp; water pH</span>
+      <div class="seg" role="radiogroup" aria-labelledby="lblPh" data-key="ph">
+        <button role="radio" aria-checked="true" data-v="calc" id="phCalc">Calcareous 7–8</button>
+        <button role="radio" aria-checked="false" data-v="acid" id="phAcid">Acidic 4–5</button>
+      </div></div>
+    <div class="ctl"><span class="ctl-label" id="lblWater">Water regime</span>
+      <div class="seg" role="radiogroup" aria-labelledby="lblWater" data-key="water">
+        <button role="radio" aria-checked="true" data-v="base" id="wBase">Base flow</button>
+        <button role="radio" aria-checked="false" data-v="melt" id="wMelt">Snowmelt</button>
+        <button role="radio" aria-checked="false" data-v="storm" id="wStorm">Storm</button>
+      </div></div>
+    <div class="ctl"><span class="ctl-label">Flows</span>
+      <button class="playbtn" id="playBtn" aria-pressed="false"><span id="playIcon">❚❚</span> <span id="playTxt">Pause</span></button></div>
+    <div class="ctl ctl-end"><span class="ctl-label" id="lblTheme">Theme</span>
+      <div class="seg" role="radiogroup" aria-labelledby="lblTheme" id="themeSeg">
+        <button role="radio" aria-checked="true" data-theme="light" id="thLight">Light</button>
+        <button role="radio" aria-checked="false" data-theme="dark" id="thDark">Dark</button>
+      </div></div>
+  </div>
+
+  <section class="adv" id="adv" hidden aria-labelledby="advTitle">
+    <div class="adv-bar">
+      <div class="adv-title">
+        <h2 id="advTitle">Scenario inputs</h2>
+        <p>Enter a release and site data. Results update as you type and appear on the profile, in the side panel and under Screening results.</p>
+      </div>
+      <div class="adv-actions">
+        <label class="mini" for="presetSel">Swiss site preset</label>
+        <select id="presetSel"></select>
+        <button class="btn ghost" id="applyPreset">Apply preset</button>
+        <button class="btn" id="loadExample">Load example</button>
+        <button class="btn ghost" id="copyJson">Copy inputs</button>
+        <button class="btn ghost" id="pasteJson">Paste inputs</button>
+        <button class="btn ghost" id="copyReport">Copy report</button>
+      </div>
+    </div>
+    <div class="json-box" id="jsonBox" hidden>
+      <label class="mini" for="jsonTxt">Inputs as JSON</label>
+      <textarea id="jsonTxt" rows="7" spellcheck="false"></textarea>
+      <div class="json-row"><button class="btn" id="jsonApply">Apply</button><button class="btn ghost" id="jsonClose">Close</button><span class="mini" id="jsonMsg" role="status"></span></div>
+    </div>
+    <div class="site-pick" id="sitePick">
+      <div class="sp-head"><h3>Pick a site in Switzerland</h3><p>Click the map or enter LV95 coordinates. The site's climate, soil, aquifer and background values can then fill the inputs below.</p></div>
+      <div class="sp-map" id="spMap" aria-label="Map of Switzerland: click to choose a site"></div>
+      <div class="sp-side">
+        <div class="sp-coords">
+          <div class="f"><label class="mini" for="spE">E (LV95)</label><input id="spE" type="number" step="any" inputmode="decimal" placeholder="2634000"></div>
+          <div class="f"><label class="mini" for="spN">N (LV95)</label><input id="spN" type="number" step="any" inputmode="decimal" placeholder="1127500"></div>
+          <button class="btn ghost" id="spGo">Look up</button>
+        </div>
+        <div class="sp-info" id="spInfo"><p>No site chosen yet. Values come from a 1 km grid built from MeteoSwiss, KOBO soil maps, the geochemical soil atlas, the hydrogeological map 1:500,000 and BFS land-use statistics.</p></div>
+        <button class="btn" id="spApply" disabled>Fill inputs from this site</button>
+      </div>
+    </div>
+    <div class="tabs" role="tablist" id="advTabs" aria-label="Input groups"></div>
+    <div id="advPanels"></div>
+  </section>
+
+  <div class="explorer">
+    <div class="stage">
+      <div class="stage-scroll">
+<svg id="scene" viewBox="0 0 1200 660" role="group" aria-label="Schematic profile of an Alpine catchment. Each compartment can be selected.">
+  <defs>
+    <linearGradient id="gSky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" class="st-top"/><stop offset="1" class="st-bot"/></linearGradient>
+    <linearGradient id="gLake" x1="0" y1="0" x2="0" y2="1"><stop offset="0" class="st-w1"/><stop offset="1" class="st-w2"/></linearGradient>
+    <pattern id="pGravel" width="16" height="12" patternUnits="userSpaceOnUse">
+      <rect width="16" height="12" class="s-gravel"/><circle cx="3" cy="3" r="1.6" class="s-gdot"/><circle cx="11" cy="8" r="2.1" class="s-gdot"/><circle cx="14" cy="2" r="1" class="s-gdot"/>
+    </pattern>
+    <pattern id="pHatch" width="9" height="9" patternUnits="userSpaceOnUse" patternTransform="rotate(-38)">
+      <line x1="0" y1="0" x2="0" y2="9" class="s-hatch"/>
+    </pattern>
+  </defs>
+
+  <g id="scenery" pointer-events="none">
+    <rect x="0" y="0" width="1200" height="420" fill="url(#gSky)"/>
+    <g id="sun"><circle cx="70" cy="62" r="20" class="s-sun"/></g>
+    <path class="s-ridge" d="M300,382 L360,300 L420,250 L470,268 L540,205 L610,232 L680,180 L760,236 L830,206 L900,246 L980,214 L1060,250 L1130,226 L1200,256 L1200,382 Z"/>
+    <g class="s-cloud">
+      <ellipse cx="430" cy="118" rx="46" ry="15"/><ellipse cx="458" cy="106" rx="30" ry="15"/><ellipse cx="405" cy="110" rx="22" ry="12"/>
+      <ellipse cx="700" cy="78" rx="40" ry="12"/><ellipse cx="724" cy="68" rx="24" ry="12"/>
+      <ellipse cx="985" cy="122" rx="44" ry="13"/><ellipse cx="1010" cy="112" rx="26" ry="12"/>
+    </g>
+    <g id="rain">
+      <line x1="402" y1="136" x2="394" y2="156" class="s-rain"/><line x1="418" y1="138" x2="410" y2="160" class="s-rain"/><line x1="434" y1="136" x2="426" y2="158" class="s-rain"/><line x1="450" y1="134" x2="442" y2="154" class="s-rain"/><line x1="466" y1="132" x2="458" y2="152" class="s-rain"/>
+      <line x1="968" y1="138" x2="960" y2="158" class="s-rain"/><line x1="984" y1="140" x2="976" y2="162" class="s-rain"/><line x1="1000" y1="138" x2="992" y2="158" class="s-rain"/><line x1="1016" y1="136" x2="1008" y2="156" class="s-rain"/>
+    </g>
+
+    <!-- bedrock band and mountain -->
+    <rect x="0" y="545" width="1200" height="115" class="s-bed"/>
+    <path class="s-rock" d="M0,545 L0,250 L80,170 L150,95 L205,58 L240,72 L290,118 L575,382 L575,420 L565,438 L480,545 Z"/>
+    <path fill="url(#pHatch)" d="M0,545 L0,250 L80,170 L150,95 L205,58 L240,72 L290,118 L575,382 L575,420 L565,438 L480,545 Z"/>
+    <g class="s-frac">
+      <path d="M40,580 l30,22 l-6,26 l24,18"/><path d="M190,560 l18,30 l30,10 l8,40"/><path d="M380,555 l-12,34 l26,24"/><path d="M640,570 l30,18 l-4,30 l28,26"/><path d="M880,560 l-16,28 l20,30"/><path d="M1080,575 l24,24 l-8,34"/>
+      <path d="M300,420 l26,36 l-10,30 l30,40"/><path d="M90,380 l22,28 l-6,30"/>
+    </g>
+    <g class="s-ore">
+      <path d="M118,282 l16,14 l-6,16 l20,12 l-4,18 l22,10 l-2,20 l18,14"/>
+      <path d="M182,300 l12,18 l-8,14 l16,16 l-2,20 l14,12"/>
+      <path d="M232,352 l10,16 l-6,14 l14,10"/>
+    </g>
+    <g class="s-glint"><circle cx="134" cy="296" r="2.4"/><circle cx="148" cy="324" r="2.4"/><circle cx="194" cy="318" r="2.4"/><circle cx="170" cy="352" r="2.4"/><circle cx="210" cy="348" r="2.4"/><circle cx="242" cy="368" r="2.4"/></g>
+
+    <!-- glacier -->
+    <path class="s-glacier" d="M146,98 L205,58 L240,72 L290,118 L330,155 L352,176 L340,180 L300,152 L252,116 L210,96 L170,108 Z"/>
+    <path class="s-snow" d="M168,82 L205,58 L240,72 L262,92 L238,90 L214,78 L190,90 Z"/>
+    <g class="s-crev"><path d="M262,112 l10,10"/><path d="M284,128 l9,10"/><path d="M306,146 l8,9"/><path d="M226,96 l9,8"/></g>
+
+    <!-- forest -->
+    <path class="s-soil" d="M330,155 L575,382 L575,396 L326,166 Z"/>
+    <g id="trees"></g>
+
+    <!-- valley floor -->
+    <path class="s-meadow" d="M575,382 L975,382 L945,420 L575,420 Z"/>
+    <g id="fields">
+      <rect x="582" y="384" width="22" height="16" class="s-f1"/><rect x="606" y="384" width="22" height="16" class="s-f2"/><rect x="630" y="384" width="22" height="16" class="s-f1"/><rect x="654" y="384" width="22" height="16" class="s-f2"/><rect x="678" y="384" width="20" height="16" class="s-f1"/>
+      <g class="s-crop"><path d="M588,384 v-6 M596,384 v-6 M612,384 v-5 M620,384 v-5 M636,384 v-7 M644,384 v-7 M660,384 v-5 M668,384 v-5 M684,384 v-6 M692,384 v-6"/></g>
+    </g>
+    <rect x="575" y="420" width="372" height="18" class="s-soil"/>
+
+    <!-- aquifer -->
+    <path fill="url(#pGravel)" d="M565,438 L947,438 C985,475 1025,510 1075,545 L480,545 Z"/>
+    <path class="s-sat" d="M546,456 L966,460 C995,488 1032,520 1075,545 L480,545 Z"/>
+    <path class="s-wt" d="M546,456 L966,460"/>
+
+    <!-- contaminated site mound -->
+    <path class="s-soil-l" d="M706,401 L716,387 L728,383 L752,382 L764,387 L774,401 Z"/>
+    <g class="s-line"><path d="M710,401 v-7 M718,401 v-7 M766,401 v-7 M772,401 v-6"/></g>
+
+    <!-- village + well -->
+    <rect x="780" y="388" width="44" height="10" class="s-f2"/>
+    <g class="s-crop"><path d="M786,388 v-4 M792,388 v-4 M798,388 v-4 M804,388 v-4 M810,388 v-4 M816,388 v-4"/></g>
+    <rect x="781" y="368" width="14" height="14" class="s-bld"/><path class="s-roof" d="M779,368 L788,359 L797,368 Z"/>
+    <rect x="799" y="366" width="15" height="16" class="s-bld"/><path class="s-roof" d="M797,366 L806.5,356 L816,366 Z"/>
+    <rect x="818" y="370" width="12" height="12" class="s-bld"/><path class="s-roof" d="M816,370 L824,362 L832,370 Z"/>
+    <rect x="832" y="374" width="8" height="9" class="s-bld"/><path class="s-line" d="M830,374 L836,369 L842,374"/>
+    <path class="s-pipe" d="M836,384 L836,500"/>
+
+    <!-- industry -->
+    <rect x="850" y="362" width="52" height="20" class="s-bld"/>
+    <path class="s-bld" d="M850,362 L850,352 L863,362 L863,352 L876,362 L876,352 L889,362 Z"/>
+    <rect x="888" y="300" width="8" height="62" class="s-bld"/>
+
+    <!-- WWTP (ARA) -->
+    <rect x="908" y="382" width="9" height="8" class="s-bld"/>
+    <ellipse cx="925" cy="393" rx="8" ry="3.6" class="s-basin"/><ellipse cx="941" cy="390" rx="7" ry="3.2" class="s-basin"/>
+
+    <!-- lake -->
+    <path class="s-lake-top" d="M975,382 L1200,382 L1200,420 L945,420 Z"/>
+    <path fill="url(#gLake)" d="M945,420 L1200,420 L1200,540 L1130,540 C1060,535 1000,490 945,420 Z"/>
+    <path class="s-thermo" d="M984,462 L1200,462"/>
+    <path class="s-sed" d="M945,420 C1000,490 1060,535 1130,540 L1200,540 L1200,557 L1126,557 C1052,552 990,503 938,426 Z"/>
+    <path class="s-fish" d="M1102,488 c8,-7 20,-7 26,0 l7,-5 l0,10 l-7,-5 c-6,7 -18,7 -26,0 Z"/>
+    <path class="s-fish" d="M1040,442 c6,-5 15,-5 20,0 l5,-4 l0,8 l-5,-4 c-5,5 -14,5 -20,0 Z"/>
+
+    <!-- river -->
+    <path id="riverLine" class="s-river" d="M352,178 C380,205 410,232 440,258 S500,315 530,340 S570,378 600,402 C660,416 720,404 780,410 S880,418 940,410 S975,405 1000,404"/>
+    <path class="s-river2" d="M352,178 C380,205 410,232 440,258 S500,315 530,340 S570,378 600,402 C660,416 720,404 780,410 S880,418 940,410 S975,405 1000,404"/>
+
+    <!-- elevation scale -->
+    <g>
+      <text x="1186" y="40" text-anchor="end" class="lbl-s">m a.s.l.</text>
+      <path class="s-tick" d="M1188,58 L1188,347 M1180,58 h8 M1180,154 h8 M1180,251 h8 M1180,347 h8"/>
+      <text x="1176" y="61" text-anchor="end" class="lbl-s">4000</text><text x="1176" y="157" text-anchor="end" class="lbl-s">3000</text><text x="1176" y="254" text-anchor="end" class="lbl-s">2000</text><text x="1176" y="350" text-anchor="end" class="lbl-s">1000</text>
+    </g>
+
+    <!-- labels -->
+    <text x="1060" y="62" class="lbl">Atmosphere</text>
+    <text x="300" y="84" class="lbl">Glacier</text>
+    <text x="70" y="452" class="lbl">Bedrock &amp; ore veins</text>
+    <text x="488" y="244" class="lbl">Forest soil</text>
+    <text x="604" y="362" class="lbl">Farmland</text>
+    <text x="740" y="376" class="lbl" text-anchor="middle" id="siteLbl">Mine dump</text>
+    <text x="806" y="345" class="lbl" text-anchor="middle">Village</text>
+    <text x="876" y="292" class="lbl" text-anchor="end">Industry</text>
+    <text x="926" y="372" class="lbl" text-anchor="middle">ARA</text>
+    <text x="664" y="433" class="lbl-s">river</text>
+    <text x="1060" y="404" class="lbl">Lake</text>
+    <text x="1196" y="456" text-anchor="end" class="lbl-w">epilimnion</text>
+    <text x="1196" y="478" text-anchor="end" class="lbl-w">hypolimnion</text>
+    <text x="1196" y="553" text-anchor="end" class="lbl-s">sediment</text>
+    <text x="640" y="512" class="lbl">Groundwater</text>
+    <text x="852" y="452" class="lbl-s">water table</text>
+    <text x="14" y="648" class="lbl-s">Schematic profile · not to scale below ground</text>
+  </g>
+
+  <g id="guides" pointer-events="none"></g>
+  <g id="particles" pointer-events="none"></g>
+
+  <g id="hits">
+    <rect class="hit" data-c="air" x="0" y="0" width="1200" height="382" pointer-events="all"/>
+    <path class="hit" data-c="bedrock" pointer-events="all" d="M0,545 L0,250 L80,170 L150,95 L205,58 L240,72 L290,118 L330,155 L326,166 L575,396 L575,420 L565,438 L480,545 Z M0,545 L1200,545 L1200,660 L0,660 Z"/>
+    <path class="hit" data-c="gw" pointer-events="all" d="M565,438 L947,438 C985,475 1025,510 1075,545 L480,545 Z"/>
+    <path class="hit" data-c="farm" pointer-events="all" d="M578,368 L703,368 L703,438 L578,438 Z"/>
+    <path class="hit" data-c="site" pointer-events="all" d="M704,368 L776,368 L776,438 L704,438 Z"/>
+    <path class="hit" data-c="people" pointer-events="all" d="M777,350 L844,350 L844,438 L777,438 Z"/>
+    <path class="hit" data-c="town" pointer-events="all" d="M845,290 L904,290 L904,438 L845,438 Z"/>
+    <path class="hit" data-c="wwtp" pointer-events="all" d="M905,378 L952,378 L944,426 L905,426 Z"/>
+    <path class="hit" data-c="forest" pointer-events="all" d="M366,166 L575,354 L575,396 L326,166 Z"/>
+    <path class="hit" data-c="glacier" pointer-events="all" d="M140,98 L205,54 L242,68 L292,114 L332,151 L358,176 L340,184 L300,156 L252,120 L210,100 L170,112 Z"/>
+    <path class="hit" data-c="lake" pointer-events="all" d="M975,382 L1200,382 L1200,540 L1130,540 C1060,535 1000,490 945,420 Z"/>
+    <path class="hit" data-c="sediment" pointer-events="all" d="M945,420 C1000,490 1060,535 1130,540 L1200,540 L1200,560 L1124,560 C1048,555 985,505 935,428 Z"/>
+    <path class="hit river-hit" data-c="river" pointer-events="stroke" d="M352,178 C380,205 410,232 440,258 S500,315 530,340 S570,378 600,402 C660,416 720,404 780,410 S880,418 940,410 S975,405 1000,404"/>
+  </g>
+  <g id="relMark" pointer-events="none"></g>
+  <g id="badges" pointer-events="none"></g>
+  <g id="chgLabels" pointer-events="none"></g>
+</svg>
+<p class="sr-only" id="chgLive" aria-live="polite"></p>
+      </div>
+      <div class="legend">
+        <span class="k"><svg width="12" height="12" aria-hidden="true"><circle cx="6" cy="6" r="4" class="pt-d"/></svg> dissolved</span>
+        <span class="k"><svg width="12" height="12" aria-hidden="true"><rect x="2" y="2" width="8" height="8" class="pt-p"/></svg> particle-bound</span>
+        <span class="k"><svg width="12" height="12" aria-hidden="true"><circle cx="6" cy="6" r="4" class="pt-g"/></svg> gas</span>
+        <span class="k"><svg width="26" height="8" aria-hidden="true"><line x1="1" y1="4" x2="25" y2="4" class="guide" stroke-width="3" style="opacity:.6"/></svg> line weight = relative flux (indicative)</span>
+        <span class="k"><svg width="26" height="8" aria-hidden="true"><line x1="1" y1="4" x2="25" y2="4" class="guide chg-up" stroke-width="4"/></svg> more / <svg width="26" height="8" aria-hidden="true"><line x1="1" y1="4" x2="25" y2="4" class="guide chg-down" stroke-width="4"/></svg> less after your last change</span>
+        <span class="hint">Hover or tap a compartment · click to pin</span><span class="swipe hint">Swipe the profile sideways · tap a compartment</span>
+      </div>
+    </div>
+
+    <aside class="panel" id="panel" aria-live="polite"></aside>
+  </div>
+
+  <!-- RESULTS -->
+  <section class="sec" id="results" hidden>
+    <div class="sec-head">
+      <h2>Screening results</h2>
+      <p id="resIntro"></p>
+    </div>
+    <aside class="intended" aria-label="Intended use">
+      <p><b>Intended use.</b> An overview of the whole system: where the metal goes, which place to act on first and what to measure, so you can form assumptions and a first plan. Check that plan with site data and the specialised models under <a href="#further">Take it further</a>. Also for teaching and comparing scenarios. <b>Not for</b> deciding under the AltlV whether a site must be investigated further or remediated, designing remediation, predicting concentrations or arrival times at a specific well, or individual health-risk assessments. Several defaults are assumptions that experts have not yet reviewed.</p>
+      <p class="imeta"><a href="manual.html#intended">Intended use and limits</a> · <a href="assumptions.html">All assumptions</a> · <a href="validation.html">Validation</a> · Version 0.12.1, 30 October 2026 · Feedback: <a href="mailto:litail@ethz.ch">litail@ethz.ch</a></p>
+    </aside>
+    <div class="res-grid" id="resGrid"></div>
+    <div class="spread" id="spread">
+      <div class="bud-head">
+        <h3>Where to act: how it spreads over time</h3>
+        <p>Red marks where the metal is above the Swiss standard at the best estimate (groundwater; for releases to air, also topsoil); amber where at least 10% of the uncertainty runs are above it. Use it to decide where to remove or cover soil, which wells and springs to protect, and where to place monitoring.</p>
+      </div>
+      <div class="sp-dir" id="spDir"></div>
+      <div class="bud-ctl">
+        <div class="ctl"><span class="ctl-label" id="lblSpT">Years since the release started</span>
+          <div class="sp-time"><button class="playbtn" id="spPlay" aria-pressed="false">▶ Play</button><input type="range" id="spT" min="0" max="5" step="1" value="2" aria-labelledby="lblSpT"><output id="spTout" for="spT">10 years</output></div></div>
+        <div class="ctl"><label class="ctl-label" for="spLim">Standard for groundwater</label><select id="spLim"><option value="tbdv">Drinking-water limit (TBDV)</option><option value="altl">AltlV concentration value (Annex 1)</option></select></div>
+      </div>
+      <div class="sp-body">
+        <div class="sp-map2" id="spMap2" role="region" aria-label="Spread map"></div>
+        <div class="sp-side">
+          <ul class="sp-legend" aria-label="Map legend">
+            <li><i class="lg-fill crit"></i>Above the standard (best estimate)</li>
+            <li><i class="lg-fill warn"></i>Possibly above (at least 10% of runs)</li>
+            <li><i class="lg-box"></i>Source area: red or amber if the topsoil is above a Swiss value</li>
+            <li><i class="lg-path"></i>Runoff path for eroded soil</li>
+            <li><i class="lg-arrow"></i>Groundwater direction you set</li>
+            <li><i class="lg-arrow dash"></i>Terrain direction (stand-in only)</li>
+            <li><i class="lg-arrow wind"></i>Prevailing wind, blowing towards (air releases)</li>
+          </ul>
+          <fieldset class="sp-layers" id="spLayers"><legend>Support layers</legend>
+            <label><input type="checkbox" data-ov="cant"><span>Cantonal groundwater protection <small>Blue: S1–S3 zones around wells and springs. Pink: protected aquifer areas (Au). Via geodienste.ch; coverage and terms vary by canton.</small></span></label>
+            <label><input type="checkbox" data-ov="hk100"><span>Hydrogeological map 1:100,000 <small>FOEN; water-table contours and flow arrows where mapped</small></span></label>
+            <label><input type="checkbox" data-ov="tracer"><span>Tracer tests <small>FOEN; measured flow paths, mainly in karst</small></span></label>
+            <label><input type="checkbox" id="spTerrDir" checked><span>Terrain direction arrow <small>a stand-in, not a measurement</small></span></label>
+            <a id="spGeoLink" href="https://map.geo.admin.ch" target="_blank" rel="noopener">Open this place in map.geo.admin.ch ↗</a>
+          </fieldset>
+        </div>
+      </div>
+      <div class="sp-act"><h4>Where to act in year <span id="spActT">10</span></h4><ul class="trap" id="spAct"></ul></div>
+      <p class="sp-note">A screening picture to plan where to look, sample and act, not a map of measured contamination. Groundwater spread: Domenico (1987) screening plume with your aquifer inputs. Deposition from air: long-term plume averaged over wind sectors, with dry and wet deposition by particle size. Terrain and streams: swisstopo, 2.4 km window at 50 m.</p>
+    </div>
+    <div class="budget" id="budget">
+      <div class="bud-head">
+        <h3 id="budTitle">Where is the metal after 1 year?</h3>
+        <p>Mass budget: every kilogram released, followed to where it sits now. The rows add up to 100%. Results above are concentrations; this shows amounts.</p>
+      </div>
+      <div class="bud-ctl">
+        <div class="ctl"><span class="ctl-label" id="lblBudT">Time since the release started</span>
+          <div class="seg" role="radiogroup" aria-labelledby="lblBudT" id="budTSeg"></div></div>
+        <div class="ctl"><label class="ctl-label" for="floodSel">Floods</label><select id="floodSel"></select></div>
+      </div>
+      <div class="bud-table" id="budRows" role="table" aria-label="Mass budget by compartment"></div>
+      <ul class="bud-note" id="budNote"></ul>
+      <div class="bud-head"><h4>Share in each place over 100 years</h4><p>Logarithmic scale, so small shares stay visible. Same release and flood setting as above.</p></div>
+      <div class="ser" id="serChart"></div>
+    </div>
+    <div class="fphase pal" id="forms">
+      <div class="bud-head">
+        <h3 id="formsTitle">Which forms, in which phase: five scenarios</h3>
+        <p>The same release under five sets of conditions. For each, the share of the released metal in soil and sediment, water and air, and which chemical forms make up each phase. Hover a bar segment for its share.</p>
+      </div>
+      <div id="formsBody"></div>
+      <p class="sp-note">Masses come from the mass budget rerun for each scenario. The split into forms follows indicative rules from general geochemistry (see the equations and assumptions below), so read the shares as orders of magnitude. In water, the solid-bound forms are metal carried on suspended particles.</p>
+    </div>
+    <div class="sens" id="sens">
+      <div class="bud-head">
+        <h3>What drives the uncertainty?</h3>
+        <p>Which uncertain input moves a result most across the Monte Carlo runs. Measure the top one first to narrow the range.</p>
+      </div>
+      <div class="ctl"><label class="ctl-label" for="sensSel">Result</label><select id="sensSel"></select></div>
+      <div class="sens-table" id="sensRows"></div>
+      <p class="sens-note" id="sensNote"></p>
+    </div>
+    <div class="sugg"><h3>Where and how to trap it</h3><ul class="trap" id="suggList"></ul></div>
+    <div class="further" id="further">
+      <div class="bud-head">
+        <h3>Take it further: specialised models</h3>
+        <p>This site gives the overview of the whole system: where the metal goes, which place to act on first and what to measure. Once you have a first plan, check the part that matters with a specialised model. Each file is a starting point filled with your current inputs; values marked ASSUMED must be replaced with site data.</p>
+      </div>
+      <div class="fx-grid">
+        <div class="fx">
+          <h4>PHREEQC <small>USGS, free</small></h4>
+          <p>Speciation, mineral solubility and sorption on iron oxides, then a 1D column to the water table or the receptor. Checks the Kd and seepage concentration used here.</p>
+          <p class="fx-need">You still need: a major-ion analysis, alkalinity and Eh.</p>
+          <button class="btn" data-x="phreeqc">Download input file</button><span class="fx-file" data-xn="phreeqc"></span>
+        </div>
+        <div class="fx">
+          <h4>HYDRUS-1D <small>PC-Progress, free version</small></h4>
+          <p>Water and metal moving through the unsaturated soil with real weather: arrival time and concentration at the water table.</p>
+          <p class="fx-need">You still need: soil texture or hydraulic properties, daily weather and a measured Kd.</p>
+          <button class="btn" data-x="hydrus">Download parameter sheet</button><span class="fx-file" data-xn="hydrus"></span>
+        </div>
+        <div class="fx">
+          <h4>MODFLOW 6 with transport <small>USGS, free, via FloPy</small></h4>
+          <p>Groundwater flow and the plume in plan view: which well, spring or river is reached, when, and how large the area above the limit is.</p>
+          <p class="fx-need">You still need: the water-table map, boundaries, pumping and the K field.</p>
+          <button class="btn" data-x="modflow">Download Python script</button><span class="fx-file" data-xn="modflow"></span>
+        </div>
+        <div class="fx">
+          <h4>All inputs and results <small>JSON</small></h4>
+          <p>Every input, result, uncertainty range, mass budget and form split of this run, for records, other tools or rerunning it with <code>SMP.run</code>.</p>
+          <p class="fx-need">Open with any text editor or script.</p>
+          <button class="btn ghost" data-x="json">Download JSON</button><span class="fx-file" data-xn="json"></span>
+        </div>
+      </div>
+      <p class="fx-warn" id="furtherNote" hidden></p>
+      <p class="sp-note">The files carry the screening values so you can compare. They are tested with PHREEQC 3 (minteq.v4.dat) and MODFLOW 6.7 with FloPy 3.11. The HYDRUS-1D sheet lists the values to enter in its dialogs, because HYDRUS project files depend on the program version.</p>
+    </div>
+    <details class="methods"><summary>Screening equations and assumptions</summary><div id="methods"></div></details>
+  </section>
+
+  <!-- INPUTS -->
+  <section class="sec" id="inputs">
+    <div class="sec-head">
+      <h2>Inputs for a professional run</h2>
+      <p>What researchers and consultants should define before any number comes out of a model. Each item notes why it matters for As, Hg or Pb and where Swiss data can fill it.</p>
+      <button class="btn ghost" id="goAdv">Enter them in Advanced mode</button>
+    </div>
+    <div class="car" id="inputCar" aria-roledescription="carousel" aria-label="Input groups">
+      <div class="car-head">
+        <div class="car-tabs" id="carTabs"></div>
+        <div class="car-ctrl">
+          <button class="car-btn" id="carPrev" aria-label="Previous group">‹</button>
+          <span class="car-count" id="carCount" aria-live="polite"></span>
+          <button class="car-btn" id="carNext" aria-label="Next group">›</button>
+        </div>
+      </div>
+      <div class="car-body">
+        <div class="car-groups" id="inputGroups"></div>
+        <button class="car-side" id="carSide" aria-label="Next group"><span class="arr">→</span><small id="carNextName"></small></button>
+      </div>
+    </div>
+  </section>
+
+  <!-- LIMITS -->
+  <section class="sec" id="limits">
+    <div class="sec-head">
+      <h2>Swiss reference values</h2>
+      <p>Benchmarks a result should be compared with. Check the current consolidated text on fedlex.admin.ch before using them in a report.</p>
+    </div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Medium</th><th class="m-as">Arsenic</th><th class="m-hg">Mercury</th><th class="m-pb">Lead</th><th>Basis</th></tr></thead>
+        <tbody>
+          <tr><td>Drinking water, maximum</td><td class="num">10 µg/L</td><td class="num">1 µg/L</td><td class="num">10 µg/L<br><span class="note">at tap, after 500 mL flush</span></td><td class="basis">TBDV (drinking-water ordinance)</td></tr>
+          <tr><td>Water / eluate at contaminated sites</td><td class="num">0.05 mg/L*</td><td class="num">0.001 mg/L</td><td class="num">0.05 mg/L</td><td class="basis">AltlV, Annex 1</td></tr>
+          <tr><td>Surface water, dissolved</td><td class="num">–</td><td class="num">0.01 µg/L</td><td class="num">1 µg/L</td><td class="basis">GSchV, Annex 2</td></tr>
+          <tr><td>Soil guide value (total content)</td><td class="num">–</td><td class="num">0.5 mg/kg</td><td class="num">50 mg/kg</td><td class="basis">VBBo, Annex 1</td></tr>
+          <tr><td>Soil trigger value</td><td class="num">–</td><td class="num">–</td><td class="num">200 mg/kg<br><span class="note">food &amp; fodder crops</span></td><td class="basis">VBBo</td></tr>
+          <tr><td>Soil remediation value, gardens &amp; playgrounds</td><td class="num">50 mg/kg</td><td class="num">2 mg/kg</td><td class="num">1000 mg/kg</td><td class="basis">AltlV, Annex 3</td></tr>
+          <tr><td>Soil remediation value, agriculture &amp; horticulture</td><td class="num">–</td><td class="num">–</td><td class="num">2000 mg/kg</td><td class="basis">AltlV, Annex 3</td></tr>
+          <tr><td>Air, PM10 annual mean</td><td class="num">–</td><td class="num">–</td><td class="num">500 ng/m³</td><td class="basis">LRV, Annex 7</td></tr>
+          <tr><td>Dust deposition, annual mean</td><td class="num">–</td><td class="num">–</td><td class="num">100 µg/(m²·d)</td><td class="basis">LRV, Annex 7</td></tr>
+          <tr><td>WHO drinking-water guideline</td><td class="num">10 µg/L</td><td class="num">6 µg/L<br><span class="note">inorganic Hg</span></td><td class="num">10 µg/L</td><td class="basis">WHO guidelines</td></tr>
+          <tr><td>Dietary reference</td><td>No safe intake identified; margin-of-exposure approach</td><td>MeHg 1.3 µg/kg bw per week; inorganic Hg 4 µg/kg bw per week</td><td>No threshold; BMDL₀₁ 12 µg/L blood (child IQ)</td><td class="basis">EFSA (As 2024, Hg 2012, Pb 2010)</td></tr>
+          <tr><td>Cancer classification</td><td>Group 1 (inorganic As)</td><td>Group 2B (methylmercury)</td><td>Group 2A (inorganic Pb)</td><td class="basis">IARC</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="note">* A 2024 revision proposal for AltlV Annex 1 lowers arsenic from 0.05 to 0.01 mg/L; confirm whether it is in force. A dash means no value is set for that medium.</p>
+  </section>
+
+  <!-- DATA -->
+  <section class="sec" id="data">
+    <div class="sec-head">
+      <h2>Swiss data to connect</h2>
+      <p>Open federal datasets that can fill inputs from a coordinate in LV95 (EPSG:2056). The map in Advanced mode already uses MeteoSwiss climate normals, KOBO soil maps, the geochemical soil atlas, the hydrogeological map and BFS land-use statistics.</p>
+    </div>
+    <div class="data-grid" id="dataGrid"></div>
+  </section>
+
+  <!-- ROADMAP -->
+  <section class="sec" id="roadmap">
+    <div class="sec-head">
+      <h2>From explainer to model</h2>
+      <p>This page is the knowledge layer: qualitative, rule-based, and checked against literature. The steps below turn it into a quantitative tool.</p>
+    </div>
+    <ol class="steps">
+      <li><b>Knowledge layer (Explore mode)</b><span>Forms, pathways, risks and trapping options per compartment and scenario.</span></li>
+      <li><b>Screening calculator (Advanced mode)</b><span>Release and site inputs, Kd-based soil mass balance, leaching, dilution, river partitioning and exposure checks against Swiss values.</span></li>
+      <li class="now"><b>Automatic site lookup</b><span>Map click fills precipitation, soil pH, organic carbon, aquifer type, land use and background values from Swiss national datasets (1 km grid).</span></li>
+      <li><b>Speciation and transport engines</b><span>PHREEQC for pH, redox and DOC-dependent speciation; HYDRUS-type vadose transport; a lake oxygen module for Hg methylation.</span></li>
+      <li><b>Uncertainty and validation</b><span>Monte Carlo ranges; test against NABO, NAQUA, NADUF and case data from Visp and shooting ranges.</span></li>
+    </ol>
+  </section>
+
+  <!-- SOURCES -->
+  <section class="sec" id="sources">
+    <div class="sec-head"><h2>Sources</h2></div>
+    <ul class="srcs">
+      <li><a href="https://opendatadocs.meteoswiss.ch/c-climate-data/c7-spatial-climate-normals" target="_blank" rel="noopener">MeteoSwiss: spatial climate normals 1991–2020 (Source: MeteoSwiss)</a></li>
+      <li><a href="https://ccsols.ch/de/boeden-kartieren/kartenerstellung/hinweiskarten-fuer-bodeneigenschaften/" target="_blank" rel="noopener">KOBO: soil property maps pH, clay, carbon stock (CC BY 4.0)</a></li>
+      <li><a href="https://www.bafu.admin.ch/de/geochemischer-bodenatlas-der-schweiz" target="_blank" rel="noopener">FOEN/Agroscope: Geochemical soil atlas of Switzerland</a></li>
+      <li><a href="https://www.soil.ch/download/pictures/aa/9xzeua32jdvfltsv5wqm9n6jqj0xum/01_reusser_jolanda.pdf" target="_blank" rel="noopener">Agroscope: soil atlas percentiles for As, Hg, Pb</a></li>
+      <li><a href="https://opendata.swiss/en/dataset/hydrogeologische-karte-der-schweiz-grundwasservorkommen-1-500000" target="_blank" rel="noopener">swisstopo: Hydrogeological map 1:500,000, groundwater resources</a></li>
+      <li><a href="https://ckan.opendata.swiss/dataset/arealstatistik-aktueller-stand-csv/resource/e0240bd6-d2c7-4292-9cd3-71b1c9b63be8" target="_blank" rel="noopener">BFS: Swiss land-use statistics (current state)</a></li>
+      <li><a href="https://www.swisstopo.admin.ch/" target="_blank" rel="noopener">swisstopo: base map tiles and elevation service</a></li>
+      <li><a href="https://www.bafu.admin.ch/de/spurenelemente-im-grundwasser" target="_blank" rel="noopener">FOEN: Spurenelemente im Grundwasser (NAQUA)</a></li>
+      <li><a href="https://www.bafu.admin.ch/de/schiessanlagen" target="_blank" rel="noopener">FOEN: Schiessanlagen</a></li>
+      <li><a href="https://www.bafu.admin.ch/de/visualisierung-der-schwermetallbelastung-des-bodens" target="_blank" rel="noopener">FOEN: NABO heavy-metal visualisation</a></li>
+      <li><a href="https://www.aefu.ch/wp-content/uploads/2026/08/20260818_MM_AefU_WWF_Quecksilber.pdf" target="_blank" rel="noopener">AefU &amp; WWF Oberwallis (Aug 2026): Quecksilber Visp</a></li>
+      <li><a href="https://www.newsd.admin.ch/newsd/message/attachments/37882.pdf" target="_blank" rel="noopener">FOEN: Hg remediation value 2 mg/kg (AltlV revision)</a></li>
+      <li><a href="https://www.Bafu.admin.ch/dam/bafu/de/dokumente/altlasten/externe-studien-berichte/quecksilber_in_boedenherleitungeinespruefwertesgemaessvbbofuernu.pdf.download.pdf/quecksilber_in_boedenherleitungeinespruefwertesgemaessvbbofuernu.pdf" target="_blank" rel="noopener">Agroscope (2013): Quecksilber in Böden, Prüfwert</a></li>
+      <li><a href="https://www.lexfind.ch/tolv/237465/de" target="_blank" rel="noopener">AltlV (consolidated text via LexFind)</a></li>
+      <li><a href="https://www.newsd.admin.ch/newsd/message/attachments/87831.pdf" target="_blank" rel="noopener">FOEN (2024): AltlV Annex 1 revision report</a></li>
+      <li><a href="https://www.ag.ch/media/kanton-aargau/bvu/umwelt-natur/boden/afu-kabo-legende-2006.pdf" target="_blank" rel="noopener">Canton Aargau: VBBo guide and trigger values</a></li>
+      <li><a href="https://www.swisstph.ch/fileadmin/user_upload/SwissTPH/Institute/Ludok/LRV_Grenzwerte_20220101.pdf" target="_blank" rel="noopener">Swiss TPH: LRV immission limits</a></li>
+      <li><a href="https://www.sg.ch/content/dam/sgch/gesundheit-soziales/verbraucherschutz/wasser/trinkwasser/WCI061_H%c3%b6chstwerte_Trinkwasser.pdf" target="_blank" rel="noopener">Canton St. Gallen: TBDV maximum values</a></li>
+      <li><a href="https://www.who.int/news-room/fact-sheets/detail/lead-poisoning-and-health" target="_blank" rel="noopener">WHO: Lead poisoning fact sheet</a></li>
+      <li><a href="https://meetingorganizer.copernicus.org/EGU26/EGU26-1802.html" target="_blank" rel="noopener">EGU26-1802: Glacier retreat as a source of legacy Hg</a></li>
+      <li><a href="https://www.nottingham.ac.uk/news/ice-core-lead" target="_blank" rel="noopener">Univ. Nottingham: Colle Gnifetti lead record</a></li>
+      <li><a href="https://www.unige.ch/forel/en/evenement/archive-actualites-institut-f-aforel/actualites-2022/methylation-du-mercure-par-des-micro-organismes-anaerobies-dans-la-colonne-deau-oxique-dun-lac-profond" target="_blank" rel="noopener">Univ. Geneva (2022): Hg methylation in an oxic lake water column</a></li>
+      <li><a href="https://www.meteoswiss.admin.ch/about-us/media/press-releases/2025/weather-and-climate-data-freely-available.html" target="_blank" rel="noopener">MeteoSwiss: open data since May 2025</a></li>
+      <li><a href="https://opendatadocs.meteoswiss.ch" target="_blank" rel="noopener">MeteoSwiss open data documentation</a></li>
+      <li><a href="https://opendata.swiss/en/dataset/klimaszenarien-ch2025-gitter-daily-gridded" target="_blank" rel="noopener">CH2025 climate scenarios (gridded, daily)</a></li>
+      <li><a href="https://opendata.eawag.ch/group/about/naduf-national-long-term-surveillance-of-swiss-rivers" target="_blank" rel="noopener">Eawag: NADUF river data</a></li>
+      <li><a href="https://www.Bafu.admin.ch/dam/bafu/de/dokumente/chemikalien/fachinfo-daten/haeufige_fragen_zuswissprtr.pdf.download.pdf/haeufige_fragen_zuswissprtr.pdf" target="_blank" rel="noopener">FOEN: SwissPRTR FAQ</a></li>
+      <li><a href="https://www.nj.gov/dep/srp/guidance/rs/daf.pdf" target="_blank" rel="noopener">NJDEP: dilution-attenuation factor (US EPA SSL equations)</a></li>
+      <li><a href="https://www.leg.mn.gov/docs/2015/other/150681/PFEISref_2/USEPA%202005.pdf" target="_blank" rel="noopener">Allison &amp; Allison (2005): Partition coefficients for metals, US EPA</a></li>
+      <li><a href="https://doaj.org/article/d4014f0c32b747e1a22dd5b22c842fef" target="_blank" rel="noopener">EFSA (2024): Inorganic arsenic in food</a></li>
+      <li><a href="https://doaj.org/article/12acfdbb5888481da155f703186f675a" target="_blank" rel="noopener">EFSA (2010): Lead in food</a></li>
+      <li><a href="https://www.newsd.admin.ch/newsd/message/attachments/60237.pdf" target="_blank" rel="noopener">GSchV amendment 2020: surface-water requirements</a></li>
+    </ul>
+  </section>
+
+  <footer>Built from literature and Swiss federal sources, checked October 2026. Explore mode is qualitative: flow weights and mobility levels are indicative. Advanced mode gives screening estimates from documented equations and does not replace a site investigation. Map data © swisstopo; climate data: Source MeteoSwiss; soil maps © KOBO (CC BY 4.0); soil atlas © FOEN/Agroscope; land use © BFS.<span class="copy">© 2026 Li-Ling T. ETH Zürich · Version 0.12.1, 30 October 2026 · Contact: <a href="mailto:litail@ethz.ch">litail@ethz.ch</a></span></footer>
+</div>
+<script>
+window.addEventListener("load", function(){
+  if(getComputedStyle(document.documentElement).getPropertyValue("--paper").trim()) return;
+  var d = document.createElement("div");
+  d.setAttribute("role", "alert");
+  d.style.cssText = "position:sticky;top:0;z-index:9999;background:#B23A30;color:#fff;font:15px/1.5 system-ui,sans-serif;padding:12px 16px";
+  d.textContent = "This page cannot find its style file (assets/css/styles.css). Keep the whole site folder together: index.html, the assets folder and the data folder must sit side by side. On GitHub, upload the folders too, not only the files.";
+  document.body.insertBefore(d, document.body.firstChild);
+});
+</script>
+</body>
+</html>

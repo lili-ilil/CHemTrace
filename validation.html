@@ -1,0 +1,426 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Validation · CHemTrace</title>
+<meta name="description" content="How well CHemTrace matches published Swiss measurements of arsenic, mercury, lead and antimony, what was changed as a result, and what remains untested.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%2316232A'/%3E%3Cpath d='M5 23C10 9 15 27 25 10' stroke='%23fff' stroke-width='3' fill='none' stroke-linecap='round'/%3E%3Ccircle cx='25' cy='10' r='3.4' fill='%23E2B33C'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="assets/css/styles.css">
+<script>
+try{ var t = localStorage.getItem("smp-theme"); if(t === "dark" || t === "light") document.documentElement.setAttribute("data-theme", t); }catch(e){}
+try{ var m = localStorage.getItem("smp-metal"); if(m === "Hg" || m === "Pb" || m === "As") document.documentElement.setAttribute("data-metal", m); }catch(e){}
+</script>
+<style>
+.man{display:grid; grid-template-columns:220px minmax(0,1fr); gap:36px; align-items:start}
+.toc{position:sticky; top:16px; display:flex; flex-direction:column; gap:2px; font-size:13.5px; border-left:2px solid var(--rule); padding-left:12px}
+.toc b{font-family:var(--f-mono); font-size:11px; font-weight:500; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-3); margin-bottom:6px}
+.toc a{text-decoration:none; color:var(--ink-2); padding-block:3px}
+.toc a:hover{color:var(--ink)}
+.man-body{display:flex; flex-direction:column; gap:34px; min-width:0; max-width:880px}
+.man-body section{display:flex; flex-direction:column; gap:12px; scroll-margin-top:16px}
+.man-body h2{font-size:clamp(22px, 2.4vw, 28px); font-weight:800; font-stretch:112%; border-top:2px solid var(--ink); padding-top:12px}
+.man-body h3{font-size:17px; font-weight:700; margin-top:6px}
+.man-body p, .man-body li{font-size:15px; color:var(--ink)}
+.man-body ul, .man-body ol{margin:0; padding-left:22px; display:flex; flex-direction:column; gap:5px}
+.man-body code, .man-body pre{font-family:var(--f-mono); font-size:12.5px; background:var(--chip); border-radius:2px}
+.man-body code{padding:1px 5px}
+.man-body pre{padding:12px 14px; overflow-x:auto; margin:0; white-space:pre; line-height:1.5}
+.man-body .lead{font-size:16.5px; color:var(--ink-2)}
+.man-body .tbl-wrap table{min-width:600px}
+.vtiles{display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:10px}
+.vtile{background:var(--surface); border:1px solid var(--rule); border-radius:4px; padding:12px 14px; display:flex; flex-direction:column; gap:4px}
+.vtile b{font-size:30px; font-weight:800; line-height:1.05; font-stretch:108%}
+.vtile span{font-size:13px; color:var(--ink-2)}
+.vtile[data-v="ok"]{box-shadow:inset 4px 0 0 var(--ok)}
+.vtile[data-v="check"]{box-shadow:inset 4px 0 0 var(--warn)}
+.vtile[data-v="crit"]{box-shadow:inset 4px 0 0 var(--crit)}
+.vtile[data-v="info"]{box-shadow:inset 4px 0 0 var(--ink-3)}
+.vt{background:var(--surface); border:1px solid var(--rule); border-radius:4px; padding:14px 18px; display:flex; flex-direction:column; gap:8px; scroll-margin-top:16px}
+.vt[data-v="ok"]{box-shadow:inset 4px 0 0 var(--ok)}
+.vt[data-v="check"]{box-shadow:inset 4px 0 0 var(--warn)}
+.vt[data-v="crit"]{box-shadow:inset 4px 0 0 var(--crit)}
+.vt[data-v="info"]{box-shadow:inset 4px 0 0 var(--ink-3)}
+.vt-h{display:flex; justify-content:space-between; align-items:flex-start; gap:12px}
+.vt h3{margin:0; font-size:16px}
+.vt dl{margin:0; display:grid; grid-template-columns:130px minmax(0,1fr); gap:6px 14px; font-size:14.5px}
+.vt dt{font-weight:600}
+.vt dd{margin:0}
+.vt dd small{color:var(--ink-2); font-size:13px}
+.fix{border-left:3px solid var(--metal); padding-left:12px}
+.back{font-size:14px}
+@media (max-width: 860px){ .man{grid-template-columns:minmax(0,1fr)} .toc{position:static; border-left:0; padding-left:0; flex-direction:row; flex-wrap:wrap; gap:6px 14px} .toc b{width:100%} .vtiles{grid-template-columns:repeat(2, minmax(0,1fr))} }
+@media (max-width: 520px){ .vt dl{grid-template-columns:minmax(0,1fr)} .vt dt{margin-top:4px} .vt-h{flex-direction:column; gap:6px} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="title-block">
+      <span class="kicker">Contaminants in Swiss landscapes · now As · Hg · Pb, more in progress</span>
+      <h1>Validation</h1>
+      <p class="lede">How the screening model compares with published Swiss measurements, what we changed as a result, and what is still untested. Checked 27 October 2026.</p>
+    </div>
+    <a class="btn" href="index.html">Open the platform</a>
+  </header>
+
+  <div class="man">
+    <nav class="toc" aria-label="Contents">
+      <b>Contents</b>
+      <a href="#approach">How we tested</a>
+      <a href="#summary">Summary</a>
+      <a href="#ranges">Shooting ranges</a>
+      <a href="#water">Rivers and lakes</a>
+      <a href="#valais">Mercury in Upper Valais</a>
+      <a href="#trends">Soil trends and groundwater</a>
+      <a href="#air">Air</a>
+      <a href="#changes">What we changed</a>
+      <a href="#limits">What this cannot tell you</a>
+      <a href="#checks">Code checks</a>
+      <a href="#reproduce">Reproduce the runs</a>
+      <a href="#sources">Sources</a>
+    </nav>
+
+    <main class="man-body">
+      <section id="approach">
+        <h2>How we tested</h2>
+        <p class="lead">This is a benchmark check, not a full validation. We ran the model for situations that match published Swiss studies and asked whether the measured values fall where the model puts them.</p>
+        <ul>
+          <li><b>Data:</b> published measurements from FOEN reports, the national soil, groundwater and air monitoring networks (NABO, NAQUA, NABEL), cantonal reports and peer-reviewed studies. Every number below is quoted from its source.</li>
+          <li><b>Model runs:</b> the platform's own engine, with its default 400 Monte Carlo runs. "Model" gives the best estimate and, in brackets, the 90% range.</li>
+          <li><b>The main weakness:</b> the studies rarely report every input the model needs (soil pH, organic carbon, area, release history) for the same site. We used the closest preset and say so. A true validation needs inputs and measurements from the same sites.</li>
+          <li><b>We did not tune the model to these data.</b> Changing defaults to fit the same data used to test them would make the test meaningless. Where the model was off, we changed what the data clearly supports (labels, warnings, new inputs) and left the numbers alone otherwise.</li>
+        </ul>
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>Verdict</th><th>Meaning</th></tr></thead>
+          <tbody>
+            <tr><td><span class="pill ok">Matches</span></td><td>The measured values fall inside the model's 90% range and the best estimate is within about 3 times of them.</td></tr>
+            <tr><td><span class="pill check">Partly</span></td><td>Inside the range but the best estimate is off by more than 3 times, or only part of the measured pattern is reproduced.</td></tr>
+            <tr><td><span class="pill crit">Does not match</span></td><td>Outside the model's range, or wrong in kind.</td></tr>
+            <tr><td><span class="pill info">Not testable</span></td><td>Outside the model's scope, or the data cannot be paired with a model run.</td></tr>
+          </tbody>
+        </table></div>
+      </section>
+
+      <section id="summary">
+        <h2>Summary</h2>
+        <div class="vtiles">
+          <div class="vtile" data-v="ok"><b>8</b><span>of 17 tests match</span></div>
+          <div class="vtile" data-v="check"><b>5</b><span>match partly</span></div>
+          <div class="vtile" data-v="crit"><b>3</b><span>do not match</span></div>
+          <div class="vtile" data-v="info"><b>1</b><span>not testable yet</span></div>
+        </div>
+        <p><b>What holds up:</b> lead and arsenic concentrations in seepage and groundwater, how metals split between water and particles in rivers, where mercury sits in contaminated Valais soils, and slow change in lead-polluted topsoil.</p>
+        <p><b>What does not:</b> the model's <b>timing</b> of arrival in groundwater (metals arrive in decades where slow matrix flow predicts thousands of years), <b>antimony</b> seepage in the field (the model uses the lab solubility), and the <b>loss of mercury</b> from topsoil (faster in reality than leaching and erosion explain).</p>
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>#</th><th>Test</th><th>Verdict</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td><a href="#t1">Lead in eluate from bullet-trap soil</a></td><td><span class="pill ok">Matches</span></td></tr>
+            <tr><td>2</td><td><a href="#t2">Lead in groundwater below shooting ranges</a></td><td><span class="pill ok">Matches</span></td></tr>
+            <tr><td>3</td><td><a href="#t3">How fast metals reach groundwater</a></td><td><span class="pill crit">Does not match</span></td></tr>
+            <tr><td>4</td><td><a href="#t4">Antimony in eluate from bullet-trap soil</a></td><td><span class="pill ok">Matches</span></td></tr>
+            <tr><td>5</td><td><a href="#t5">Antimony in field seepage</a></td><td><span class="pill crit">Does not match</span></td></tr>
+            <tr><td>6</td><td><a href="#t6">Antimony in groundwater below shooting ranges</a></td><td><span class="pill check">Partly</span></td></tr>
+            <tr><td>7</td><td><a href="#t7">Dissolved arsenic share in the Rhine</a></td><td><span class="pill ok">Matches</span></td></tr>
+            <tr><td>8</td><td><a href="#t8">Dissolved lead share in the Rhine</a></td><td><span class="pill ok">Matches</span></td></tr>
+            <tr><td>9</td><td><a href="#t9">Particles retained in large lakes</a></td><td><span class="pill check">Partly</span></td></tr>
+            <tr><td>10</td><td><a href="#t10">Water-soluble mercury in Valais soils</a></td><td><span class="pill ok">Matches</span></td></tr>
+            <tr><td>11</td><td><a href="#t11">Mercury in soil solution</a></td><td><span class="pill check">Partly</span></td></tr>
+            <tr><td>12</td><td><a href="#t12">Mercury in Valais groundwater</a></td><td><span class="pill ok">Matches</span></td></tr>
+            <tr><td>13</td><td><a href="#t13">Lead trend in Swiss topsoils</a></td><td><span class="pill check">Partly</span></td></tr>
+            <tr><td>14</td><td><a href="#t14">Mercury trend in Swiss topsoils</a></td><td><span class="pill crit">Does not match</span></td></tr>
+            <tr><td>15</td><td><a href="#t15">Arsenic in Plateau groundwater</a></td><td><span class="pill ok">Matches</span></td></tr>
+            <tr><td>16</td><td><a href="#t16">Arsenic in crystalline-rock groundwater</a></td><td><span class="pill info">Not testable</span></td></tr>
+            <tr><td>17</td><td><a href="#t17">Lead deposition from air</a></td><td><span class="pill check">Partly</span></td></tr>
+          </tbody>
+        </table></div>
+      </section>
+
+      <section id="ranges">
+        <h2>Shooting ranges: lead and antimony</h2>
+        <p>Seven Swiss 300 m ranges were studied for FOEN in 2001 (site names anonymised in the report). Model run: the platform's shooting-range example, which is the Swiss Plateau preset with metallic lead at 400 kg/yr for 50 years on 500 m², a 50 cm berm and a 10% reactive fraction. It gives 60,900 mg/kg lead in the berm, inside the measured 1,443–515,800 mg/kg.</p>
+
+        <div class="vt" id="t1" data-v="ok">
+          <div class="vt-h"><h3>1. Lead in eluate from bullet-trap soil</h3><span class="pill ok">Matches</span></div>
+          <dl>
+            <dt>Measured</dt><dd>40–700 µg/L at 5 of 7 ranges; about 6 and 180 mg/L at the other two.<br><small>Lab eluate: soil &lt; 0.5 mm shaken 24 h with distilled water at water:solid 10:1.</small></dd>
+            <dt>Model</dt><dd>Seepage water 120 µg/L (8.1–720)</dd>
+            <dt>Note</dt><dd>The model gives pore water, not a lab eluate. The two are almost equal when Kd is far above 10 L/kg, as it is for lead (52,000 L/kg here).</dd>
+          </dl>
+        </div>
+
+        <div class="vt" id="t2" data-v="ok">
+          <div class="vt-h"><h3>2. Lead in groundwater directly below the ranges</h3><span class="pill ok">Matches</span></div>
+          <dl>
+            <dt>Measured</dt><dd>0.5–3 µg/L at 4 ranges with groundwater pH 6.4–7.5; about 30 µg/L at the acidic site</dd>
+            <dt>Model</dt><dd>Groundwater under the source, long term: 2.7 µg/L (0.44–22)</dd>
+          </dl>
+        </div>
+
+        <div class="vt" id="t3" data-v="crit">
+          <div class="vt-h"><h3>3. How fast metals reach groundwater</h3><span class="pill crit">Does not match</span></div>
+          <dl>
+            <dt>Measured</dt><dd>Lead and antimony were already in the groundwater directly below ranges used for decades. The report names preferential flow paths as a key factor.</dd>
+            <dt>Model</dt><dd>Travel time to the water table by slow matrix flow: 1.2 million years (90,000 to 16 million)</dd>
+            <dt>Meaning</dt><dd>The concentration the model expects once the metal arrives is right (test 2), but the arrival time is wrong by orders of magnitude. Metals most likely take fast paths, such as cracks and root channels, or travel on fine particles.</dd>
+            <dt>Changed</dt><dd class="fix">The travel-time result no longer shows green "Beyond horizon". It now shows "Matrix flow only" as a result to check, with this evidence beside it. A new <b>fast-path share</b> input (Budget &amp; floods tab) lets you test quick arrival.</dd>
+          </dl>
+        </div>
+
+        <div class="vt" id="t4" data-v="ok">
+          <div class="vt-h"><h3>4. Antimony in eluate from bullet-trap soil</h3><span class="pill ok">Matches</span></div>
+          <dl>
+            <dt>Measured</dt><dd>200–5,000 µg/L (same lab eluate as test 1)</dd>
+            <dt>Model</dt><dd>5,000 µg/L (760–5,000), held at the solubility cap of about 5 mg/L</dd>
+          </dl>
+        </div>
+
+        <div class="vt" id="t5" data-v="crit">
+          <div class="vt-h"><h3>5. Antimony in field seepage</h3><span class="pill crit">Does not match</span></div>
+          <dl>
+            <dt>Measured</dt><dd>Outdoor lysimeters with a calcareous range soil: 110 µg/L in summer and below 40 µg/L in winter when drained; 2–5 µg/L when waterlogged</dd>
+            <dt>Model</dt><dd>5,000 µg/L, the lab solubility</dd>
+            <dt>Not changed</dt><dd class="fix">One lysimeter study with one soil is too little to set a new national default. The antimony results now show the lysimeter values beside the lab eluates, so users see that field seepage can be 50 times lower.</dd>
+          </dl>
+        </div>
+
+        <div class="vt" id="t6" data-v="check">
+          <div class="vt-h"><h3>6. Antimony in groundwater directly below the ranges</h3><span class="pill check">Partly</span></div>
+          <dl>
+            <dt>Measured</dt><dd>2–50 µg/L</dd>
+            <dt>Model</dt><dd>110 µg/L (12–250)</dd>
+            <dt>Meaning</dt><dd>The range overlaps, but the best estimate is about twice the highest measured value. This follows from test 5: the model starts from lab-solubility seepage. It errs on the cautious side.</dd>
+          </dl>
+        </div>
+      </section>
+
+      <section id="water">
+        <h2>Rivers and lakes</h2>
+        <p>Model runs: a release to the river with the Swiss Plateau preset and suspended sediment set to the measured 5.6 mg/L.</p>
+
+        <div class="vt" id="t7" data-v="ok">
+          <div class="vt-h"><h3>7. Dissolved arsenic share in the Rhine</h3><span class="pill ok">Matches</span></div>
+          <dl>
+            <dt>Measured</dt><dd>Rhine at Weil am Rhein, 2015: dissolved As median 0.74 µg/L (13 samples), total 0.81 µg/L (25 samples), so about 90% dissolved. Suspended solids median 5.6 mg/L.<br><small>Dissolved and total samples were taken on different schedules, so the ratio is approximate.</small></dd>
+            <dt>Model</dt><dd>95% dissolved (74–99%)</dd>
+          </dl>
+        </div>
+
+        <div class="vt" id="t8" data-v="ok">
+          <div class="vt-h"><h3>8. Dissolved lead share in the Rhine</h3><span class="pill ok">Matches</span></div>
+          <dl>
+            <dt>Measured</dt><dd>Same station: dissolved Pb below detection in 12 of 13 samples (maximum 0.13 µg/L), while total Pb had a median of 0.18 µg/L. Lead is mostly particle-bound.</dd>
+            <dt>Model</dt><dd>26% dissolved (5–72%)</dd>
+            <dt>Note</dt><dd>A qualitative match: the data show "mostly particle-bound" but cannot give a share.</dd>
+          </dl>
+        </div>
+
+        <div class="vt" id="t9" data-v="check">
+          <div class="vt-h"><h3>9. Particles retained in large lakes</h3><span class="pill check">Partly</span></div>
+          <dl>
+            <dt>Measured</dt><dd>Lake Brienz receives about 300 kt of suspended sediment a year and exports about 10 kt, so about 97% stays. Lake Geneva's sediment budget gives about 98%.</dd>
+            <dt>Model</dt><dd>90% of river particles settle (fixed until now)</dd>
+            <dt>Changed</dt><dd class="fix">The trapping efficiency is now an input (Budget &amp; floods tab), with the measured values in its help text. We kept 90% as the default because metals ride on the finest particles, which settle least, so metal retention is likely below bulk-sediment retention. A lake water residence time input was added for each preset (Lake Zurich 1.2, Lake Neuchâtel 8.2, Lake Geneva 11.4, Lake Lugano north basin 11.9 years).</dd>
+          </dl>
+        </div>
+      </section>
+
+      <section id="valais">
+        <h2>Mercury in Upper Valais</h2>
+        <p>Soils near Visp and Raron were polluted by mercury from a chemical factory, mainly through canal sediment spread on fields. Model: Visp preset, 2% organic carbon, Hg(II) bound to organic matter (Kd = Koc·foc, log Koc 5.5).</p>
+
+        <div class="vt" id="t10" data-v="ok">
+          <div class="vt-h"><h3>10. Water-soluble mercury in Valais soils</h3><span class="pill ok">Matches</span></div>
+          <dl>
+            <dt>Measured</dt><dd>Soils with 0.5–28.4 mg/kg Hg and pH 6.2–8.1: water extraction at solid:liquid 1:100 released 0.1–1.5% of the total Hg.</dd>
+            <dt>Model</dt><dd>1.6% (0.1–18%) at 1:100, from Kd 6,300 L/kg</dd>
+            <dt>Note</dt><dd>The best estimate sits at the upper edge of the measured range, so the model leans towards more mobile mercury.</dd>
+          </dl>
+        </div>
+
+        <div class="vt" id="t11" data-v="check">
+          <div class="vt-h"><h3>11. Mercury in soil solution</h3><span class="pill check">Partly</span></div>
+          <dl>
+            <dt>Measured</dt><dd>A floodplain soil with 2.38 mg/kg Hg and 3.45% organic carbon: 25–160 ng/L dissolved (&lt; 0.02 µm) in lab microcosms.</dd>
+            <dt>Model</dt><dd>220 ng/L (15–3,100) at 3.45% organic carbon, if all the Hg can dissolve</dd>
+            <dt>Meaning</dt><dd>Inside the range, but the best estimate is 1.4–9 times too high: cautious again.</dd>
+          </dl>
+        </div>
+
+        <div class="vt" id="t12" data-v="ok">
+          <div class="vt-h"><h3>12. Mercury in Valais groundwater</h3><span class="pill ok">Matches</span></div>
+          <dl>
+            <dt>Measured</dt><dd>No mercury above the 0.01 µg/L quantification limit in any groundwater campaign so far, including March 2024.</dd>
+            <dt>Model</dt><dd>For soil at 28 mg/kg: the metal has not reached the water table, and matrix flow needs about 29,000 years (2,200–390,000)</dd>
+            <dt>Note</dt><dd>Consistent, though test 3 shows the timing can be too slow where fast paths exist.</dd>
+          </dl>
+        </div>
+      </section>
+
+      <section id="trends">
+        <h2>Soil trends and groundwater arsenic</h2>
+        <p>The national soil monitoring network (NABO) has resampled about 100 sites every five years since 1985. If the model's long topsoil half-lives are right, topsoil concentrations should change only slowly.</p>
+
+        <div class="vt" id="t13" data-v="check">
+          <div class="vt-h"><h3>13. Lead trend in Swiss topsoils</h3><span class="pill check">Partly</span></div>
+          <dl>
+            <dt>Measured</dt><dd>1985–2009: unchanged at 70 sites, lower at 29, higher at 1. The authors explain the decline by cleaner air and the ban on leaded petrol, and by tillage and soil animals mixing topsoil into the subsoil.</dd>
+            <dt>Model</dt><dd>Topsoil half-life about 1,500 years on arable land, 3,100 under garden or grass and 11,000 under forest, so less than 2% change in 24 years</dd>
+            <dt>Meaning</dt><dd>It explains why most sites did not change, but not the decline at a third of them, because mixing into deeper soil is not in the model.</dd>
+          </dl>
+        </div>
+
+        <div class="vt" id="t14" data-v="crit">
+          <div class="vt-h"><h3>14. Mercury trend in Swiss topsoils</h3><span class="pill crit">Does not match</span></div>
+          <dl>
+            <dt>Measured</dt><dd>1985–2009: lower at 63 sites, unchanged at 27, higher at 3.</dd>
+            <dt>Model</dt><dd>Topsoil half-life about 670–1,100 years since version 0.11.0, which adds Hg⁰ emission from the soil (10 ng/m²/h per mg/kg). That is still only about 2–2.5% change in 24 years.</dd>
+            <dt>Meaning</dt><dd>Mercury leaves topsoil faster than the model explains. Hg⁰ emission at published flux rates adds only a small loss, so mixing into deeper soil is probably the main missing process.</dd>
+            <dt>Changed</dt><dd class="fix">Mercury soil results show the NABO trend beside them. Version 0.11.0 adds Hg⁰ emission from soil at published flux rates (Air &amp; surface tab). Mixing into deeper soil can be tested with Other losses (Soil tab); we add no default for it because NABO reports no rate.</dd>
+          </dl>
+        </div>
+
+        <div class="vt" id="t15" data-v="ok">
+          <div class="vt-h"><h3>15. Arsenic in Plateau groundwater</h3><span class="pill ok">Matches</span></div>
+          <dl>
+            <dt>Measured</dt><dd>NAQUA 2018: As above 10 µg/L at 2 of 524 stations and above 5 µg/L at 7. On the Plateau and in the Prealps, mostly below 1 µg/L.</dd>
+            <dt>Model</dt><dd>Seepage from Plateau soil with 8 mg/kg natural As: 0.70 µg/L (0.04–13), before any dilution in the aquifer</dd>
+          </dl>
+        </div>
+
+        <div class="vt" id="t16" data-v="info">
+          <div class="vt-h"><h3>16. Arsenic in crystalline-rock groundwater</h3><span class="pill info">Not testable</span></div>
+          <dl>
+            <dt>Measured</dt><dd>Values above 5 µg/L occur almost only in crystalline fractured-rock aquifers in the Alps and south of the Alps; 10 µg/L is exceeded at one station each in Valais and Graubünden.</dd>
+            <dt>Model</dt><dd>Seepage from Ticino soil with 25 mg/kg natural As: 1.1 µg/L (0.05–20)</dd>
+            <dt>Meaning</dt><dd>The high values come from arsenic minerals in the rock, not from soil, so this is outside what the soil route models. Enter local groundwater arsenic as the background value. The result text now says this.</dd>
+          </dl>
+        </div>
+      </section>
+
+      <section id="air">
+        <h2>Air</h2>
+        <div class="vt" id="t17" data-v="check">
+          <div class="vt-h"><h3>17. Lead deposition from air</h3><span class="pill check">Partly: the shape</span></div>
+          <dl>
+            <dt>Measured</dt><dd>NABEL 2024 annual means: 1.2 µg/(m²·d) at rural Payerne up to 8.9 at Lausanne city centre, all far below the 100 µg/(m²·d) limit. Around the Gerlafingen steel works in 2010: 92 µg/(m²·d) next to the plant, falling to 4–15 nearby, against 3 at the reference site. The canton notes the dust travels only a few hundred metres.</dd>
+            <dt>Model</dt><dd>Since version 0.11.0: a plume averaged over wind sectors with dry and wet deposition by particle size. For a low, dusty source (10 m, 40% large dust), deposition falls about 8× from 100 to 500 m and 30× by 1 km. For fine particles from a 60 m stack it falls only about 6× over the same distance.</dd>
+            <dt>Meaning</dt><dd>The modelled fall-off for coarse dust is as steep as the Gerlafingen pattern, which supports the shape. The level still cannot be tested: no study gives both a plant's emission rate and the deposition around it. National lead emissions (about 15 t in 2018) spread over Switzerland would give at most 1 µg/(m²·d). Measured rural deposition is similar or higher, so resuspended dust and imports from abroad matter too.</dd>
+          </dl>
+        </div>
+      </section>
+
+      <section id="changes">
+        <h2>What we changed</h2>
+        <ul>
+          <li><b>Travel time to the water table</b> in gravel and sand: no longer green when it is beyond the horizon. It now reads "Matrix flow only" and shows the shooting-range evidence (test 3).</li>
+          <li><b>New fast-path share</b> input, so the mass budget can send part of the seepage straight to groundwater (test 3).</li>
+          <li><b>Lake trapping efficiency and lake residence time</b> are now inputs, with measured Swiss values in the help text (test 9).</li>
+          <li><b>Mercury:</b> the NABO trend is shown beside soil results, and a suggestion to test Other losses is added (test 14).</li>
+          <li><b>Shooting-range benchmarks:</b> labelled correctly as lab eluates (water:solid 10:1, &lt; 0.5 mm), with field lysimeter values added for antimony (tests 1, 5, 6).</li>
+          <li><b>New "Measured" lines</b> on results for river dissolved share, lake settling, Hg methylation, topsoil after the horizon, travel time and groundwater arsenic.</li>
+        </ul>
+        <h3>What we did not change, and why</h3>
+        <ul>
+          <li><b>Antimony defaults</b> (tests 5 and 6): only one field lysimeter study exists, and fitting the defaults to the same data would hide the problem rather than fix it.</li>
+          <li><b>Kd relations:</b> where results are off, they are high (cautious), and the measured values still fall inside the uncertainty range.</li>
+        </ul>
+      </section>
+
+      <section id="limits">
+        <h2>What this cannot tell you</h2>
+        <ul>
+          <li><b>Site-level accuracy.</b> Inputs and measurements were never from the same site, so a match means "plausible for this kind of situation", not "right for your site".</li>
+          <li><b>The mass budget.</b> Only the lake retention step was checked. The shares in soil, groundwater and lake have no Swiss dataset to test against yet.</li>
+          <li><b>Floods.</b> The flood settings are assumptions; no Swiss event data were used.</li>
+          <li><b>Assumptions.</b> Every default and its basis is listed on the <a href="assumptions.html">assumptions page</a>; those marked as developer assumptions need expert review.</li>
+          <li><b>The forms by phase.</b> The form rules are indicative shares from general geochemistry. Apart from the methylmercury share in lake sediment, they have not been checked against Swiss speciation data.</li>
+          <li><b>The spread map.</b> The plume equation, the terrain direction and the runoff path have not been checked against Swiss plume or tracer data.</li>
+          <li><b>Lake processes and the redox ladder.</b> The Hg⁰ escape rate, the season factors and the trophic-state rules are assumptions scaled from studies outside Switzerland. The redox ladder is an electron balance without kinetics; it has not been checked against Swiss redox profiles.</li>
+          <li><b>Exports.</b> The PHREEQC and MODFLOW 6 files were run to check they work, not to check their results against field data.</li>
+          <li><b>Air and land surface.</b> Deposition velocities, washout, the size split by form, snow re-emission, leaf uptake, road partition and glacier ice concentrations come from literature outside these tests or are assumptions; only the fall-off with distance (test 17) was compared with Swiss data.</li>
+          <li><b>Air releases.</b> See test 17.</li>
+          <li><b>Few sites.</b> Several tests rest on one station or a handful of sites.</li>
+        </ul>
+        <h3>What would make it a real validation</h3>
+        <ul>
+          <li>Paired site data from cantonal contaminated-site registers or consultants' reports: soil, eluate, seepage and groundwater from the same place.</li>
+          <li>NADUF river data with dissolved and particulate metals measured in the same samples.</li>
+          <li>Field lysimeter or seepage data for lead, antimony and arsenic.</li>
+          <li>A topsoil mercury loss rate from NABO or flux studies.</li>
+        </ul>
+      </section>
+
+      <section id="checks">
+        <h2>Code checks</h2>
+        <p class="lead">Validation asks whether the model matches reality. Code checks ask whether the code does what the equations say. Version 0.12.1 passes all 18 automated checks.</p>
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>Check</th><th>Result</th></tr></thead>
+          <tbody>
+            <tr><td>The error function used by the plume matches reference values</td><td><span class="pill ok">Pass</span> largest error 1.4 × 10⁻⁷ (method limit 1.5 × 10⁻⁷)</td></tr>
+            <tr><td>Pb Kd follows log Kd = 1.99 + 0.42·pH</td><td><span class="pill ok">Pass</span></td></tr>
+            <tr><td>Hg Kd equals Koc × organic carbon fraction</td><td><span class="pill ok">Pass</span></td></tr>
+            <tr><td>Kd stays inside the literature ranges at extreme inputs</td><td><span class="pill ok">Pass</span></td></tr>
+            <tr><td>Topsoil follows its analytical solution S(t) = J/k·(1 − e<sup>−kt</sup>)</td><td><span class="pill ok">Pass</span></td></tr>
+            <tr><td>The mass budget conserves mass in 108 cases (3 metals × 4 release routes × 3 flood settings × 3 times)</td><td><span class="pill ok">Pass</span> largest error 3 × 10⁻¹⁴</td></tr>
+            <tr><td>Forms by phase add up to the released mass in all five scenarios</td><td><span class="pill ok">Pass</span></td></tr>
+            <tr><td>Uncertainty runs are reproducible (fixed random seed)</td><td><span class="pill ok">Pass</span></td></tr>
+            <tr><td>The groundwater plume is symmetric across the flow</td><td><span class="pill ok">Pass</span></td></tr>
+            <tr><td>The plume falls with distance at steady state</td><td><span class="pill ok">Pass</span></td></tr>
+            <tr><td>The plume equals the source concentration next to it and is zero upstream</td><td><span class="pill ok">Pass</span></td></tr>
+            <tr><td>The plume does not reach beyond its travel distance</td><td><span class="pill ok">Pass</span></td></tr>
+            <tr><td>The groundwater dilution factor is at least 1 and grows with conductivity</td><td><span class="pill ok">Pass</span></td></tr>
+            <tr><td>Hg⁰ escape from lake water keeps the budget closed, rises with the escape rate, and the monthly cycle averages to the yearly rate</td><td><span class="pill ok">Pass</span> largest error 7 × 10⁻¹⁵</td></tr>
+            <tr><td>The redox ladder steps from oxic to sulfidic as organic carbon rises (1, 5, 10, 500 mg C/L)</td><td><span class="pill ok">Pass</span></td></tr>
+            <tr><td>Deposition from air accounts for the whole emission in every size class, and the wind directions add up to one</td><td><span class="pill ok">Pass</span> largest error 7 × 10⁻¹⁶</td></tr>
+            <tr><td>Coarse dust lands closer to the source than fine particles</td><td><span class="pill ok">Pass</span></td></tr>
+            <tr><td>The mass budget and the forms stay closed with snow, forests, sealed surfaces, roads and glacier melt (24 cases)</td><td><span class="pill ok">Pass</span> largest error 1 × 10⁻¹⁴</td></tr>
+          </tbody>
+        </table></div>
+        <p>Rerun them after any change: open the platform, open the developer console (F12) and call <code>SMP.selfTest()</code>. Not yet checked: comparison of the dilution factor and the plume with published worked examples, which needs the original reference tables.</p>
+      </section>
+
+      <section id="reproduce">
+        <h2>Reproduce the runs</h2>
+        <p>Every model number here can be rerun in the browser. Open the platform, open the developer console (F12), and call <code>SMP.run(metal, inputs)</code>. Inputs you leave out take the preset values. The call returns all results with their 90% ranges, the mass budget, the uncertainty drivers and the internal rates.</p>
+<pre>// Tests 1–6: shooting-range example
+SMP.run("Pb", {preset:"plateau", medium:"soil", form:"pbm", pattern:"continuous",
+  amount:400, duration:50, area:500, depthMix:50, land:"agri", reactive:10})
+
+// Tests 7–8: river release at 5.6 mg/L suspended sediment
+SMP.run("As", {preset:"plateau", medium:"river", form:"asV", amount:1, ssc:5.6})
+
+// Test 12: Valais soil at about 28 mg/kg Hg
+SMP.run("Hg", {preset:"visp", medium:"soil", form:"hgsed", pattern:"pulse",
+  amount:2.3, area:200, depthMix:30, land:"garden", reactive:50})</pre>
+        <p>Tests 10 and 11 follow directly from the Kd relation: dissolved share = V/(Kd·M + V) for an extraction with V litres of water per M kg of soil, and pore water = C<sub>soil</sub>/Kd.</p>
+      </section>
+
+      <section id="sources">
+        <h2>Sources</h2>
+        <ul>
+          <li>Wersin P., Keusen H.R., Meyer Ch. (GEOTEST) 2007. <a href="https://www.bafu.admin.ch/dam/bafu/de/dokumente/altlasten/fachinfo-daten/gefaehrdung_von_grundwasserdurchschiessanlagenbleiundantimon.pdf.download.pdf/gefaehrdung_von_grundwasserdurchschiessanlagenbleiundantimon.pdf" target="_blank" rel="noopener">Gefährdung von Grundwasser durch Schiessanlagen: Blei und Antimon</a>. Report for FOEN.</li>
+          <li>Thut D., Bunge R. 2003. <a href="https://www.bafu.admin.ch/dam/bafu/de/dokumente/altlasten/fachinfo-daten/antimonmobilitaetinkugelfaengen.pdf.download.pdf/antimonmobilitaetinkugelfaengen.pdf" target="_blank" rel="noopener">Antimonmobilität in Kugelfängen</a>. umtec, Rapperswil, for FOEN.</li>
+          <li>Hockmann K. et al. 2015. <a href="https://irf.fhnw.ch/handle/11654/6239" target="_blank" rel="noopener">Antimony retention and release from drained and waterlogged shooting range soil under field conditions</a>. Chemosphere 134, 536–543.</li>
+          <li>Rheinüberwachungsstation Weil am Rhein. <a href="https://media.bs.ch/original_file/602a53807755a44b7e12c11a382c0d694e40f66b/anhang-jahresbericht-rues-teil-b-2015.pdf" target="_blank" rel="noopener">Jahresbericht 2015, Teil B, Anhang</a>.</li>
+          <li>Müller B. et al. 2007. <a href="https://doc.rero.ch/record/317482/files/27_2007_Article_871.pdf" target="_blank" rel="noopener">Present and past bio-available phosphorus budget in the ultra-oligotrophic Lake Brienz</a>. Aquatic Sciences 69, 227–239.</li>
+          <li>Loizeau J.-L., Girardclos S., Dominik J. 2012. Taux d'accumulation de sédiments récents et bilan de la matière particulaire dans le Léman. Archives des Sciences 65, 81–92.</li>
+          <li>Gilli R.S. et al. 2018. <a href="https://www.mdpi.com/2571-8789/2/3/44" target="_blank" rel="noopener">Speciation and mobility of mercury in soils contaminated by legacy emissions from a chemical factory in the Rhône Valley in Canton of Valais, Switzerland</a>. Soil Systems 2, 44.</li>
+          <li>Gfeller L. et al. 2021. <a href="https://bg.copernicus.org/articles/18/3445/2021/bg-18-3445-2021.html" target="_blank" rel="noopener">Mercury mobility, colloid formation and methylation in a polluted Fluvisol as affected by manure application and flooding–draining cycle</a>. Biogeosciences 18, 3445–3465.</li>
+          <li>Canton of Valais. <a href="https://www.vs.ch/documents/d/sen/28-plattform-2024-05-07_protokoll-genehmigt_vfinal" target="_blank" rel="noopener">Plattform Quecksilber, minutes of 7 May 2024</a>.</li>
+          <li>Gubler A., Schwab P., Wächter D., Meuli R.G., Keller A. 2015. <a href="https://www.bafu.admin.ch/dam/bafu/de/dokumente/boden/uz-umwelt-zustand/ergebnisse_der_nationalenbodenbeobachtungnabo1985-2009.pdf.download.pdf/ergebnisse_der_nationalenbodenbeobachtungnabo1985-2009.pdf" target="_blank" rel="noopener">Ergebnisse der Nationalen Bodenbeobachtung (NABO) 1985–2009</a>. FOEN, Umwelt-Zustand 1507.</li>
+          <li>FOEN, NAQUA. <a href="https://www.bafu.admin.ch/dam/de/sd-web/GXBsqFJBgvw6/NAQUA%20-%20Spurenelemente%20im%20Grundwasser%202018.pdf" target="_blank" rel="noopener">Spurenelemente im Grundwasser 2018</a> and <a href="https://www.bafu.admin.ch/de/spurenelemente-im-grundwasser" target="_blank" rel="noopener">Spurenelemente im Grundwasser</a> (web page).</li>
+          <li>FOEN, Empa. <a href="https://www.bafu.admin.ch/dam/bafu/de/dokumente/luft/fachinfo-daten/detaillierte-messergebnisse-nabel-2021.pdf.download.pdf/nabel_JB_2024_d.pdf" target="_blank" rel="noopener">NABEL Jahresbericht 2024</a>, Table 3.</li>
+          <li>Canton of Solothurn, Amt für Umwelt 2012. <a href="https://so.ch/fileadmin/internet/bjd/bjd-afu/pdf/luft/423_ui_12.pdf" target="_blank" rel="noopener">Biberist/Gerlafingen: Staub- und Schwermetalldepositionen</a>.</li>
+          <li>CEIP/EEA 2020. <a href="https://www.ceip.at/fileadmin/inhalte/ceip/00_pdf_other/2020_s3/ch_s3_rr_2020_clean.pdf" target="_blank" rel="noopener">Stage 3 Review Report Switzerland</a>, Annex I (national lead emissions).</li>
+          <li>Canton of Schwyz. <a href="https://www.sz.ch/umweltdepartement/amt-fuer-gewaesser/gewaesserschutz/seen/zuerich-und-obersee.html/8756-8758-8802-9447-9450-10712-10723-10737" target="_blank" rel="noopener">Zürich- und Obersee</a> (renewal time of Lake Zurich).</li>
+        </ul>
+        <p class="back"><a href="index.html">← Back to the platform</a> · <a href="manual.html">User manual</a> · <a href="assumptions.html">Assumptions</a></p>
+      </section>
+    </main>
+  </div>
+
+  <footer>CHemTrace · screening estimates for contaminants in Switzerland (now As, Hg and Pb). Benchmarks quoted from the sources listed; model runs from the platform's own engine.<span class="copy">© 2026 Li-Ling T. ETH Zürich · Version 0.12.1, 30 October 2026 · Contact: <a href="mailto:litail@ethz.ch">litail@ethz.ch</a></span></footer>
+</div>
+</body>
+</html>

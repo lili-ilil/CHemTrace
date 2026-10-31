@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Assumptions · CHemTrace</title>
+<meta name="description" content="Every default and assumption in CHemTrace, with its value, what it affects and its basis: published source, Swiss data, legal value or developer assumption.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%2316232A'/%3E%3Cpath d='M5 23C10 9 15 27 25 10' stroke='%23fff' stroke-width='3' fill='none' stroke-linecap='round'/%3E%3Ccircle cx='25' cy='10' r='3.4' fill='%23E2B33C'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="assets/css/styles.css">
+<script>
+try{ var t = localStorage.getItem("smp-theme"); if(t === "dark" || t === "light") document.documentElement.setAttribute("data-theme", t); }catch(e){}
+try{ var m = localStorage.getItem("smp-metal"); if(m === "Hg" || m === "Pb" || m === "As") document.documentElement.setAttribute("data-metal", m); }catch(e){}
+</script>
+<style>
+.man{display:grid; grid-template-columns:220px minmax(0,1fr); gap:36px; align-items:start}
+.toc{position:sticky; top:16px; display:flex; flex-direction:column; gap:2px; font-size:13.5px; border-left:2px solid var(--rule); padding-left:12px}
+.toc b{font-family:var(--f-mono); font-size:11px; font-weight:500; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-3); margin-bottom:6px}
+.toc a{text-decoration:none; color:var(--ink-2); padding-block:3px}
+.toc a:hover{color:var(--ink)}
+.man-body{display:flex; flex-direction:column; gap:34px; min-width:0; max-width:880px}
+.man-body section{display:flex; flex-direction:column; gap:12px; scroll-margin-top:16px}
+.man-body h2{font-size:clamp(22px, 2.4vw, 28px); font-weight:800; font-stretch:112%; border-top:2px solid var(--ink); padding-top:12px}
+.man-body h3{font-size:17px; font-weight:700; margin-top:6px}
+.man-body p, .man-body li{font-size:15px; color:var(--ink)}
+.man-body ul, .man-body ol{margin:0; padding-left:22px; display:flex; flex-direction:column; gap:5px}
+.man-body code, .man-body pre{font-family:var(--f-mono); font-size:12.5px; background:var(--chip); border-radius:2px}
+.man-body code{padding:1px 5px}
+.man-body pre{padding:12px 14px; overflow-x:auto; margin:0; white-space:pre; line-height:1.5}
+.man-body .lead{font-size:16.5px; color:var(--ink-2)}
+.man-body .tbl-wrap table{min-width:600px}
+.vtiles{display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:10px}
+.vtile{background:var(--surface); border:1px solid var(--rule); border-radius:4px; padding:12px 14px; display:flex; flex-direction:column; gap:4px}
+.vtile b{font-size:30px; font-weight:800; line-height:1.05; font-stretch:108%}
+.vtile span{font-size:13px; color:var(--ink-2)}
+.vtile[data-v="ok"]{box-shadow:inset 4px 0 0 var(--ok)}
+.vtile[data-v="check"]{box-shadow:inset 4px 0 0 var(--warn)}
+.vtile[data-v="crit"]{box-shadow:inset 4px 0 0 var(--crit)}
+.vtile[data-v="info"]{box-shadow:inset 4px 0 0 var(--ink-3)}
+.vt{background:var(--surface); border:1px solid var(--rule); border-radius:4px; padding:14px 18px; display:flex; flex-direction:column; gap:8px; scroll-margin-top:16px}
+.vt[data-v="ok"]{box-shadow:inset 4px 0 0 var(--ok)}
+.vt[data-v="check"]{box-shadow:inset 4px 0 0 var(--warn)}
+.vt[data-v="crit"]{box-shadow:inset 4px 0 0 var(--crit)}
+.vt[data-v="info"]{box-shadow:inset 4px 0 0 var(--ink-3)}
+.vt-h{display:flex; justify-content:space-between; align-items:flex-start; gap:12px}
+.vt h3{margin:0; font-size:16px}
+.vt dl{margin:0; display:grid; grid-template-columns:130px minmax(0,1fr); gap:6px 14px; font-size:14.5px}
+.vt dt{font-weight:600}
+.vt dd{margin:0}
+.vt dd small{color:var(--ink-2); font-size:13px}
+.fix{border-left:3px solid var(--metal); padding-left:12px}
+.back{font-size:14px}
+@media (max-width: 860px){ .man{grid-template-columns:minmax(0,1fr)} .toc{position:static; border-left:0; padding-left:0; flex-direction:row; flex-wrap:wrap; gap:6px 14px} .toc b{width:100%} .vtiles{grid-template-columns:repeat(2, minmax(0,1fr))} }
+@media (max-width: 520px){ .vt dl{grid-template-columns:minmax(0,1fr)} .vt dt{margin-top:4px} .vt-h{flex-direction:column; gap:6px} }
+.man-body .tbl-wrap table{min-width:760px}
+.prio{display:inline-block; margin-left:6px; font-family:var(--f-mono); font-size:10.5px; text-transform:uppercase; letter-spacing:.04em; color:var(--ink-3)}
+.prio.high{color:var(--crit)}
+.prio.med{color:var(--warn)}
+td .pill{white-space:nowrap}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="title-block">
+      <span class="kicker">Contaminants in Swiss landscapes · now As · Hg · Pb, more in progress</span>
+      <h1>Assumptions</h1>
+      <p class="lede">Every default and assumption in the model, what it affects and where it comes from. Version 0.12.1, 30 October 2026.</p>
+    </div>
+    <a class="btn" href="index.html">Open the platform</a>
+  </header>
+
+  <div class="man">
+    <nav class="toc" aria-label="Contents">
+      <b>Contents</b>
+      <a href="#read">How to read this page</a>
+      <a href="#chem">Soil chemistry</a>
+      <a href="#site">Site data from the map</a>
+      <a href="#ero">Erosion and floods</a>
+      <a href="#gw">Groundwater</a>
+      <a href="#sw">Rivers and lakes</a>
+      <a href="#redox">Redox ladder (optional)</a>
+      <a href="#exports">Exports for specialised models</a>
+      <a href="#exp">Exposure</a>
+      <a href="#forms">Forms by phase</a>
+      <a href="#unc">Uncertainty</a>
+      <a href="#air">Air and land surface</a>
+      <a href="#law">Swiss limit values</a>
+      <a href="validation.html">Validation →</a>
+    </nav>
+
+    <main class="man-body">
+      <section id="read">
+        <h2>How to read this page</h2>
+        <p class="lead">82 items are listed. 54 are developer assumptions, set for this tool without a published source; 20 of them are marked high priority for expert review because they drive key results.</p>
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>Basis</th><th>Meaning</th><th>Items</th></tr></thead>
+          <tbody>
+            <tr><td><span class="pill ok">Published</span></td><td>Equation or value from a peer-reviewed or official international source</td><td>16</td></tr>
+            <tr><td><span class="pill ok">Swiss data</span></td><td>Measured in Switzerland or taken from a Swiss agency report</td><td>10</td></tr>
+            <tr><td><span class="pill info">Legal value</span></td><td>Set in Swiss ordinances; check the current text</td><td>2</td></tr>
+            <tr><td><span class="pill check">Developer assumption</span></td><td>Set by the developer for this tool; needs expert review. Priority <span class="prio high">High</span> <span class="prio med">Medium</span> <span class="prio low">Low</span> shows how much it moves key results</td><td>54</td></tr>
+          </tbody>
+        </table></div>
+        <p>Most values can be changed in Advanced mode, and entering measured data replaces the default. The equations are listed under "Screening equations and assumptions" on the platform, and the comparison with measurements is on the <a href="validation.html">validation page</a>.</p>
+      </section>
+      <section id="chem">
+        <h2>Soil chemistry</h2>
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>Item</th><th>Value</th><th>Affects</th><th>Basis</th><th>Note</th></tr></thead>
+          <tbody><tr><td><b>Pb Kd in soil</b></td><td>log Kd = 1.99 + 0.42·pH, kept within 10<sup>0.7</sup>–10<sup>5.0</sup> L/kg</td><td>All lead results in soil and seepage</td><td><span class="pill ok">Published</span></td><td>Carlon et al. 2004; range from Allison &amp; Allison 2005</td></tr><tr><td><b>Hg Kd in soil</b></td><td>Kd = Koc × organic carbon fraction, log Koc 5.5, kept within 10<sup>2.2</sup>–10<sup>5.8</sup> L/kg</td><td>All mercury results in soil and seepage</td><td><span class="pill check">Developer assumption</span><span class="prio high">High</span></td><td>Chosen so that 2% organic carbon gives the Allison &amp; Allison (2005) median (log 3.8)</td></tr><tr><td><b>As Kd in soil</b></td><td>log Kd = 2.77 + 0.9·log Fe<sub>ox</sub> − 0.25·max(0, pH − 7) + 0.1·max(0, 7 − pH)</td><td>All arsenic results in soil and seepage</td><td><span class="pill check">Developer assumption</span><span class="prio high">High</span></td><td>Built for this tool and anchored to the Allison &amp; Allison (2005) median; US EPA advises measured Kd for arsenic</td></tr><tr><td><b>As Kd adjustments</b></td><td>High phosphate −0.3; As(III) −0.7; periodically or permanently waterlogged −0.5 or −1.2; aquifer suboxic, anoxic or sulfidic −0.3, −1.2, −0.7 (log units)</td><td>Arsenic under reducing or phosphate-rich conditions</td><td><span class="pill check">Developer assumption</span><span class="prio high">High</span></td><td>Direction from general geochemistry; sizes set by the developer</td></tr><tr><td><b>Sulfidic conditions</b></td><td>Kd +0.5 log units for Pb and Hg</td><td>Lead and mercury in sulfidic aquifers</td><td><span class="pill check">Developer assumption</span><span class="prio low">Low</span></td><td></td></tr><tr><td><b>Kd ranges</b></td><td>Clamped to the soil ranges in Allison &amp; Allison (2005)</td><td>Extreme inputs</td><td><span class="pill ok">Published</span></td><td></td></tr><tr><td><b>Pb solubility limit</b></td><td>About 300 µg/L at pH 7–9, about 10 mg/L at pH 5 or below, log-linear in between</td><td>Lead seepage at high loads</td><td><span class="pill ok">Swiss data</span></td><td>Values from the FOEN shooting-range study (GEOTEST 2007); the interpolation is the developer's</td></tr><tr><td><b>Kd on suspended matter</b></td><td>log Kd 4.0 (As), 5.7 (Pb), 5.3 (Hg)</td><td>Dissolved share in rivers and lakes</td><td><span class="pill ok">Published</span></td><td>Medians from Allison &amp; Allison 2005</td></tr><tr><td><b>Aquifer retardation</b></td><td>R = 1 + 1.8·Kd/n<sub>e</sub> (bulk density 1.8 kg/L) in gravel and sand; R = 1 in karst and fractured rock</td><td>Travel times and plume in groundwater</td><td><span class="pill check">Developer assumption</span><span class="prio med">Medium</span></td><td>Standard form; bulk density and the no-retardation rule are the developer's</td></tr><tr><td><b>Subsoil Kd</b></td><td>Uses 30% of the topsoil organic carbon</td><td>Travel time to the water table</td><td><span class="pill check">Developer assumption</span><span class="prio med">Medium</span></td><td></td></tr><tr><td><b>Reactive fraction by form</b></td><td>Salts 100%; CCA wood 50%; sulfide tailings 5%; Hg-rich sediment 50%; Hg⁰ 20%; cinnabar 1%; PbO dust 60%; metallic Pb 10%; fly ash 30%; galena 2%</td><td>Seepage, leaching and forms</td><td><span class="pill check">Developer assumption</span><span class="prio high">High</span></td><td>Editable on the Release tab</td></tr><tr><td><b>Reactive share of background</b></td><td>20%</td><td>Background seepage</td><td><span class="pill check">Developer assumption</span><span class="prio med">Medium</span></td><td></td></tr><tr><td><b>Antimony at shooting ranges</b></td><td>3% of the Pb mass; Kd 20 L/kg; mobile fraction 12%; solubility about 5 mg/L</td><td>Antimony results</td><td><span class="pill ok">Swiss data</span></td><td>FOEN shooting-range study; field seepage is much lower (see validation test 5)</td></tr></tbody>
+        </table></div>
+      </section>
+      <section id="site">
+        <h2>Site data from the map</h2>
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>Item</th><th>Value</th><th>Affects</th><th>Basis</th><th>Note</th></tr></thead>
+          <tbody><tr><td><b>Topsoil organic carbon</b></td><td>Soil carbon stock 0–120 cm ÷ 60</td><td>Hg Kd at map sites</td><td><span class="pill check">Developer assumption</span><span class="prio high">High</span></td><td>Assumes 60% of the stock in 0–30 cm and a bulk density of 1.2 t/m³</td></tr><tr><td><b>Oxalate iron</b></td><td>1.5–9 g/kg by soil-atlas iron class</td><td>As Kd at map sites</td><td><span class="pill check">Developer assumption</span><span class="prio high">High</span></td><td></td></tr><tr><td><b>Soil-atlas classes to mg/kg</b></td><td>Agroscope percentiles; class value is the geometric mean of its bounds, 10th and 90th percentiles interpolated</td><td>Background As, Hg, Pb at map sites</td><td><span class="pill ok">Swiss data</span></td><td>Percentiles from Agroscope; the conversion is the developer's</td></tr><tr><td><b>Aquifer class to K and porosity</b></td><td>Gravel 3×10⁻³ or 1×10⁻³ m/s; moraine 1×10⁻⁴; karst 5×10⁻³ (porosity 0.02); fractured rock 1×10⁻⁶ or 1×10⁻⁷ (0.01)</td><td>Groundwater results at map sites</td><td><span class="pill check">Developer assumption</span><span class="prio med">Medium</span></td><td>Typical values, not site measurements</td></tr><tr><td><b>Land use</b></td><td>Settlement → garden; unproductive land → forest</td><td>Which Swiss soil values apply</td><td><span class="pill check">Developer assumption</span><span class="prio low">Low</span></td><td></td></tr><tr><td><b>Preset sites</b></td><td>All values of the four presets</td><td>Examples</td><td><span class="pill check">Developer assumption</span><span class="prio low">Low</span></td><td>Illustrative</td></tr><tr><td><b>Preset places on the spread map</b></td><td>Visp, Kirchberg (BE), La Chaux-de-Fonds, Astano (TI)</td><td>Spread map before you set a source</td><td><span class="pill check">Developer assumption</span><span class="prio low">Low</span></td><td>Illustrative; slope is not applied there</td></tr></tbody>
+        </table></div>
+      </section>
+      <section id="ero">
+        <h2>Erosion and floods</h2>
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>Item</th><th>Value</th><th>Affects</th><th>Basis</th><th>Note</th></tr></thead>
+          <tbody><tr><td><b>Erosion on arable land</b></td><td>0.7 t/ha/yr</td><td>Erosion and downslope transport</td><td><span class="pill ok">Swiss data</span></td><td>Mean measured at Frienisberg (BE), 1997–2007 (Prasuhn)</td></tr><tr><td><b>Erosion on other land</b></td><td>Gardens 0.3, forest 0.05, industrial 1, bare berms and dumps 2 t/ha/yr</td><td>Erosion and downslope transport</td><td><span class="pill check">Developer assumption</span><span class="prio med">Medium</span></td><td></td></tr><tr><td><b>Enrichment and delivery</b></td><td>Eroded soil carries 1.5 times the metal; 10% reaches a stream</td><td>River loads from erosion</td><td><span class="pill check">Developer assumption</span><span class="prio med">Medium</span></td><td></td></tr><tr><td><b>Slope factor</b></td><td>Default erosion × S(slope)/S(5%), S from McCool et al. 1987</td><td>Erosion at a location you set</td><td><span class="pill check">Developer assumption</span><span class="prio med">Medium</span></td><td>Published factor; the 5% reference slope is the developer's</td></tr><tr><td><b>Extreme flood</b></td><td>10 t/ha soil loss; 30% reaches the river; 10% of its particles settle on floodplains; suspended sediment ×10</td><td>Flood scenarios</td><td><span class="pill check">Developer assumption</span><span class="prio high">High</span></td><td></td></tr><tr><td><b>Snowmelt and storm</b></td><td>Discharge ×2 and sediment ×3; discharge ×5 and sediment ×10</td><td>River results under these water regimes</td><td><span class="pill check">Developer assumption</span><span class="prio med">Medium</span></td><td></td></tr></tbody>
+        </table></div>
+      </section>
+      <section id="gw">
+        <h2>Groundwater</h2>
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>Item</th><th>Value</th><th>Affects</th><th>Basis</th><th>Note</th></tr></thead>
+          <tbody><tr><td><b>Dilution factor</b></td><td>US EPA soil screening method</td><td>Groundwater under the source</td><td><span class="pill ok">Published</span></td><td></td></tr><tr><td><b>Travel time</b></td><td>Matrix flow: t = L·θ·R/q</td><td>Arrival at the water table</td><td><span class="pill ok">Published</span></td><td>Arrival is wrong in kind where fast paths exist (validation test 3)</td></tr><tr><td><b>Plume</b></td><td>Domenico (1987); dispersivity 0.83·(log<sub>10</sub>x)<sup>2.414</sup> m (Xu &amp; Eckstein 1995); transverse ÷10, vertical ÷100</td><td>Spread map</td><td><span class="pill ok">Published</span></td><td>The ratios are common defaults</td></tr><tr><td><b>Source in the plume</b></td><td>Held at its peak concentration</td><td>Spread map</td><td><span class="pill check">Developer assumption</span><span class="prio low">Low</span></td><td>Cautious</td></tr><tr><td><b>Fast paths</b></td><td>0% in gravel and sand by default; karst and fractured rock treated as fast</td><td>Budget and spread map</td><td><span class="pill check">Developer assumption</span><span class="prio high">High</span></td><td>Editable on the Budget &amp; floods tab</td></tr><tr><td><b>Path to surface water</b></td><td>500 m</td><td>When groundwater reaches the river or lake</td><td><span class="pill check">Developer assumption</span><span class="prio med">Medium</span></td><td></td></tr><tr><td><b>Terrain direction</b></td><td>Plane fitted to the terrain within 1 km</td><td>Stand-in until you set the groundwater direction</td><td><span class="pill check">Developer assumption</span><span class="prio high">High</span></td><td>Support only</td></tr><tr><td><b>Amber zone</b></td><td>At least 10% of the uncertainty runs above the standard</td><td>Spread map</td><td><span class="pill check">Developer assumption</span><span class="prio low">Low</span></td><td></td></tr></tbody>
+        </table></div>
+      </section>
+      <section id="sw">
+        <h2>Rivers and lakes</h2>
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>Item</th><th>Value</th><th>Affects</th><th>Basis</th><th>Note</th></tr></thead>
+          <tbody><tr><td><b>Lake water residence time</b></td><td>Lake Zurich 1.2, Lake Neuchâtel 8.2, Lake Geneva 11.4, Lake Lugano north basin 11.9 years</td><td>Metal in lake water</td><td><span class="pill ok">Swiss data</span></td><td>Canton of Schwyz; lake data summaries</td></tr><tr><td><b>Lake trapping</b></td><td>90% of river particles settle</td><td>Lake sediment and downstream shares</td><td><span class="pill check">Developer assumption</span><span class="prio med">Medium</span></td><td>Bulk sediment retention measured at about 97–98%</td></tr><tr><td><b>Methylation index</b></td><td>Points for bottom-water oxygen, trophic state, wetlands, DOC, pH and sulfate</td><td>Mercury methylation potential</td><td><span class="pill check">Developer assumption</span><span class="prio med">Medium</span></td><td>Qualitative ranking only</td></tr><tr><td><b>Trophic state and bottom-water oxygen</b></td><td>With oxygen on Estimate: nutrient-poor lakes oxic; moderately or very nutrient-rich lakes seasonally anoxic</td><td>Lake redox, methylation, forms in lake water</td><td><span class="pill check">Developer assumption</span><span class="prio med">Medium</span></td><td>General limnology; many Swiss Plateau lakes have seasonal anoxia</td></tr><tr><td><b>Season</b></td><td>Summer: seasonal anoxia counts as anoxic; winter: oxic; the multi-year budget runs May–September as summer</td><td>Methylation index and forms in lake water</td><td><span class="pill check">Developer assumption</span><span class="prio med">Medium</span></td><td></td></tr><tr><td><b>Hg⁰ escape from lake water</b></td><td>10% of the lake-water Hg per year; ×2 from May to September, ×2/7 in the other months</td><td>Hg in lake water and the air share of the budget</td><td><span class="pill check">Developer assumption</span><span class="prio high">High</span></td><td>Scaled from inland-lake evasion of about 1 ng/m²/h (Denkenberger et al. 2012); shallow lakes lose much more</td></tr><tr><td><b>Methylmercury in lake water</b></td><td>3%, 10% or 20% of the dissolved Hg for oxic, seasonal or permanent anoxia, plus wetland and trophic terms (+2% or +5%); ×0.7 in summer, ×1.2 in winter; at most 40%</td><td>Forms in lake water</td><td><span class="pill check">Developer assumption</span><span class="prio high">High</span></td><td>Summer factor for breakdown by light (Sellers et al. 1996)</td></tr><tr><td><b>Methylated arsenic in lake water</b></td><td>Year 3, 5, 10%; summer 5, 10, 20%; winter 2, 2, 3% for nutrient-poor, moderate and nutrient-rich lakes</td><td>Forms in lake water</td><td><span class="pill check">Developer assumption</span><span class="prio med">Medium</span></td><td>Algae methylate arsenic in summer</td></tr><tr><td><b>Lake chemistry</b></td><td>Dissolved metal is not scavenged to the sediment</td><td>Lake water and downstream shares</td><td><span class="pill check">Developer assumption</span><span class="prio med">Medium</span></td><td>Simplification</td></tr></tbody>
+        </table></div>
+      </section>
+      <section id="redox">
+        <h2>Redox ladder (optional)</h2>
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>Item</th><th>Value</th><th>Affects</th><th>Basis</th><th>Note</th></tr></thead>
+          <tbody><tr><td><b>Electron balance</b></td><td>O₂ 4, NO₃⁻ to N₂ 5, organic carbon 4, SO₄²⁻ to H₂S 8 electrons; Mn(IV) 2 and Fe(III) 1 per atom</td><td>Aquifer redox state with the ladder on</td><td><span class="pill ok">Published</span></td><td>Standard redox stoichiometry</td></tr><tr><td><b>Oxide stock</b></td><td>All Mn and Fe oxides count as available to microbes; bulk density 1.8 kg/L</td><td>Time until sulfate is reduced</td><td><span class="pill check">Developer assumption</span><span class="prio high">High</span></td><td>Only part of the oxides is microbially available, so the real time can be shorter</td></tr><tr><td><b>Reaction zone</b></td><td>The first 10 m of the aquifer below the source</td><td>Time until sulfate is reduced</td><td><span class="pill check">Developer assumption</span><span class="prio med">Medium</span></td><td></td></tr><tr><td><b>Time horizon</b></td><td>The step reached by the budget year sets the redox state</td><td>All results with the ladder on</td><td><span class="pill check">Developer assumption</span><span class="prio med">Medium</span></td><td></td></tr><tr><td><b>Water regime from saturation</b></td><td>Fewer than 14 days well drained, up to 180 periodic, more permanent; below 1% organic carbon one step drier</td><td>Soil water regime with the ladder on</td><td><span class="pill check">Developer assumption</span><span class="prio med">Medium</span></td><td></td></tr><tr><td><b>Default water chemistry</b></td><td>O₂ 8, NO₃⁻ 15, SO₄²⁻ 30 mg/L; organic carbon 1 mg C/L; Mn oxides 0.2 g/kg</td><td>The ladder until you enter data</td><td><span class="pill check">Developer assumption</span><span class="prio med">Medium</span></td><td>Illustrative Swiss Plateau groundwater</td></tr></tbody>
+        </table></div>
+      </section>
+      <section id="exports">
+        <h2>Exports for specialised models</h2>
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>Item</th><th>Value</th><th>Affects</th><th>Basis</th><th>Note</th></tr></thead>
+          <tbody><tr><td><b>PHREEQC water chemistry</b></td><td>Ca 40 (charge balance), Mg 8, Na 5, K 1.5, Cl 10 mg/L; 10 °C; soil air 1% CO₂, river 0.1%</td><td>PHREEQC file</td><td><span class="pill check">Developer assumption</span><span class="prio high">High</span></td><td>Placeholders: replace with a water analysis</td></tr><tr><td><b>PHREEQC redox and pH</b></td><td>Oxic set by dissolved O₂; suboxic pe 4, anoxic 0, sulfidic −3.5, held by adding H₂; pH held with CO₂ (or HCl below pH 6.5)</td><td>PHREEQC file</td><td><span class="pill check">Developer assumption</span><span class="prio med">Medium</span></td><td></td></tr><tr><td><b>PHREEQC sorption</b></td><td>Hydrous ferric oxide from the oxalate Fe: 0.2 weak and 0.005 strong sites per Fe, 600 m²/g, 89 g per mol Fe</td><td>PHREEQC file</td><td><span class="pill ok">Published</span></td><td>Dzombak &amp; Morel 1990; organic-matter binding not included</td></tr><tr><td><b>HYDRUS hydraulic parameters</b></td><td>Loam: θr 0.078, θs 0.43, α 0.036 /cm, n 1.56, Ks 24.96 cm/d</td><td>HYDRUS sheet</td><td><span class="pill ok">Published</span></td><td>Carsel &amp; Parrish 1988; replace with Rosetta estimates from texture</td></tr><tr><td><b>MODFLOW 6 set-up</b></td><td>3 layers; vertical K = K/10; bulk density 1.8 t/m³; fixed heads for the gradient; dispersivity from Xu &amp; Eckstein at the receptor distance; slow seepage beyond the horizon starts at once</td><td>MODFLOW script</td><td><span class="pill check">Developer assumption</span><span class="prio med">Medium</span></td><td></td></tr></tbody>
+        </table></div>
+      </section>
+      <section id="exp">
+        <h2>Exposure</h2>
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>Item</th><th>Value</th><th>Affects</th><th>Basis</th><th>Note</th></tr></thead>
+          <tbody><tr><td><b>Child soil ingestion</b></td><td>0.25 g/d, 10 kg body weight</td><td>Child dose</td><td><span class="pill ok">Swiss data</span></td><td>As in the Agroscope derivation of the Swiss Hg value</td></tr><tr><td><b>Health reference points</b></td><td>As BMDL<sub>05</sub> 0.06 and Pb BMDL<sub>01</sub> 0.50 µg/kg bw per day; inorganic Hg TWI 4 µg/kg bw per week</td><td>Child dose ratings</td><td><span class="pill ok">Published</span></td><td>EFSA 2024, 2010, 2012</td></tr><tr><td><b>Relative bioavailability</b></td><td>100% by default</td><td>Child dose</td><td><span class="pill check">Developer assumption</span><span class="prio med">Medium</span></td><td>Cautious; often 30–50% for arsenic</td></tr></tbody>
+        </table></div>
+      </section>
+      <section id="forms">
+        <h2>Forms by phase</h2>
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>Item</th><th>Value</th><th>Affects</th><th>Basis</th><th>Note</th></tr></thead>
+          <tbody><tr><td><b>Form shares</b></td><td>As(III) share by soil water regime; methylmercury shares; HgS and lead sulfide shares in reducing conditions; lead carbonate share by pH; and the other rules in the methods</td><td>Forms-by-phase panel</td><td><span class="pill check">Developer assumption</span><span class="prio high">High</span></td><td>Methylmercury in lake sediment is supported by Swiss data (Lake Geneva about 0.4%, Lake Maggiore below 2%)</td></tr><tr><td><b>Scenario definitions</b></td><td>Waterlogged: permanently waterlogged soil, anoxic aquifer; acidified: pH −1.5; floods: 1 in 10 years; anoxic lake: permanent anoxia, many wetlands</td><td>Forms-by-phase panel</td><td><span class="pill check">Developer assumption</span><span class="prio low">Low</span></td><td></td></tr></tbody>
+        </table></div>
+      </section>
+      <section id="unc">
+        <h2>Uncertainty</h2>
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>Item</th><th>Value</th><th>Affects</th><th>Basis</th><th>Note</th></tr></thead>
+          <tbody><tr><td><b>Input spreads</b></td><td>Kd σ 0.7 log (Pb, Hg), 0.8 (As), 0.3 if measured; suspended-matter Kd 0.5; erosion 0.4; conductivity 0.3 log units; infiltration ±30%; reactive fraction ×0.5–1.5; deposition share ×0.5–2; background ±30%</td><td>All ranges and the sensitivity chart</td><td><span class="pill check">Developer assumption</span><span class="prio high">High</span></td><td>Judgement-based and deliberately wide</td></tr><tr><td><b>Runs</b></td><td>400 runs with a fixed seed</td><td>All ranges</td><td><span class="pill ok">Published</span></td><td>Standard Monte Carlo method</td></tr></tbody>
+        </table></div>
+      </section>
+      <section id="air">
+        <h2>Air and land surface</h2>
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>Item</th><th>Value</th><th>Affects</th><th>Basis</th><th>Note</th></tr></thead>
+          <tbody><tr><td><b>Size split by chemical form</b></td><td>% of Hg⁰ gas / Hg(II) gas / fine / coarse / large particles, for example Pb fly ash 0/0/90/10/0, PbO dust 0/0/60/30/10, Hg(II) salt 20/60/20/0/0</td><td>How much of an air release lands nearby</td><td><span class="pill check">Developer assumption</span><span class="prio high">High</span></td><td>Hg split from US EPA speciation factors for waste incineration (Godfrey et al. 2020); particle splits loosely follow EMEP/EEA PM2.5/TSP ratios</td></tr><tr><td><b>Dry deposition velocities</b></td><td>Open land / forest, cm/s: Hg(II) gas 1.0 / 1.7, fine 0.1 / 0.3, coarse 0.5 / 1.5, large dust 3.5 / 4.0, Hg⁰ 0 / 0.06 (leaf uptake)</td><td>Deposition near and far</td><td><span class="pill ok">Published</span></td><td>Zhang &amp; He 2014; Zhang et al. 2012; Obrist et al. 2021; the coarse values are the least certain</td></tr><tr><td><b>Washout by rain</b></td><td>Fine 6×10⁻⁵, coarse and Hg(II) gas 3×10⁻⁴, large 6.7×10⁻⁴ per second per mm/h of rain</td><td>Wet deposition</td><td><span class="pill ok">Published</span></td><td>US EPA HHRAP 2005 example values; the Hg(II) value is the developer's</td></tr><tr><td><b>Plume</b></td><td>Briggs (1973) σz for neutral conditions, mixing height 700 m, no plume rise, averaged over wind sectors</td><td>Deposition pattern and air concentration</td><td><span class="pill check">Developer assumption</span><span class="prio med">Medium</span></td><td>Standard screening form; mixing height from the Payerne and Schaffhausen boundary-layer climatology (Collaud Coen et al. 2014), rounded</td></tr><tr><td><b>Wind</b></td><td>Mean 2.5 m/s; the prevailing direction you set gets its share in a 90° sector, the rest is spread evenly</td><td>Most exposed point and map</td><td><span class="pill ok">Swiss data</span></td><td>Graf et al. 2019: 1.4–2.5 m/s on the Swiss Plateau</td></tr><tr><td><b>Most exposed point</b></td><td>Searched beyond 100 m from the source</td><td>Deposition and air results</td><td><span class="pill check">Developer assumption</span><span class="prio med">Medium</span></td><td>Treats the first 100 m as the plant site</td></tr><tr><td><b>Regional and far</b></td><td>Deposited between the footprint and 50 km counts as regional; beyond 50 km as carried far</td><td>Budget rows</td><td><span class="pill check">Developer assumption</span><span class="prio low">Low</span></td><td></td></tr><tr><td><b>Forest and sealed shares</b></td><td>Forest 30% (100% if the land use is forest); sealed 5% for fields, 30% for gardens, 50% for industrial land</td><td>Where deposition goes</td><td><span class="pill check">Developer assumption</span><span class="prio med">Medium</span></td><td></td></tr><tr><td><b>Hg leaf uptake and litter</b></td><td>Uptake April to October, reaching the soil with the litter in October and November</td><td>Hg in forest soils</td><td><span class="pill ok">Published</span></td><td>Wohlgemuth et al. 2020; litterfall 10–25 µg/m²/yr in European forests</td></tr><tr><td><b>Snow cover</b></td><td>D = 0.114·h − 32 days, centred on early February at 1000 m; all year above about 3200 m</td><td>Snow storage and melt</td><td><span class="pill ok">Swiss data</span></td><td>Hydrological Atlas of Switzerland plate 3.6 (northern Alps), shortened by about 20 days for today's climate (Klein et al. 2016); the south side has less snow</td></tr><tr><td><b>Hg re-emission from snow</b></td><td>50% of the Hg landing on snow returns to air before melt</td><td>Mercury budget</td><td><span class="pill ok">Published</span></td><td>Model: 57% at 45–60°N (Durnford et al. 2012)</td></tr><tr><td><b>Snowmelt runoff</b></td><td>30% of what the snowpack held runs off to streams at melt</td><td>Meltwater pulse to rivers</td><td><span class="pill check">Developer assumption</span><span class="prio high">High</span></td><td></td></tr><tr><td><b>Drainage of sealed surfaces and roads</b></td><td>Route shares by road type; retention direct 15%, road shoulder 100%, oil separator 30%, SABA 90%, sewage works 70%</td><td>Road and roof runoff</td><td><span class="pill ok">Swiss data</span></td><td>Steiner &amp; Hermann 2023 for FOEN (tyre-wear retention used for metals)</td></tr><tr><td><b>Hg⁰ emission from soil</b></td><td>10 ng/m²/h per mg/kg soil Hg; ×10 for elemental Hg, ×0.1 for cinnabar</td><td>Hg topsoil loss and Hg in air</td><td><span class="pill ok">Published</span></td><td>Fits 1–2 ng/m²/h for background soils (Zhu et al. 2016) and 15–800 at 2–25 mg/kg (Floreani et al. 2023); the form factors are the developer's</td></tr><tr><td><b>Blown dust</b></td><td>0.05%/yr on industrial ground, 0.01% on fields, 0.005% in gardens, 0 in forest; 30% of it leaves the area</td><td>Small loss from bare soil</td><td><span class="pill check">Developer assumption</span><span class="prio med">Medium</span></td><td></td></tr><tr><td><b>Road emission factors</b></td><td>Pb 0.076 mg per car-km today; 10 mg per car-km in the leaded-petrol era; heavy vehicles count four times</td><td>Road releases</td><td><span class="pill check">Developer assumption</span><span class="prio high">High</span></td><td>Today's value from the EMEP/EEA Guidebook 2023 (brake and tyre wear); the leaded-era value and the heavy-vehicle factor are assumptions</td></tr><tr><td><b>Road partition</b></td><td>Today 40% on the road surface, 50% beside the road, 10% in air; leaded era 20/30/50; 30% of road-surface dust blown back to the roadside; 75% of roadside deposition within 5 m</td><td>Roadside soil and runoff</td><td><span class="pill check">Developer assumption</span><span class="prio high">High</span></td><td>75% within 5 m from Sieber, Kawecki &amp; Nowack 2019 (Empa)</td></tr><tr><td><b>Glacier ice</b></td><td>Pb 2 ng/g, Hg 0.01 ng/g, As 0.1 ng/g in 1950–1990 ice; 20% of the melt comes from that ice</td><td>Glacier melt releases</td><td><span class="pill check">Developer assumption</span><span class="prio high">High</span></td><td>Pb from the Colle Gnifetti record (decade means 1.0–2.7 ng/g, Sigl et al. 2018); Hg, As and the meltwater share are assumptions</td></tr><tr><td><b>Background air</b></td><td>Pb in PM10 and Pb deposition at the nearest suitable NABEL station (2024); gaseous Hg from Osterwalder et al. 2024; Hg wet deposition 5 µg/m²/yr; PM10 and PM2.5 from the FOEN maps (2023–2025)</td><td>LRV comparisons</td><td><span class="pill ok">Swiss data</span></td><td>Added for comparison only, not to the mass budget</td></tr><tr><td><b>Air limits</b></td><td>LRV Pb in PM10 500 ng/m³; EU target value for As 6 ng/m³; WHO guideline for inorganic Hg vapour 1 µg/m³</td><td>Air results</td><td><span class="pill info">Legal value</span></td><td>LRV Annex 7; EU Directive 2004/107/EC; WHO Air Quality Guidelines for Europe 2000</td></tr></tbody>
+        </table></div>
+      </section>
+      <section id="law">
+        <h2>Swiss limit values</h2>
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>Item</th><th>Value</th><th>Affects</th><th>Basis</th><th>Note</th></tr></thead>
+          <tbody><tr><td><b>Limits</b></td><td>TBDV drinking water; AltlV Annex 1 and 3; GSchV; VBBo guide and trigger values; LRV deposition</td><td>All status labels</td><td><span class="pill info">Legal value</span></td><td>Check against the current text on fedlex.admin.ch</td></tr></tbody>
+        </table></div>
+      </section>
+      <p class="back"><a href="index.html">← Back to the platform</a> · <a href="manual.html">User manual</a> · <a href="validation.html">Validation</a></p>
+    </main>
+  </div>
+
+  <footer>CHemTrace · screening estimates for contaminants in Switzerland (now As, Hg and Pb).<span class="copy">© 2026 Li-Ling T. ETH Zürich · Version 0.12.1, 30 October 2026 · Contact: <a href="mailto:litail@ethz.ch">litail@ethz.ch</a></span></footer>
+</div>
+</body>
+</html>
