@@ -798,7 +798,8 @@ const BASE = {preset:"plateau", medium:"soil", form:"", pattern:"continuous", am
   eros:"", sdr:10, er:1.5, sbShare:3, sbMobile:12, kdSb:20,
   rivDist:500, fastShare:0, trapEff:90, floodEros:10, floodSdr:30, floodPlain:10, budT:1, flood:"none",
   srcE:"", srcN:"", gwDir:"", slope:"", mapLim:"tbdv", season:"year", hgEvas:10,
-  rlOn:"off", satDays:"", o2In:8, no3In:15, so4In:30, docIn:1, docSrc:0, aqMn:0.2,
+  rlOn:"off", satDays:"", o2In:8, no3In:15, so4In:30, docIn:1, orgType:"none", orgHc:0, orgCod:0, docSrc:0, aqMn:0.2,
+  wcT:"", wcCa:"", wcMg:"", wcNa:"", wcK:"", wcCl:"", wcAlk:"", wcFe:"", wcMn:"", wcH2S:"", wcEh:"",
   stackH:30, windU:2.5, windFrom:"", windShare:40, pGas0:"", pRgm:"", pFine:"", pCoarse:"", pLarge:"", forestShare:"", sealedShare:"", drainSys:"urban", resusp:"",
   snowDays:"", snowReem:50, snowRun:30, hgSoilF:10, bgDep:{As:"", Hg:"", Pb:""}, bgAir:{As:"", Hg:"", Pb:""},
   roadL:1000, aadt:15000, hgv:6, roadEra:"today", efRoad:"", roadDir:"90", glArea:5, glLoss:1.4, glConc:{As:0.1, Hg:0.01, Pb:2}, glShare:20};
@@ -807,7 +808,7 @@ const EXAMPLES = {
   Hg:{short:"Visp garden", preset:"visp", v:{medium:"soil", form:"hgsed", pattern:"pulse", amount:0.5, horizon:100, area:200, depthMix:30, land:"garden", drink:"no", fish:"monthly", reactive:50}},
   Pb:{short:"shooting range", preset:"plateau", v:{medium:"soil", form:"pbm", pattern:"continuous", amount:400, duration:50, horizon:100, area:500, depthMix:50, land:"agri", drink:"yes", fish:"none", reactive:10}}
 };
-const TABS = [{id:"rel", label:"Release"},{id:"site", label:"Site & climate"},{id:"air", label:"Air & surface"},{id:"soil", label:"Soil"},{id:"gw", label:"Groundwater"},{id:"sw", label:"River & lake"},{id:"bud", label:"Budget & floods"},{id:"redox", label:"Redox (optional)"},{id:"exp", label:"Exposure"}];
+const TABS = [{id:"rel", label:"Release"},{id:"site", label:"Site & climate"},{id:"air", label:"Air & surface"},{id:"soil", label:"Soil"},{id:"gw", label:"Groundwater"},{id:"sw", label:"River & lake"},{id:"bud", label:"Budget & floods"},{id:"redox", label:"Redox (optional)"},{id:"water", label:"Water analysis (optional)"},{id:"exp", label:"Exposure"}];
 const soilLike = I => I.medium === "soil" || I.medium === "air" || I.medium === "road";
 const FIELDS = [
   {k:"medium", tab:"rel", label:"Released to", type:"select", structural:true, opts:m => [["soil","Soil surface"],["air","Air (stack or chimney)"]].concat(m === "Pb" ? [["road","Road traffic"]] : [], [["gw","Groundwater, directly"],["river","River"],["glacier","Glacier melt (old deposition)"]]), help:"Where the metal first enters the environment. Road traffic and glacier melt calculate the release from their own inputs."},
@@ -909,14 +910,28 @@ const FIELDS = [
   {k:"trapEff", tab:"bud", label:"River particles settling in the lake", unit:"%", min:0, max:100, help:"Bulk sediment retention measured at 97–98% in Lake Geneva and Lake Brienz. Metals ride on the finest particles, which settle least, so 90% is a cautious default."},
   {k:"floodEros", tab:"bud", label:"Soil loss in one extreme flood", unit:"t/ha", min:0, max:500, help:"Assumption: 10 t/ha in one event, about 14 years of average arable erosion."},
   {k:"floodSdr", tab:"bud", label:"Flood-eroded soil reaching the river", unit:"%", min:0, max:100, help:"Assumption: 30%. Heavy runoff connects fields to streams."},
-  {k:"rlOn", tab:"redox", label:"Redox ladder", type:"select", structural:true, opts:[["off","Off: use the choices on the Soil and Groundwater tabs"],["on","On: calculate them from the data below"]], help:"For users with water-chemistry data. Microbes burn organic carbon with oxygen first, then nitrate, manganese and iron oxides, then sulfate; the ladder works out which step is reached below the source."},
+  {k:"rlOn", tab:"redox", label:"Redox ladder", type:"select", structural:true, opts:[["off","Off: use the choices on the Soil and Groundwater tabs"],["on","On: calculate them from the data below"]], help:"For users with water-chemistry data. Microbes oxidise organic matter with oxygen first, then nitrate, manganese and iron oxides, then sulfate. From an electron balance the ladder finds the predominant terminal electron-accepting process below the source. It shows the dominant process only; it does not calculate species. Oxygen, nitrate and sulfate come from the Water analysis tab."},
   {k:"satDays", tab:"redox", label:"Days per year the topsoil is water-saturated", unit:"days", min:0, max:366, optional:true, show:I => I.rlOn === "on", help:"Empty keeps the water regime on the Soil tab. Fewer than 14 days: well drained; up to 180: periodically waterlogged; more: permanently. Low organic carbon (under 1%) moves it one step towards oxic.", src:"Site observation; BLW soil suitability map (waterlogging)"},
-  {k:"o2In", tab:"redox", label:"Oxygen in the water reaching the aquifer", unit:"mg/L", min:0, max:20, show:I => I.rlOn === "on", src:"Recharge or upstream groundwater (NAQUA, site wells)"},
-  {k:"no3In", tab:"redox", label:"Nitrate", unit:"mg/L as NO₃", min:0, max:500, show:I => I.rlOn === "on"},
-  {k:"so4In", tab:"redox", label:"Sulfate", unit:"mg/L", min:0, max:3000, show:I => I.rlOn === "on"},
-  {k:"docIn", tab:"redox", label:"Biodegradable organic carbon reaching the aquifer", unit:"mg C/L", min:0, max:5000, show:I => I.rlOn === "on", help:"Usually 0.5–2 mg/L under fields and forests; more under wetlands or peat."},
-  {k:"docSrc", tab:"redox", label:"Extra organic carbon from the release", unit:"mg C/L", min:0, max:50000, show:I => I.rlOn === "on", help:"For example landfill leachate, manure or sewage. 0 if the release carries none."},
+  {k:"docIn", tab:"redox", label:"Natural biodegradable organic carbon reaching the aquifer", unit:"mg C/L", min:0, max:5000, show:I => I.rlOn === "on", help:"Usually 0.5–2 mg/L under fields and forests; more under wetlands or peat."},
+  {k:"orgType", tab:"redox", label:"Organic contamination (electron donor only)", type:"select", structural:true, opts:[["none","None"],["fuel","Fuel or oil spill (petroleum hydrocarbons)"],["leachate","Landfill leachate"],["sewage","Sewage or manure"],["doc","Other organic carbon"]], show:I => I.rlOn === "on", help:"Organic contaminants enter only as electron donors: they use up oxygen, nitrate and the oxides and push the aquifer towards reducing conditions. Their own fate and transformation products are not calculated."},
+  {k:"orgHc", tab:"redox", label:"Dissolved hydrocarbons reaching the aquifer", unit:"mg/L", min:0, max:2000, show:I => I.rlOn === "on" && I.orgType === "fuel", help:"From site wells (TPH or BTEX analysis). Fully oxidised, 1 mg gives about 0.42 mmol of electrons (benzene 0.38, toluene 0.39, alkanes 0.44).", src:"Site wells: TPH or BTEX"},
+  {k:"orgCod", tab:"redox", label:I => I.orgType === "sewage" ? "Biodegradable COD of the sewage or manure liquid reaching the aquifer" : "Biodegradable COD of the leachate reaching the aquifer", unit:"mg O₂/L", min:0, max:100000, show:I => I.rlOn === "on" && (I.orgType === "leachate" || I.orgType === "sewage"), help:I => "COD counts electrons directly: 1 mg O₂ = 0.125 mmol e⁻. Use BOD, or COD × the biodegradable share" + (I.orgType === "leachate" ? ": about 0.6 in young leachate, below 0.1 in old, methanogenic leachate (Kjeldsen et al. 2002)." : "."), src:"Leachate or effluent analysis (COD, BOD)"},
+  {k:"docSrc", tab:"redox", label:"Organic carbon from the contamination reaching the aquifer", unit:"mg C/L", min:0, max:50000, show:I => I.rlOn === "on" && I.orgType === "doc", help:"Biodegradable organic carbon, counted like natural organic carbon (4 electrons per C)."},
   {k:"aqMn", tab:"redox", label:"Reactive manganese oxides in the aquifer", unit:"g/kg", min:0, max:100, show:I => I.rlOn === "on", help:"Reactive iron oxides come from the Groundwater tab."},
+  {k:"wcT", tab:"water", label:"Water temperature", unit:"°C", min:0, max:40, optional:true, ph:"10 assumed", help:"Used in the PHREEQC file and to convert a measured Eh to pe."},
+  {k:"o2In", tab:"water", label:"Dissolved oxygen", unit:"mg/L", min:0, max:20, src:"Recharge or upstream groundwater (NAQUA, site wells)", help:"Also used by the redox ladder. The default 8 mg/L is a placeholder."},
+  {k:"no3In", tab:"water", label:"Nitrate", unit:"mg/L as NO₃", min:0, max:500, help:"Also used by the redox ladder. Default 15 mg/L."},
+  {k:"so4In", tab:"water", label:"Sulfate", unit:"mg/L", min:0, max:3000, help:"Also used by the redox ladder. Default 30 mg/L."},
+  {k:"wcCa", tab:"water", label:"Calcium", unit:"mg/L", min:0, max:2000, optional:true, ph:"not measured"},
+  {k:"wcMg", tab:"water", label:"Magnesium", unit:"mg/L", min:0, max:2000, optional:true, ph:"not measured"},
+  {k:"wcNa", tab:"water", label:"Sodium", unit:"mg/L", min:0, max:20000, optional:true, ph:"not measured"},
+  {k:"wcK", tab:"water", label:"Potassium", unit:"mg/L", min:0, max:2000, optional:true, ph:"not measured"},
+  {k:"wcCl", tab:"water", label:"Chloride", unit:"mg/L", min:0, max:30000, optional:true, ph:"not measured"},
+  {k:"wcAlk", tab:"water", label:"Alkalinity", unit:"mg/L as HCO₃⁻", min:0, max:5000, optional:true, ph:"not measured", help:"Empty: the PHREEQC file sets dissolved carbonate from an assumed CO₂ pressure instead."},
+  {k:"wcFe", tab:"water", label:"Dissolved iron (Fe²⁺)", unit:"mg/L", min:0, max:500, optional:true, ph:"not measured", help:"Filtered and acidified in the field."},
+  {k:"wcMn", tab:"water", label:"Dissolved manganese (Mn²⁺)", unit:"mg/L", min:0, max:100, optional:true, ph:"not measured"},
+  {k:"wcH2S", tab:"water", label:"Dissolved sulfide", unit:"mg/L as H₂S", min:0, max:500, optional:true, ph:"not measured"},
+  {k:"wcEh", tab:"water", label:"Measured redox potential Eh (vs. SHE)", unit:"mV", min:-500, max:900, optional:true, ph:"not measured", help:"If given, the PHREEQC file holds pe at this value instead of the redox class. Electrode Eh is often not at equilibrium; measured O₂, Fe²⁺ and sulfide are more reliable."},
   {k:"floodPlain", tab:"bud", label:"Flood particles left on floodplains", unit:"%", min:0, max:100, help:"Assumption: 10% of the flood's particle load settles on flooded land."},
   {k:"land", tab:"exp", label:"Land use at the source", type:"select", opts:[["garden","Garden or playground"],["agri","Agriculture"],["forest","Forest"],["ind","Industrial or commercial"]]},
   {k:"drink", tab:"exp", label:"Groundwater used for drinking", type:"select", opts:[["yes","Yes"],["no","No"]]},
@@ -930,10 +945,11 @@ const TABNOTES = {
   site: I => I.preset === "custom" ? (I.siteName ? `Values filled from the map at ${I.siteName}. Edit any of them if you have site data.` : "Custom site values.") : PRESETS[I.preset].note + " Illustrative defaults: replace with MeteoSwiss station normals and site data.",
   air: I => I.medium === "air" ? "How the emission spreads and lands: particle size, release height, wind and rain decide how much falls in the footprint; forests, snow and sealed surfaces decide where it goes next." : I.medium === "road" ? "Wind, forest and drainage values used for the road release." : soilLike(I) ? "Hg⁰ emission and blown dust from the topsoil. The other values apply to releases to air." : "These values apply to releases to air, roads and soils.",
   soil: I => "Kd is estimated from pH, organic carbon and Fe oxides unless you enter a measured value." + (I.rlOn === "on" && I.satDays !== "" ? " Water regime: set by the redox ladder." : ""),
-  gw: I => (I.medium === "gw" ? "The release enters the aquifer directly." : "Used for leaching from soil and the long-term groundwater estimate.") + (I.rlOn === "on" ? " Redox state: set by the redox ladder." : ""),
+  gw: I => (I.medium === "gw" ? "The release enters the aquifer directly." : "Used for leaching from soil and the long-term groundwater estimate.") + (I.rlOn === "on" ? " Redox condition: set by the redox ladder (predominant electron-accepting process)." : ""),
   sw: I => (riverLike(I) ? "River values drive the river calculation. " : "River values apply when the release goes to a river. ") + (S.metal === "Hg" ? "Lake values drive the methylation index." : "Lake oxygen also sets the redox state shown on the profile."),
   bud: () => "These settings drive the mass budget below the results. Flood values are assumptions: replace them with event data if you have it.",
-  redox: I => I.rlOn === "on" ? "The ladder now sets the soil water regime (if you give saturation days) and the aquifer redox state; its electron balance appears among the results. Switching it off keeps the last calculated values." : "Off. Switch on if you have oxygen, nitrate, sulfate and organic-carbon data for the water reaching the aquifer.",
+  redox: I => I.rlOn === "on" ? "The ladder finds the predominant terminal electron-accepting process below the source. CHemTrace uses it as the aquifer redox condition (and as the soil water regime if you give saturation days); its electron balance appears among the results. It is a first indication only: species distributions need thermodynamics with measured pH and concentrations (PHREEQC export). Switching it off keeps the last calculated values." : "Off. Switch on if you have oxygen, nitrate, sulfate and organic-carbon data for the water reaching the aquifer.",
+  water: () => "Optional. Enter your water analysis (filtered samples). The PHREEQC export uses these values in place of its assumed ones, which is what a thermodynamic species calculation needs; oxygen, nitrate and sulfate also feed the redox ladder. pH comes from the Soil, Groundwater or River & lake tab.",
   exp: () => "The child soil-ingestion dose is calculated for gardens and playgrounds."
 };
 const MEDIUM_LBL = {soil:"soil", air:"air", road:"a road (traffic)", gw:"groundwater", river:"a river", glacier:"a glacier-fed river (melt)"};
@@ -958,10 +974,10 @@ const METHODS_HTML = () => `<ol>
 <li><b>Child soil ingestion.</b> Dose = C<sub>soil</sub>·IR·RBA/BW, with 0.25 g/d and 10 kg as in the Agroscope derivation of the Swiss Hg value. Reference points: As BMDL<sub>05</sub> 0.06 µg/kg bw per day (EFSA 2024); Pb BMDL<sub>01</sub> 0.50 µg/kg bw per day (EFSA 2010); inorganic Hg TWI 4 µg/kg bw per week (EFSA 2012).</li>
 <li><b>Hg methylation index (0–10).</b> Bottom-water oxygen (0, 3, 4) + trophic state (0, 0.5, 1) + wetlands (0, 1, 2) + DOC (0, 1, 1.5) + pH (0, 0.5, 1.5) + sulfate (0, 1, 0.5), capped at 10. A qualitative ranking of known drivers, not a concentration.</li>
 <li><b>Lake state and season.</b> With bottom-water oxygen on "estimate", a nutrient-poor lake is taken as oxic and a moderately or very nutrient-rich lake as seasonally anoxic (algae sink and are decomposed in the deep water; many Swiss Plateau lakes behave like this). A seasonally anoxic lake counts as anoxic in summer and oxic in winter; the year setting uses the mean. In lake water, sunlight and algae drive two Hg losses: Hg(II) is reduced to dissolved gaseous Hg⁰ that escapes to air (default 10% of the lake-water Hg per year on average, run in the budget at ×2 from May to September and ×2/7 in the other months; an assumption for deep lakes, scaled from inland-lake evasion of about 1 ng/m²/h, Denkenberger et al. 2012), and methylmercury is broken down by light (Sellers et al. 1996), which lowers its share in summer surface water. The lake box loses mass at the rate 1/τ + k<sub>Hg⁰</sub>. The season setting changes the snapshot results (methylation index, forms in lake water), not the multi-year budget. Methylated arsenic shares in lake water rise with trophic state and in summer (algae methylate As).</li>
-<li><b>Redox ladder (optional).</b> An electron balance per litre of water reaching the aquifer, in mmol e⁻/L: organic carbon 4·DOC/12 is set against O₂ 4·O₂/32, then NO₃⁻ 5·NO₃/62. Any surplus reduces the Mn and Fe oxides held by the sediment (2 and 1 e⁻ per atom, a stock of a·1000/M·ρ<sub>b</sub>/n<sub>e</sub> per litre of pore water, ρ<sub>b</sub> 1.8 kg/L); once they are used up in the first ${LAD_ZONE} m (t = stock/surplus·${LAD_ZONE} m/v) sulfate is reduced (8 e⁻). The step reached by the budget year sets the aquifer redox state; days of topsoil saturation set the soil water regime (&lt;14 well drained, ≤180 periodic, more permanent; below 1% organic carbon one step drier). It ignores kinetics, pH buffering and mixing; use a reactive transport code for those.</li>
+<li><b>Redox ladder (optional).</b> An electron balance per litre of water reaching the aquifer, in mmol e⁻/L, that gives the predominant terminal electron-accepting process. Electron donors are natural organic carbon (4·DOC/12) plus any organic contamination, which counts only as an electron donor: dissolved hydrocarbons 0.42 mmol e⁻ per mg (stoichiometry of benzene, toluene and alkanes), biodegradable COD 4/32 per mg O₂, organic carbon 4/12 per mg C. They are set against O₂ (4·O₂/32), then NO₃⁻ (5·NO₃/62). Any surplus reduces the Mn and then the Fe oxides held by the sediment (2 and 1 e⁻ per atom, a stock of a·1000/M·ρ<sub>b</sub>/n<sub>e</sub> per litre of pore water, ρ<sub>b</sub> 1.8 kg/L) in the first ${LAD_ZONE} m (t = stock/surplus·${LAD_ZONE} m/v); once they are used up, sulfate is reduced (8 e⁻), and methanogenesis follows if donors remain. The process reached by the budget year sets the aquifer redox class used for Kd and the indicative forms; days of topsoil saturation set the soil water regime (&lt;14 well drained, ≤180 periodic, more permanent; below 1% organic carbon one step drier). The ladder names the dominant process only; species distributions need thermodynamics with measured pH and concentrations (PHREEQC export, Water analysis tab). It ignores kinetics, pH buffering and mixing.</li>
 <li><b>Mass budget.</b> Monthly steps up to the chosen year. Topsoil follows the mass balance above. Leached metal waits below the root zone for the matrix travel time, or arrives at once along fast paths (the fast-path share in gravel; always in karst and fractured rock). It then crosses the aquifer to surface water in t = X·R/v, with R as in the groundwater item and v = K·i/n<sub>e</sub>; while in the aquifer, 1/R of it is dissolved and the rest sorbed. Eroded soil reaches the river at the delivery ratio; the rest stays downslope. In the river the particle-bound share settles in the lake at the trapping efficiency (default 90%; 97–98% measured for bulk sediment in Lake Geneva and Lake Brienz) and the rest passes downstream; the dissolved share mixes into the lake and leaves with first-order flushing over the water residence time. For air releases the share not deposited leaves the footprint. A flood removes E<sub>flood</sub>·ER/(d·ρ<sub>b</sub>) of the topsoil metal; part reaches the river with SSC ×10, and part of its particles settles on floodplains. The best estimate spreads return-period floods as expected values; Monte Carlo runs draw random flood years. Mass is conserved: the rows add up to the released mass.</li>
 <li><b>Spread map.</b> Terrain comes from the swisstopo profile service on a 50 m grid over a 2.4 km window. Slope uses central differences. The runoff path follows the steepest descent until it meets a stream of the swisstopo VECTOR25 river network, a hollow or the window edge. The terrain direction is a plane fitted within 1 km and is only a stand-in for the groundwater direction you set. Groundwater spread uses the Domenico (1987) continuous plane source without decay: C = C<sub>0</sub>/4 · erfc((x − vt/R)/(2√(α<sub>x</sub>vt/R))) · [erf((y + Y/2)/(2√(α<sub>y</sub>x))) − erf((y − Y/2)/(2√(α<sub>y</sub>x)))] · erf(Z/(2√(α<sub>z</sub>x))), with α<sub>x</sub> = 0.83·(log<sub>10</sub>x)<sup>2.414</sup> m (Xu &amp; Eckstein 1995, as in US EPA BIOSCREEN), α<sub>y</sub> = α<sub>x</sub>/10 and α<sub>z</sub> = α<sub>x</sub>/100. For soil and air releases C<sub>0</sub> is the seepage concentration divided by the DAF, over the source width √A and the DAF mixing depth; it starts at the matrix travel time, and at once for the fast-path share. For direct releases C<sub>0</sub> is the plume concentration over the plume width and mixing thickness. The source is held at its peak, which is cautious. Red marks cells where background plus plume exceeds the chosen standard at the best estimate; amber marks cells where at least 10% of 100 Monte Carlo runs exceed it. Karst is not drawn as a plume. The default erosion is multiplied by S(slope)/S(5%), with the RUSLE slope factor S of McCool et al. (1987), only at a location you set.</li>
-<li><b>Forms by phase.</b> Five scenarios change the conditions on top of your inputs (waterlogged: permanently waterlogged soil and an anoxic aquifer; acidified: soil pH −1.5; floods: 1-in-10-year floods; anoxic lake: permanent bottom-water anoxia and many wetlands). The mass budget is rerun for each at the budget year. Topsoil, downslope and floodplain soil keep the non-reactive share in the original form; of the reactive share, θ/(θ + ρ<sub>b</sub>·Kd) is in pore water and the rest on solids. Forms then follow indicative rules from general geochemistry, not fitted to Swiss data: arsenic is mainly As(V) on iron oxides when oxic and As(III) when reducing (As(III) share of solids 5%, 30%, 70% for well drained, periodically and permanently waterlogged soil; of pore water 10%, 50%, 85%), with arsenic sulfides in anoxic sediment; mercury is mainly Hg(II) bound to reduced-sulfur groups of organic matter, with methylmercury at 0.2–3% of soil Hg, 0.4–2% of lake-sediment Hg (Lake Geneva about 0.4%, Lake Maggiore below 2%) and 3–40% of lake-water Hg depending on oxygen and wetlands, and HgS forming in reducing soil and anoxic sediment; lead is mainly bound to organic matter and oxides, with carbonates at pH ≥ 6.5 (20%) or ≥ 7.5 (40%), sulfides under reducing conditions and pyromorphite where phosphate is high. River water passing downstream is split into dissolved and particle-bound with the suspended-matter Kd. Treat the shares as orders of magnitude.</li>
+<li><b>Forms by phase.</b> Five scenarios change the conditions on top of your inputs (waterlogged: permanently waterlogged soil and an anoxic aquifer; acidified: soil pH −1.5; floods: 1-in-10-year floods; anoxic lake: permanent bottom-water anoxia and many wetlands). The mass budget is rerun for each at the budget year. Topsoil, downslope and floodplain soil keep the non-reactive share in the original form; of the reactive share, θ/(θ + ρ<sub>b</sub>·Kd) is in pore water and the rest on solids. Forms then follow indicative rules from general geochemistry, not fitted to Swiss data: arsenic is mainly As(V) on iron oxides when oxic and As(III) when reducing (As(III) share of solids 5%, 30%, 70% for well drained, periodically and permanently waterlogged soil; of pore water 10%, 50%, 85%), with arsenic sulfides in anoxic sediment; mercury is mainly Hg(II) bound to reduced-sulfur groups of organic matter, with methylmercury at 0.2–3% of soil Hg, 0.4–2% of lake-sediment Hg (Lake Geneva about 0.4%, Lake Maggiore below 2%) and 3–40% of lake-water Hg depending on oxygen and wetlands, and HgS forming in reducing soil and anoxic sediment; lead is mainly bound to organic matter and oxides, with carbonates at pH ≥ 6.5 (20%) or ≥ 7.5 (40%), sulfides under reducing conditions and pyromorphite where phosphate is high. River water passing downstream is split into dissolved and particle-bound with the suspended-matter Kd. Treat the shares as orders of magnitude. These are indicative classes, not a speciation calculation: species distributions need thermodynamics with measured pH and concentrations, for example the PHREEQC export with your analysis on the Water analysis tab.</li>
 <li><b>Sensitivity.</b> Spearman rank correlation between each sampled input multiplier and the result across the Monte Carlo runs. A value near ±1 means that input alone sets the order of the results; below 0.1 is noise. It ranks inputs within the stated spreads, so entering a measured value narrows that input and shrinks its bar.</li>
 <li><b>Uncertainty.</b> ${MC_N} Monte Carlo runs with a fixed seed. Kd varies log-normally with σ = 0.7 log units for Pb and Hg and 0.8 for As (0.3 when you enter a measured Kd); suspended-matter Kd σ 0.5; erosion σ 0.4 log units; hydraulic conductivity σ 0.3 log units; infiltration ±30%; reactive fraction ×0.5–1.5; deposition share ×0.5–2; background ±30%. The bar shows the 5–95% range, the dot the median and the red tick the limit. These spreads are judgement-based and wider than many site studies would find.</li>
 </ol>`;
@@ -972,7 +988,7 @@ const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 const SUPS = {"-":"⁻","0":"⁰","1":"¹","2":"²","3":"³","4":"⁴","5":"⁵","6":"⁶","7":"⁷","8":"⁸","9":"⁹"};
 // results are screening estimates, often uncertain by a factor of 10: show two significant figures, not more
 const NF = new Intl.NumberFormat("en-US", {maximumSignificantDigits:2});
-const APP_VERSION = "0.12.5", APP_DATE = "2026-10-31";
+const APP_VERSION = "0.13.0", APP_DATE = "2026-11-03";
 function fmt(v){
   if(v == null || isNaN(v)) return "–";
   if(!isFinite(v)) return "∞";
@@ -1693,8 +1709,8 @@ function compute(){
   }
   if(I.rlOn === "on"){
     const L = redoxLadder(I), t = ladderText(L);
-    add({id:"ladder", comp:["gw"], label:"Redox state below the source (ladder)", v:L.pe, vtxt:LAD_LBL[L.cls], unit:"", status:"info", tag:"Calculated", ref:t.how + (L.drain ? ` Topsoil: ${({well:"well drained", periodic:"periodically waterlogged", perm:"permanently waterlogged"})[L.drain]} from ${fmt(num(I.satDays))} saturated days${num(I.oc) < 1 ? " and low organic carbon" : ""}.` : ""), how:t.bal});
-    if(num(I.docSrc) > 0 && L.cls !== "oxic") sugg.push("Organic carbon from the release drives the aquifer towards reducing conditions, which dissolves the Fe and Mn oxides that hold As and Pb: cut the organic load, or test aeration, before relying on sorption.");
+    add({id:"ladder", comp:["gw"], label:"Predominant terminal electron-accepting process below the source", v:L.pe, vtxt:TEAP_LBL[L.teap], unit:"", status:"info", tag:"Redox ladder", ref:t.how + ` CHemTrace uses this as the screening redox condition (${LAD_LBL[L.cls]}).` + (L.drain ? ` Topsoil: ${({well:"well drained", periodic:"periodically waterlogged", perm:"permanently waterlogged"})[L.drain]} from ${fmt(num(I.satDays))} saturated days${num(I.oc) < 1 ? " and low organic carbon" : ""}.` : "") + " A first indication of the dominant process, not a species calculation: species distributions need thermodynamics with measured pH and concentrations (PHREEQC export).", how:t.bal});
+    if(L.e.org > 0 && L.cls !== "oxic") sugg.push(`The organic contamination (${ORG_LBL[L.e.orgType]}) acts as an electron donor and drives the aquifer towards reducing conditions. That dissolves the Fe and Mn oxides that hold As and Pb, and can also release arsenic naturally present in the sediment, which CHemTrace does not calculate: remove or contain the organic source before relying on sorption.`);
   }
 
   const R = id => rows.find(r => r.id === id) || {};
@@ -1922,20 +1938,35 @@ function drawScene(){
    then NO₃⁻ → N₂ (5 e⁻), then Mn(IV) and Fe(III) oxides held by the sediment, then SO₄²⁻ → H₂S (8 e⁻).
    The oxides are a stock, not a flux: the surplus eats them away near the source, so the zone turns sulfidic once they are used up. */
 const LAD_ZONE = 10, LAD_RB = 1.8, LAD_PE = {oxic:8, suboxic:4, anoxic:0, sulfidic:-3};
-const LAD_LBL = {oxic:"Oxic", suboxic:"Suboxic (nitrate reducing)", anoxic:"Anoxic (Mn and Fe reducing)", sulfidic:"Sulfidic (sulfate reducing)"};
+const LAD_LBL = {oxic:"oxic", suboxic:"suboxic", anoxic:"anoxic", sulfidic:"sulfidic"};
+// the ladder's output: the predominant terminal electron-accepting process (TEAP), not a species distribution
+const TEAP_LBL = {o2:"O₂ reduction", no3:"Nitrate reduction", mn:"Mn(IV) oxide reduction", fe:"Fe(III) oxide reduction", so4:"Sulfate reduction", ch4:"Methanogenesis"};
+// organic contamination counts only as an electron donor (mmol e⁻ per mg): hydrocarbons from the stoichiometry of
+// benzene 0.38, toluene 0.39 and alkanes 0.44; COD by definition (4 e⁻ per O₂); organic carbon 4 e⁻ per C
+const HC_E = 0.42, COD_E = 4 / 32, DOC_E = 4 / 12;
+const ORG_LBL = {fuel:"hydrocarbons", leachate:"leachate", sewage:"sewage or manure", doc:"organic carbon from the contamination"};
+function migrateOrg(src, I){ if(src && src.orgType === undefined && num(src.docSrc) > 0) I.orgType = "doc"; }
+function orgType(I){ return I.orgType && I.orgType !== "none" ? I.orgType : (num(I.docSrc) > 0 && !I.orgType ? "doc" : "none"); }
+function orgElectrons(I){
+  const t = orgType(I);
+  return t === "fuel" ? HC_E * num(I.orgHc) : t === "leachate" || t === "sewage" ? COD_E * num(I.orgCod) : t === "doc" ? DOC_E * num(I.docSrc) : 0;
+}
 function redoxLadder(I){
   const ne = Math.max(0.005, num(I.ne) || 0.2), T = num(I.budT) || 1;
-  const e = {o2:4 * num(I.o2In) / 32, no3:5 * num(I.no3In) / 62, so4:8 * num(I.so4In) / 96, doc:4 * (num(I.docIn) + num(I.docSrc)) / 12};
+  const bg = DOC_E * num(I.docIn), org = orgElectrons(I);
+  const e = {o2:4 * num(I.o2In) / 32, no3:5 * num(I.no3In) / 62, so4:8 * num(I.so4In) / 96, doc:bg + org, docBg:bg, org, orgType:orgType(I)};
   const cap = {mn:2 * num(I.aqMn) * 1000 / 54.94 * LAD_RB / ne, fe:num(I.aqFe) * 1000 / 55.85 * LAD_RB / ne};
   const v = num(I.K) * YEAR_S * num(I.grad) / ne;
   const s1 = e.doc - e.o2, s2 = s1 - e.no3;
-  let cls, tEx = Infinity, meth = false;
-  if(s1 <= 0) cls = "oxic";
-  else if(s2 <= 0) cls = "suboxic";
+  let cls, tEx = Infinity, tMn = Infinity, meth = false, teap;
+  if(s1 <= 0){ cls = "oxic"; teap = "o2"; }
+  else if(s2 <= 0){ cls = "suboxic"; teap = "no3"; }
   else {
+    tMn = v > 0 ? cap.mn / s2 * LAD_ZONE / v : Infinity;
     tEx = v > 0 ? (cap.mn + cap.fe) / s2 * LAD_ZONE / v : Infinity;
     cls = tEx <= T && e.so4 > 0 ? "sulfidic" : "anoxic";
     meth = tEx <= T && s2 > e.so4;
+    teap = tEx > T ? (tMn > T ? "mn" : "fe") : meth ? "ch4" : "so4";
   }
   let drain = null;
   if(I.satDays !== "" && I.satDays != null && isFinite(Number(I.satDays))){
@@ -1943,7 +1974,7 @@ function redoxLadder(I){
     if(num(I.oc) < 1 && k > 0) k--;
     drain = ["well", "periodic", "perm"][k];
   }
-  return {cls, e, cap, v, s1, s2, tEx, T, meth, drain, pe:LAD_PE[cls]};
+  return {cls, teap, e, cap, v, s1, s2, tEx, tMn, T, meth, drain, pe:LAD_PE[cls]};
 }
 // with the ladder on, its classes replace the choices on the Soil and Groundwater tabs
 function applyLadder(I){
@@ -1955,12 +1986,13 @@ function applyLadder(I){
 }
 function ladderText(L){
   const f = x => fmt(Math.max(0, x));
-  const bal = `Electron balance, mmol e⁻/L: organic carbon ${f(L.e.doc)} against O₂ ${f(L.e.o2)}, nitrate ${f(L.e.no3)}, sulfate ${f(L.e.so4)}; oxide stock in the sediment Mn ${f(L.cap.mn)}, Fe ${f(L.cap.fe)} per litre of pore water`;
+  const don = L.e.org > 0 ? `electron donors ${f(L.e.doc)} (natural organic carbon ${f(L.e.docBg)}, ${ORG_LBL[L.e.orgType]} ${f(L.e.org)})` : `electron donors (natural organic carbon) ${f(L.e.doc)}`;
+  const bal = `Electron balance, mmol e⁻/L: ${don} against O₂ ${f(L.e.o2)}, nitrate ${f(L.e.no3)}, sulfate ${f(L.e.so4)}; oxide stock in the sediment Mn ${f(L.cap.mn)}, Fe ${f(L.cap.fe)} per litre of pore water`;
   let how;
-  if(L.cls === "oxic") how = "Oxygen is enough to burn all the organic carbon: oxides stay intact.";
-  else if(L.cls === "suboxic") how = "Oxygen runs out, nitrate takes the rest: Mn and Fe oxides stay intact.";
-  else if(!isFinite(L.tEx)) how = "Organic carbon is left after oxygen and nitrate; with no groundwater flow the oxides are not used up.";
-  else how = `Organic carbon is left after oxygen and nitrate. It uses up the Mn and Fe oxides in the first ${LAD_ZONE} m of the aquifer in about ${fmtYr(L.tEx)} years${L.cls === "sulfidic" ? `, within the budget year (${L.T}): sulfate is now reduced${L.meth ? " and runs out too, so methane forms" : ""}` : `, later than the budget year (${L.T}): until then the oxides are being dissolved, and sulfate reduction follows`}.`;
+  if(L.cls === "oxic") how = "Oxygen is enough to oxidise all the electron donors: the oxides stay intact.";
+  else if(L.cls === "suboxic") how = "Oxygen runs out and nitrate takes the rest: the Mn and Fe oxides stay intact.";
+  else if(!isFinite(L.tEx)) how = "Electron donors are left after oxygen and nitrate; with no groundwater flow the oxides are not used up.";
+  else how = `Electron donors are left after oxygen and nitrate. In the first ${LAD_ZONE} m of the aquifer they use up the Mn oxides in about ${fmtYr(L.tMn)} years and the Fe oxides in about ${fmtYr(L.tEx)} years${L.tEx <= L.T ? `, within the budget year (${L.T}): ${L.meth ? (L.e.so4 > 0 ? "sulfate is reduced and runs out too, so methanogenesis follows" : "with no sulfate, methanogenesis follows") : "sulfate is now reduced"}` : `, ${L.teap === "mn" ? "so Mn oxides are still being reduced" : "so Fe oxides are being reduced"} in the budget year (${L.T})`}.`;
   return {bal, how};
 }
 
@@ -1984,7 +2016,7 @@ function fieldHTML(f){
     const lk = (f.k === "redox" || f.k === "drain") && ladderLocks(INP)[f.k];
     ctl = `<select id="${id}" data-k="${f.k}"${lk ? ' disabled title="Set by the redox ladder (Redox tab)"' : ""}>${opts.map(([val, l]) => `<option value="${val}"${String(v) === String(val) ? " selected" : ""}>${esc(l)}</option>`).join("")}</select>`;
   } else {
-    ctl = `<input id="${id}" data-k="${f.k}" type="number" step="any" inputmode="decimal" value="${v === "" || v == null ? "" : v}"${f.optional ? ' placeholder="calculated"' : ""}>`;
+    ctl = `<input id="${id}" data-k="${f.k}" type="number" step="any" inputmode="decimal" value="${v === "" || v == null ? "" : v}"${f.optional ? ` placeholder="${esc(f.ph || "calculated")}"` : ""}>`;
   }
   return `<div class="fld"><label for="${id}">${esc(lab)}${unit ? `<span class="u">${esc(unit)}</span>` : ""}</label>${ctl}${(typeof f.help === "function" ? f.help(INP) : f.help) ? `<span class="help">${esc(typeof f.help === "function" ? f.help(INP) : f.help)}</span>` : ""}${f.src ? `<span class="src">${esc(f.src)}</span>` : ""}<span class="err" hidden></span></div>`;
 }
@@ -2036,6 +2068,7 @@ function sanitize(src){
   if(FLOODS[src.flood]) out.flood = src.flood;
   if(src.mapLim === "tbdv" || src.mapLim === "altl") out.mapLim = src.mapLim;
   if(src.slopeSrc === "terrain") out.slopeSrc = "terrain";
+  migrateOrg(src, out);   // inputs saved before organic contamination types existed
   return out;
 }
 let advTimer = 0;
@@ -2971,7 +3004,10 @@ window.SMP = window.CHemTrace = Object.freeze({
       ok("Budget and forms stay closed with snow, forests, roads and glacier melt", wN < 1e-9, `${nN} cases, largest error ${wN.toExponential(1)}`);
       // redox ladder steps down as organic carbon rises
       const ORD = ["oxic", "suboxic", "anoxic", "sulfidic"], cls = [1, 5, 10, 500].map(doc => { setup("As", {preset:"plateau", medium:"soil", rlOn:"on", docIn:doc, budT:1}); return redoxLadder(INP).cls; });
-      ok("Redox ladder steps down as organic carbon rises", cls.every((c, i) => i === 0 || ORD.indexOf(c) >= ORD.indexOf(cls[i - 1])) && cls[0] === "oxic" && cls[3] === "sulfidic", `1, 5, 10, 500 mg C/L: ${cls.join(", ")}`);
+      const fuel = [0, 5, 50, 500].map(hc => { setup("As", {preset:"plateau", medium:"soil", rlOn:"on", docIn:1, orgType:"fuel", orgHc:hc, budT:1}); return redoxLadder(INP).cls; });
+      setup("As", {preset:"plateau", medium:"soil", rlOn:"on", docIn:1, orgType:"leachate", orgCod:1200, budT:1}); const eCod = redoxLadder(INP).e.org;
+      ok("Redox ladder steps down as electron donors rise, natural or from contamination", [cls, fuel].every(a => a.every((c, i) => i === 0 || ORD.indexOf(c) >= ORD.indexOf(a[i - 1]))) && cls[0] === "oxic" && cls[3] === "sulfidic" && fuel[0] === "oxic" && fuel[3] === "sulfidic" && Math.abs(eCod - 150) < 1e-9,
+        `organic carbon 1, 5, 10, 500 mg C/L: ${cls.join(", ")}; fuel 0, 5, 50, 500 mg/L: ${fuel.join(", ")}; 1,200 mg O₂/L COD = ${fmt(eCod)} mmol e⁻/L`);
     }catch(err){ ok("Checks ran without errors", false, String(err)); }
     finally{ S.metal = keepM; INP = keepI; S.water = keepW; }
     const passed = out.filter(r => r.pass).length;
@@ -2995,7 +3031,7 @@ window.SMP = window.CHemTrace = Object.freeze({
     try{
       if(metal){ if(!METALS[metal]) throw new Error("metal must be As, Hg or Pb"); S.metal = metal; }
       S.water = "base";
-      if(inputs){ INP = Object.assign(freshInputs(PRESETS[inputs.preset] ? inputs.preset : "plateau"), clone(inputs)); if(!FORMS[S.metal].some(f => f.id === INP.form)) INP.form = FORMS[S.metal][0].id; const f = formOf(); if(inputs.reactive == null) INP.reactive = f.fr; applyLadder(INP); applyDerived(INP); }
+      if(inputs){ INP = Object.assign(freshInputs(PRESETS[inputs.preset] ? inputs.preset : "plateau"), clone(inputs)); migrateOrg(inputs, INP); if(!FORMS[S.metal].some(f => f.id === INP.form)) INP.form = FORMS[S.metal][0].id; const f = formOf(); if(inputs.reactive == null) INP.reactive = f.fr; applyLadder(INP); applyDerived(INP); }
       if(!INP) throw new Error("no inputs");
       if(!exportOK(INP)[kind]) throw new Error(kind + " export does not apply to a release to " + MEDIUM_LBL[INP.medium]);
       return {name:EXPORTS[kind].file(S.metal), text:EXPORTS[kind].make()};
@@ -3007,7 +3043,7 @@ window.SMP = window.CHemTrace = Object.freeze({
     try{
       S.metal = metal; S.water = "base";
       const src = inputs || {};
-      INP = Object.assign(freshInputs(PRESETS[src.preset] ? src.preset : "plateau"), clone(src));
+      INP = Object.assign(freshInputs(PRESETS[src.preset] ? src.preset : "plateau"), clone(src)); migrateOrg(src, INP);
       if(!FORMS[metal].some(f => f.id === INP.form)) INP.form = FORMS[metal][0].id;
       const f = formOf(); if(src.reactive == null) INP.reactive = f.fr;
       const lad = applyLadder(INP); applyDerived(INP);
@@ -3019,7 +3055,7 @@ window.SMP = window.CHemTrace = Object.freeze({
           phases:Object.fromEntries(PHASES.map(p => [p.k, {kg:r.tot[p.k], forms:Object.fromEntries(Object.entries(r.F[p.k]).map(([k, v]) => [formLabel(metal, k, r.origLabel), v]))}]))})),
         drivers: R.sens.map(it => ({id:it.id, label:it.label, ranking:sensitivity(it, R).map(x => ({input:x.f.label, rho:x.rho}))})),
         internals: {Kd:o.Kd, kLeach:o.kL, kErosion:o.kE, kOther:o.kO, halfLife:o.half, travelToWaterTable:o.tArr, DAF:o.D ? o.D.daf : null, dissolvedShareRiver:o.fd, seepage:o.cw, seepageAdded:o.cwAdd, topsoilPeak:o.Ctot, sb:o.sb || null},
-        ladder: lad ? {redox:lad.cls, drain:lad.drain, pe:lad.pe, electrons:lad.e, oxideStock:lad.cap, yearsToUseUpOxides:isFinite(lad.tEx) ? lad.tEx : null} : null,
+        ladder: lad ? {predominantTEAP:TEAP_LBL[lad.teap], redox:lad.cls, drain:lad.drain, pe:lad.pe, electrons:lad.e, oxideStock:lad.cap, yearsToUseUpMnOxides:isFinite(lad.tMn) ? lad.tMn : null, yearsToUseUpOxides:isFinite(lad.tEx) ? lad.tEx : null} : null,
         inputs: clone(INP)
       };
     } finally { S.metal = keepM; INP = keepI; S.water = keepW; }
@@ -3049,8 +3085,15 @@ const exportOK = I => ({phreeqc:true, hydrus:soilLike(I), modflow:!riverLike(I),
 
 function phreeqcInput(){
   const c = exportCtx(), {m, I, o, soil, riv} = c, mw = MWT[m];
-  const zone = soil ? SOIL_REDOX[I.drain] : riv ? "oxic" : I.redox, pe = PQ_PE[zone], pe0txt = pe == null ? "set by dissolved O2" : String(pe);
-  const o2 = I.rlOn === "on" ? I.o2In : 8;
+  const zone = soil ? SOIL_REDOX[I.drain] : riv ? "oxic" : I.redox;
+  // measured water analysis (Water analysis tab): used in place of the assumed values
+  const W = k => I[k] === "" || I[k] == null || !isFinite(Number(I[k])) ? null : Number(I[k]);
+  const tC = W("wcT") != null ? W("wcT") : 10, eh = W("wcEh");
+  const peEh = eh != null ? Math.round(eh / (0.19841 * (273.15 + tC)) * 100) / 100 : null;   // pe = F·Eh / (RT ln 10)
+  const pe = peEh != null ? peEh : PQ_PE[zone], pe0txt = peEh != null ? `${peEh} from the measured Eh` : pe == null ? "set by dissolved O2" : String(pe);
+  const o2 = I.o2In;
+  const isDef = k => Number(I[k]) === Number(BASE[k]);
+  const meas = ["wcCa", "wcMg", "wcNa", "wcK", "wcCl", "wcAlk", "wcFe", "wcMn", "wcH2S", "wcEh", "wcT"].filter(k => W(k) != null).length + ["o2In", "no3In", "so4In"].filter(k => !isDef(k)).length;
   const pH = soil ? I.pH : riv ? I.lpH : I.gwpH;
   const kgL = soil ? I.rhob / I.theta : LAD_RB / I.ne;            // kg of solids per litre of pore water
   const fe = soil ? I.fe : I.aqFe, molFe = fe * kgL / 55.847;      // Fe oxides (oxalate-extractable) per litre of pore water
@@ -3058,17 +3101,21 @@ function phreeqcInput(){
   const noSurf = !soil && !riv && I.aq !== "porous";               // karst and fractured rock: the website uses no sorption (R = 1)
   const tot = soil ? (o.fr * o.dC + I.bgReactive / 100 * o.bg) * kgL / 1000 / mw : cScr * (1 + (noSurf ? 0 : kdScr * kgL)) / 1e6 / mw;
   const where = soil ? "seepage water below the topsoil" : riv ? "river water" : "groundwater at the source";
-  const chem = I.rlOn === "on" ? {so4:I.so4In, no3:I.no3In, src:"Redox tab"} : {so4:30, no3:15, src:"ASSUMED"};
+  const srcOf = k => isDef(k) ? "ASSUMED default, Water analysis tab" : "entered, Water analysis tab";
+  const alkOK = W("wcAlk") != null && !(pH < 5.6 && W("wcAlk") > 30);     // alkalinity above 30 mg/L at pH < 5.6 is inconsistent
+  const reag = m === "Pb" && alkOK ? "NaOH" : pH < 6.5 ? "HCl" : "CO2";
   const pe0 = {oxic:"oxic", suboxic:"suboxic", anoxic:"anoxic", sulfidic:"sulfidic"}[zone];
   const L = [];
   L.push(`DATABASE minteq.v4.dat`);
   L.push(`TITLE ${c.tag}: ${m} at ${c.site}, ${where}`);
   L.push(`# Generated ${c.date}. A starting file for a specialist, not a result: check every line.`);
-  L.push(`# Lines marked ASSUMED are placeholders. Replace them with your water analysis (major ions, alkalinity, Eh).`);
+  L.push(meas ? `# ${meas} value${meas > 1 ? "s" : ""} come from your water analysis (Water analysis tab). Lines marked ASSUMED are placeholders: replace them.` : `# Lines marked ASSUMED are placeholders. Enter your water analysis on the Water analysis tab, or edit them here.`);
+  L.push(`# Species distributions come from the thermodynamics in this file and need measured pH and concentrations.`);
+  L.push(`# The chemical forms on the website are indicative classes only, and its redox ladder only names the dominant process.`);
   L.push(`# Database: minteq.v4.dat, shipped with PHREEQC 3 (USGS). Command line: phreeqc chemtrace.pqi chemtrace.pqo minteq.v4.dat`);
   L.push(`#`);
   L.push(`# Screening values from the website, for comparison:`);
-  L.push(`#   redox class ${pe0} (pe ${pe0txt}), pH ${pq(pH)}`);
+  L.push(`#   redox class ${pe0} (pe ${pe0txt})${c.lad ? `; aquifer below the source (redox ladder): ${TEAP_LBL[c.lad.teap]} predominates` : ""}, pH ${pq(pH)}`);
   L.push(`#   dissolved ${m}: ${pq(cScr)} ug/L, Kd ${pq(kdScr)} L/kg${soil ? `, topsoil ${pq(o.Ctot)} mg/kg at the peak` : ""}`);
   if(noSurf) L.push(`#   ${I.aq} aquifer: water flows in conduits or fractures with little contact, so no sorbing surface is included`);
   else if(!riv) L.push(`#   per litre of pore water: ${pq(kgL)} kg of solids, ${pq(molFe)} mol Fe as oxides, ${pq(tot)} mol reactive ${m}`);
@@ -3084,27 +3131,37 @@ function phreeqcInput(){
   L.push(`Fix_pe          # holds pe at the chosen redox class (see EQUILIBRIUM_PHASES)`);
   L.push(`    e- = e-`);
   L.push(`    log_k 0.0`);
-  L.push(`Fix_H+          # holds the measured pH (the soil or aquifer buffers it) by adding or removing ${pH < 6.5 ? "HCl" : "CO2"}`);
+  L.push(`Fix_H+          # holds the measured pH (the soil or aquifer buffers it) by adding or removing ${reag}`);
   L.push(`    H+ = H+`);
   L.push(`    log_k 0.0`);
   L.push(``);
   const sol = (n, label, metal) => {
+    // charge balance on the first ion that was not measured; none if all are measured
+    const cand = pH < 6 ? ["wcCl", "wcNa", "wcCa"] : ["wcCa", "wcNa", "wcCl"], chg = cand.find(k => W(k) == null);
+    const ion = (el, k, def) => {
+      const v = W(k), c = k === chg ? " charge" : "";
+      L.push(`    ${el.padEnd(10)}${v != null ? String(pq(v)) + c : String(def) + c}`.padEnd(30) + `# ${v != null ? "measured" : "ASSUMED"}${c ? ", adjusted to balance charge" : ""}`);
+    };
     L.push(`SOLUTION ${n}  ${label}`);
-    L.push(`    temp      10           # ASSUMED, typical Swiss groundwater`);
+    L.push(`    temp      ${pq(tC)}           # ${W("wcT") != null ? "measured" : "ASSUMED, typical Swiss groundwater"}`);
     L.push(`    pH        ${pq(pH)}`);
-    L.push(`    pe        ${pe == null ? 8 : pe}            # redox class ${pe0}: ${pe == null ? "dissolved O2 below sets it" : "held by Fix_pe"}; suboxic 4, anoxic 0, sulfidic -3.5 (or measured Eh/59 mV)`);
+    L.push(`    pe        ${pe == null ? 8 : pe}            # ${peEh != null ? `from the measured Eh of ${pq(eh)} mV, held by Fix_pe` : `redox class ${pe0}: ${pe == null ? "dissolved O2 below sets it" : "held by Fix_pe"}; suboxic 4, anoxic 0, sulfidic -3.5 (or measured Eh/59 mV)`}`);
     L.push(`    redox     ${pe == null ? "O(0)/O(-2)     # pe from dissolved O2" : "pe"}`);
     L.push(`    units     mg/L`);
-    L.push(`    Ca        40${pH < 6 ? "          " : " charge   "}  # ASSUMED${pH < 6 ? "" : ", adjusted to balance charge"}`);
-    L.push(`    Mg        8            # ASSUMED`);
-    L.push(`    Na        5            # ASSUMED`);
-    L.push(`    K         1.5          # ASSUMED`);
-    L.push(`    Cl        ${pH < 6 ? "10 charge    # ASSUMED, adjusted to balance charge (acidic water)" : "10           # ASSUMED"}`);
-    L.push(`    S(6)      ${pq(chem.so4)}           # sulfate, ${chem.src}`);
-    L.push(`    N(5)      ${pq(chem.no3)} as NO3    # nitrate, ${chem.src}`);
-    L.push(`    C(4)      1 CO2(g) ${riv ? "-3.0   # ASSUMED, river water near air" : "-2.0   # ASSUMED, soil air about 1% CO2"}`);
+    ion("Ca", "wcCa", 40); ion("Mg", "wcMg", 8); ion("Na", "wcNa", 5); ion("K", "wcK", 1.5); ion("Cl", "wcCl", 10);
+    if(!chg) L.push(`    # all major ions measured: no charge adjustment. Check "Percent error" in the output (within about 5%).`);
+    L.push(`    S(6)      ${pq(I.so4In)}           # sulfate, ${srcOf("so4In")}`);
+    L.push(`    N(5)      ${pq(I.no3In)} as NO3    # nitrate, ${srcOf("no3In")}`);
+    if(alkOK) L.push(`    Alkalinity ${pq(W("wcAlk"))} as HCO3   # measured`);
+    else {
+      if(W("wcAlk") != null) L.push(`    # Alkalinity ${pq(W("wcAlk"))} as HCO3 (measured) is left out: above 30 mg/L it does not fit pH ${pq(pH)}. Check both values.`);
+      L.push(`    C(4)      1 CO2(g) ${riv ? "-3.0   # ASSUMED, river water near air" : "-2.0   # ASSUMED, soil air about 1% CO2"}`);
+    }
+    if(W("wcFe") != null) L.push(`    Fe(2)     ${pq(W("wcFe"))}           # measured dissolved iron`);
+    if(W("wcMn") != null) L.push(`    Mn(2)     ${pq(W("wcMn"))}           # measured dissolved manganese`);
+    if(W("wcH2S") != null) L.push(`    S(-2)     ${pq(W("wcH2S"))} as H2S    # measured dissolved sulfide`);
     if(metal > 0) L.push(`    ${m}        ${pq(metal / 1000)}       # ${pq(metal)} ug/L from the screening model`);
-    if(pe == null) L.push(`    O(0)      ${pq(o2)}            # dissolved O2, ${I.rlOn === "on" ? "Redox tab" : "ASSUMED"}`);
+    if(pe == null) L.push(`    O(0)      ${pq(o2)}            # dissolved O2, ${srcOf("o2In")}`);
     L.push(`    -water    1            # kg`);
   };
   const surf = (n, eq) => {
@@ -3116,7 +3173,7 @@ function phreeqcInput(){
   };
   const phases = n => {
     L.push(`EQUILIBRIUM_PHASES ${n}`);
-    L.push(`    Fix_H+    ${-pH}   ${pH < 6.5 ? "HCl" : "CO2"}   10    # holds pH ${pq(pH)}`);
+    L.push(`    Fix_H+    ${-pH}   ${reag}   10    # holds pH ${pq(pH)}${reag === "NaOH" ? ": lead carbonate and sorption release acid, so a base is needed" : ""}`);
     if(pe != null) L.push(`    Fix_pe    ${-pe}   H2   1    # adds H2 (stand-in for organic carbon) until pe = ${pe}`);
     PQ_MIN[m].forEach(p => L.push(`    ${p.padEnd(15)} 0  0    # may precipitate; none present at the start`));
   };
@@ -3142,9 +3199,13 @@ function phreeqcInput(){
   L.push(`USE solution 100`);
   if(!noSurf) L.push(`USE surface 100`);
   phases(100);
-  const salt = m === "Pb" ? "PbCO3" : m === "Hg" ? "Hg(OH)2" : (c.form.sp === "III" ? "H3AsO3" : "H3AsO4");
+  // As(V) is added as a sodium arsenate mix matched to the pH (pKa2 6.96), so the addition itself barely shifts the pH;
+  // H3AsO4 would add up to 2 mol of acid per mol of As, which the CO2 pH control cannot neutralise at high loads
+  const asV = m === "As" && c.form.sp !== "III", fHA = asV ? 1 / (1 + Math.pow(10, 6.96 - pH)) : 0;
+  const salt = m === "Pb" ? "PbCO3" : m === "Hg" ? "Hg(OH)2" : !asV ? "H3AsO3" : "sodium arsenate (NaH2AsO4 and Na2HAsO4 in the ratio of their species at this pH)";
   L.push(`REACTION 100  total reactive ${m} per litre of pore water (screening estimate: dissolved + sorbed), added as ${salt}`);
-  L.push(`    ${salt}   1`);
+  if(asV){ L.push(`    NaH2AsO4   ${pq(1 - fHA)}`); L.push(`    Na2HAsO4   ${pq(fHA)}`); }
+  else L.push(`    ${m === "Pb" ? "PbCO3" : m === "Hg" ? "Hg(OH)2" : "H3AsO3"}   1`);
   L.push(`    ${pq(tot)} moles in 1 steps`);
   L.push(`SELECTED_OUTPUT 1`);
   L.push(`    -file     chemtrace_batch.sel`);
