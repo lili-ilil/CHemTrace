@@ -337,8 +337,8 @@ try{ var m = localStorage.getItem("smp-metal"); if(m === "Hg" || m === "Pb" || m
           <li><b>Assumptions.</b> Every default and its basis is listed on the <a href="assumptions.html">assumptions page</a>; those marked as developer assumptions need expert review.</li>
           <li><b>The forms by phase.</b> The form rules are indicative shares from general geochemistry. Apart from the methylmercury share in lake sediment, they have not been checked against Swiss speciation data.</li>
           <li><b>The spread map.</b> The plume equation, the terrain direction and the runoff path have not been checked against Swiss plume or tracer data.</li>
-          <li><b>Lake processes and the redox ladder.</b> The Hg⁰ escape rate, the season factors and the trophic-state rules are assumptions scaled from studies outside Switzerland. The redox ladder is an electron balance without kinetics; it has not been checked against Swiss redox profiles.</li>
-          <li><b>Exports.</b> The PHREEQC and MODFLOW 6 files were run to check they work, not to check their results against field data.</li>
+          <li><b>Lake processes and the redox ladder.</b> The Hg⁰ escape rate, the season factors and the trophic-state rules are assumptions scaled from studies outside Switzerland. The redox ladder is an electron balance without kinetics that names the predominant terminal electron-accepting process; it does not calculate species, and it has not been checked against Swiss redox profiles.</li>
+          <li><b>Exports.</b> The PHREEQC and MODFLOW 6 files were run to check they work, not to check their results against field data. The PHREEQC batch was run for 48 combinations of metal, preset, release and water analysis, and held the set pH in all of them.</li>
           <li><b>Air and land surface.</b> Deposition velocities, washout, the size split by form, snow re-emission, leaf uptake, road partition and glacier ice concentrations come from literature outside these tests or are assumptions; only the fall-off with distance (test 17) was compared with Swiss data.</li>
           <li><b>Air releases.</b> See test 17.</li>
           <li><b>Few sites.</b> Several tests rest on one station or a handful of sites.</li>
@@ -354,7 +354,7 @@ try{ var m = localStorage.getItem("smp-metal"); if(m === "Hg" || m === "Pb" || m
 
       <section id="checks">
         <h2>Code checks</h2>
-        <p class="lead">Validation asks whether the model matches reality. Code checks ask whether the code does what the equations say. Version 0.12.5 passes all 18 automated checks.</p>
+        <p class="lead">Validation asks whether the model matches reality. Code checks ask whether the code does what the equations say. Version 0.13.0 passes all 18 automated checks.</p>
         <div class="tbl-wrap"><table>
           <thead><tr><th>Check</th><th>Result</th></tr></thead>
           <tbody>
@@ -372,7 +372,7 @@ try{ var m = localStorage.getItem("smp-metal"); if(m === "Hg" || m === "Pb" || m
             <tr><td>The plume does not reach beyond its travel distance</td><td><span class="pill ok">Pass</span></td></tr>
             <tr><td>The groundwater dilution factor is at least 1 and grows with conductivity</td><td><span class="pill ok">Pass</span></td></tr>
             <tr><td>Hg⁰ escape from lake water keeps the budget closed, rises with the escape rate, and the monthly cycle averages to the yearly rate</td><td><span class="pill ok">Pass</span> largest error 7 × 10⁻¹⁵</td></tr>
-            <tr><td>The redox ladder steps from oxic to sulfidic as organic carbon rises (1, 5, 10, 500 mg C/L)</td><td><span class="pill ok">Pass</span></td></tr>
+            <tr><td>The redox ladder steps from oxic to sulfidic as electron donors rise: natural organic carbon (1, 5, 10, 500 mg C/L) and fuel hydrocarbons (0, 5, 50, 500 mg/L); 1,200 mg O₂/L of COD counts as 150 mmol e⁻/L</td><td><span class="pill ok">Pass</span></td></tr>
             <tr><td>Deposition from air accounts for the whole emission in every size class, and the wind directions add up to one</td><td><span class="pill ok">Pass</span> largest error 7 × 10⁻¹⁶</td></tr>
             <tr><td>Coarse dust lands closer to the source than fine particles</td><td><span class="pill ok">Pass</span></td></tr>
             <tr><td>The mass budget and the forms stay closed with snow, forests, sealed surfaces, roads and glacier melt (24 cases)</td><td><span class="pill ok">Pass</span> largest error 1 × 10⁻¹⁴</td></tr>
@@ -421,7 +421,7 @@ SMP.run("Hg", {preset:"visp", medium:"soil", form:"hgsed", pattern:"pulse",
     </main>
   </div>
 
-  <footer>CHemTrace · screening estimates for contaminants in Switzerland (now As, Hg and Pb). Benchmarks quoted from the sources listed; model runs from the platform's own engine.<span class="copy">© 2026 Li-Ling T. ETH Zürich · Version 0.12.5, 31 October 2026 · Contact: <a href="mailto:litail@ethz.ch">litail@ethz.ch</a></span></footer>
+  <footer>CHemTrace · screening estimates for contaminants in Switzerland (now As, Hg and Pb). Benchmarks quoted from the sources listed; model runs from the platform's own engine.<span class="copy">© 2026 Li-Ling T. ETH Zürich · Version 0.13.0, 3 November 2026 · Contact: <a href="mailto:litail@ethz.ch">litail@ethz.ch</a></span></footer>
 </div>
 </body>
 </html>
