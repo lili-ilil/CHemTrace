@@ -9,7 +9,7 @@ img{max-width:100%}
 /* Layout: a schematic Alpine profile is the hero; a field-guide panel sits beside it; reference sections follow below */
 :root{
   --paper:#F2F4F0; --surface:#FFFFFF; --ink:#16232A; --ink-2:#4B5B61; --ink-3:#6E7D82; --rule:#D3DBD5; --chip:#E8EDE8;
-  --as:#B8870C; --hg:#C2362B; --pb:#4A5A86; --metal:var(--as);
+  --as:#B8870C; --hg:#C2362B; --pb:#4A5A86; --cd:#0F7A72; --cu:#A8532B; --zn:#7A4E9E; --ni:#4F7A28; --cr:#A8326E; --metal:var(--as);
   --ok:#2F7D4F; --warn:#B7790F; --crit:#B23A30; --dir:#00C853;
   --sky-top:#D4E5F0; --sky-bot:#EEF3F1; --ridge:#C9D3D8; --cloud:#FFFFFF;
   --rock:#CBC5BA; --rock-line:#9C9588; --ore:#3E3A35;
@@ -25,7 +25,7 @@ img{max-width:100%}
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
     --paper:#0E1619; --surface:#152025; --ink:#E4EBE9; --ink-2:#A3B3B5; --ink-3:#7E8F92; --rule:#2A3A40; --chip:#1E2C31;
-    --as:#E2B33C; --hg:#EA6155; --pb:#93A3D8;
+    --as:#E2B33C; --hg:#EA6155; --pb:#93A3D8; --cd:#3CC2B4; --cu:#E58A5E; --zn:#B98AE0; --ni:#8DBE5C; --cr:#E070A8;
     --ok:#5FB27F; --warn:#E0A43A; --crit:#EE6A5F; --dir:#2EE06F;
     --sky-top:#14222B; --sky-bot:#1B2A2F; --ridge:#24343B; --cloud:#33454D;
     --rock:#4B4944; --rock-line:#6D6960; --ore:#C9C1B2;
@@ -39,7 +39,7 @@ img{max-width:100%}
 }
 :root[data-theme="dark"]{
     --paper:#0E1619; --surface:#152025; --ink:#E4EBE9; --ink-2:#A3B3B5; --ink-3:#7E8F92; --rule:#2A3A40; --chip:#1E2C31;
-    --as:#E2B33C; --hg:#EA6155; --pb:#93A3D8;
+    --as:#E2B33C; --hg:#EA6155; --pb:#93A3D8; --cd:#3CC2B4; --cu:#E58A5E; --zn:#B98AE0; --ni:#8DBE5C; --cr:#E070A8;
     --ok:#5FB27F; --warn:#E0A43A; --crit:#EE6A5F; --dir:#2EE06F;
     --sky-top:#14222B; --sky-bot:#1B2A2F; --ridge:#24343B; --cloud:#33454D;
     --rock:#4B4944; --rock-line:#6D6960; --ore:#C9C1B2;
@@ -52,6 +52,11 @@ img{max-width:100%}
 }
 :root[data-metal="Hg"]{--metal:var(--hg)}
 :root[data-metal="Pb"]{--metal:var(--pb)}
+:root[data-metal="Cd"]{--metal:var(--cd)}
+:root[data-metal="Cu"]{--metal:var(--cu)}
+:root[data-metal="Zn"]{--metal:var(--zn)}
+:root[data-metal="Ni"]{--metal:var(--ni)}
+:root[data-metal="Cr"]{--metal:var(--cr)}
 
 *{box-sizing:border-box}
 body{background:var(--paper); color:var(--ink); font-family:var(--f-body); font-size:15px; line-height:1.55;
@@ -235,7 +240,7 @@ nav.jump a{text-decoration:none; color:var(--ink-2)} nav.jump a:hover{color:var(
 table{border-collapse:collapse; width:100%; min-width:760px; font-size:13.5px; font-variant-numeric:tabular-nums}
 th,td{text-align:left; padding:9px 12px; border-bottom:1px solid var(--rule); vertical-align:top}
 thead th{font-family:var(--f-mono); font-weight:500; font-size:11.5px; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-3); background:var(--chip)}
-thead th.m-as{color:var(--as)} thead th.m-hg{color:var(--hg)} thead th.m-pb{color:var(--pb)}
+thead th.m-as{color:var(--as)} thead th.m-hg{color:var(--hg)} thead th.m-pb{color:var(--pb)} thead th.m-cd{color:var(--cd)} thead th.m-cu{color:var(--cu)} thead th.m-zn{color:var(--zn)} thead th.m-ni{color:var(--ni)} thead th.m-cr{color:var(--cr)}
 tbody tr:last-child td{border-bottom:0}
 td.num{font-family:var(--f-mono); font-size:13px}
 td.basis{color:var(--ink-2); font-size:12.5px}
@@ -395,6 +400,10 @@ table.sp-table td:last-child{font-family:var(--f-mono); font-size:10.5px; color:
 .leaflet-container{font-family:var(--f-body); background:var(--chip)}
 .leaflet-container .leaflet-control-attribution{background:color-mix(in srgb, var(--surface) 85%, transparent); color:var(--ink-2)}
 .leaflet-container .leaflet-control-attribution a{color:var(--ink)}
+.leaflet-container .leaflet-control-layers{background:var(--surface); color:var(--ink); border:1px solid var(--rule); box-shadow:none; border-radius:8px; font-size:13px}
+.leaflet-container .leaflet-control-layers-expanded{padding:4px 10px}
+.leaflet-container .leaflet-control-layers label{display:flex; align-items:center; gap:4px; min-height:28px; cursor:pointer}
+.leaflet-container .leaflet-control-layers-separator{display:none}
 @media (max-width: 760px){ .site-pick{grid-template-columns:minmax(0,1fr)} .sp-map{min-height:280px} }
 
 /* Mass budget and sensitivity */

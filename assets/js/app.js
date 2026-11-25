@@ -135,7 +135,7 @@ const C = {
    what:"In neutral and calcareous soils lead hardly moves and stays in the top 20 cm for centuries. It leaves the field mainly by erosion and as soil stuck to vegetables, not through roots.",
    risk:["med","Children ingest soil and dust hand-to-mouth; leafy vegetables carry soil particles."],
    trap:["Phosphate amendments turn Pb into insoluble pyromorphite (not on As-rich soils)","Excavate where remediation values are exceeded","Raised beds and clean topsoil in gardens"],
-   swiss:"VBBo guide value 50 mg/kg; trigger value 200 mg/kg for food and fodder crops. AltlV remediation values: 1,000 mg/kg in gardens and playgrounds, 2,000 mg/kg in agriculture.",
+   swiss:"VBBo guide value 50 mg/kg; trigger value 200 mg/kg for food and fodder crops. AltlV remediation values: 300 mg/kg in gardens and playgrounds, 2,000 mg/kg in agriculture.",
    inputs:["total Pb","pH","organic carbon","P","erosion risk"],
    sc:{acidic:[1,"Below pH ~5, Pb starts to leach."],storm:[1,"Erosion is the main way Pb leaves the field."]}}
  },
@@ -202,7 +202,7 @@ const C = {
    what:"Children absorb a much larger share of ingested lead than adults. Lead stored in bone returns to the blood during pregnancy.",
    risk:["high","No known safe level (WHO). Lowers IQ, raises blood pressure, harms kidneys. IHME attributes more than 3.5 million deaths worldwide in 2023 to lead exposure."],
    trap:["Clean soil in playgrounds and gardens","Wet-clean house dust","Flush taps; replace old lead pipes"],
-   swiss:"Swiss remediation value for Pb in garden and playground soil: 1,000 mg/kg (AltlV).",
+   swiss:"Swiss remediation value for Pb in garden and playground soil: 300 mg/kg (AltlV, lowered from 1,000 mg/kg).",
    inputs:["children's play areas","garden produce","housing age"], sc:{}}
  },
  wwtp:{name:"Wastewater treatment (ARA)", zone:"Sewer outlet to river", base:{As:3,Hg:2,Pb:1},
@@ -313,7 +313,7 @@ const C = {
    sc:{reducing:[1,"Reductive dissolution of Fe oxides releases bound Hg."]}},
   Pb:{forms:[["Pb²⁺ and Pb–carbonate complexes","Dissolved"],["Colloid-bound Pb","Fast transport"]],
    what:"Usually below 1 µg/L. Exceptions are karst aquifers, where water flows fast through open conduits, and colloid-facilitated transport.",
-   risk:["low","No NAQUA site exceeds the 10 µg/L limit. Old lead pipes and brass fittings can add Pb at the tap."],
+   risk:["low","No NAQUA site exceeds 10 µg/L. The drinking-water limit falls from 10 to 5 µg/L (to be met by February 2036); old lead pipes and brass fittings can add Pb at the tap."],
    trap:["Protect karst recharge areas (Jura) from Pb sources","Coagulation-filtration or ion exchange if needed"],
    swiss:"FOEN NAQUA: Pb is above the 1 µg/L indicator value at over 4% of sites, mainly in Jura karst and Mittelland gravel aquifers.",
    inputs:["aquifer type (karst vs gravel)","colloids, DOC, pH"],
@@ -385,6 +385,565 @@ const MODS = {
  storm:{all:{farm_river:3,site_river:2,forest_river:2,town_river:4,river_lake:2,wwtp_river:1.5,air_glacier:1.5,air_forest:1.5,air_farm:1.5,air_lake:1.5}},
  base:{all:{gw_lake:1.5,river_lake:.7}}
 };
+/* ================= Cd, Cu, Zn, Ni, Cr (added in 0.14.0) ================= */
+Object.assign(METALS, {
+  Cd:{name:"Cadmium", site:"Ash landfill",
+    sig:"A soft metal that stays mobile as the free Cd²⁺ ion in acidic soils. Crops take it up readily, so food, not water, is the main route to people, and it builds up in the kidneys for decades.",
+    forms:["Cd²⁺ on clay, oxides and organic matter (exchangeable)","Free Cd²⁺ and CdCl⁺ in soil water","Otavite · CdCO₃ in calcareous soil","Greenockite · CdS in reduced sediment","Cd in sphalerite · ZnS ores, together with zinc"],
+    sources:["Mineral phosphate fertilisers: median about 47 mg Cd per kg P on the Swiss market","Geogenic: Jurassic limestone in the Jura; soils locally above 10 mg/kg","Waste incineration ash, and sewage sludge spread on fields until 2006","Zinc-related industry and batteries"],
+    health:["high","Builds up in the kidneys over decades and weakens bones. Group 1 carcinogen (lung, by inhalation). EFSA tolerable weekly intake: 2.5 µg/kg body weight."],
+    lever:"Keep soils near neutral by liming, limit cadmium in phosphate fertilisers, and choose low-uptake crops on affected land."},
+  Cu:{name:"Copper", site:"Vineyard",
+    sig:"An essential nutrient that harms soil life and aquatic organisms at low levels. Copper binds strongly to organic matter in soil and in water, which keeps it in the topsoil and lowers its toxicity in rivers.",
+    forms:["Cu²⁺ bound to soil organic matter","Cu–DOC complexes: almost all dissolved Cu in natural waters","Malachite · Cu₂CO₃(OH)₂ and other carbonates","Cu sulfides · CuS, Cu₂S in reduced sediment","Metallic Cu: roofs, wires, ammunition jackets"],
+    sources:["Copper fungicides in vineyards and orchards: 1.4–2.4 kg Cu per ha and year","Copper roofs and façades: 30–60 t Cu per year in Switzerland","Brake wear and railway contact wires","Feed additives reaching soil with manure"],
+    health:["low","Essential for people; harmful only at high intake. EFSA acceptable daily intake: 0.07 mg/kg body weight per day. The main concern is ecotoxicity: Cu harms algae, invertebrates and fish at a few µg/L."],
+    lever:"Cut inputs at the source (less copper fungicide, fewer bare copper roofs) and pass roof and road runoff through filter soils."},
+  Zn:{name:"Zinc", site:"Infiltration swale",
+    sig:"The main trace metal in urban runoff. Zinc is fairly mobile in acidic soils and matters mostly for aquatic life, not for people.",
+    forms:["Zn²⁺ on oxides, clay and organic matter","Free Zn²⁺ in water","Smithsonite · ZnCO₃ and hydrozincite in calcareous soil","Sphalerite · ZnS in ore and reduced sediment","Metallic and galvanised Zn: gutters, roofs, crash barriers"],
+    sources:["Runoff from metal roofs and gutters: about 3.6 mg/L Zn on average","Tyre wear: road runoff supplies about 30% of the zinc in the Rhine","Feed additives in pig and cattle manure","Waste incineration and the zinc industry"],
+    health:["low","Essential nutrient; too much causes copper deficiency. US EPA oral reference dose: 0.3 mg/kg body weight per day. Zinc matters mainly for aquatic organisms."],
+    lever:"Pass roof and road runoff through filter soils or swales before it infiltrates or reaches streams, and reduce zinc in animal feed."},
+  Ni:{name:"Nickel", site:"Serpentinite slope",
+    sig:"Mostly natural in Switzerland: soils on serpentinite and other ultramafic rock hold hundreds of mg/kg. Nickel stays fairly mobile as Ni²⁺ in acidic water and is the most common contact allergen.",
+    forms:["Ni in serpentine and other silicate minerals","Ni²⁺ on Fe and Mn oxides and clay","Free Ni²⁺ in water","Ni sulfides in reduced sediment","Metallic Ni and stainless steel"],
+    sources:["Geogenic: serpentinite and ophiolite rock, e.g. soils up to 928 mg/kg near Davos","Plating and metal finishing","Fuel-oil and coal combustion","Wear of stainless steel and alloys"],
+    health:["med","The most common contact allergen. Inhaled nickel compounds are Group 1 carcinogens. EFSA tolerable daily intake: 13 µg/kg body weight."],
+    lever:"Know the geology before excavating, because serpentinite soil is a natural source. Contain and treat plating waste at the source."},
+  Cr:{name:"Chromium", site:"Chromate works",
+    sig:"Two metals in one: Cr(III) is nearly insoluble and of low toxicity, while chromate Cr(VI) is mobile, toxic and carcinogenic. Iron(II), sulfide and organic matter reduce Cr(VI) to Cr(III); manganese oxides can oxidise it back.",
+    forms:["Chromate Cr(VI) · CrO₄²⁻ / HCrO₄⁻, mobile","Cr(III) hydroxide · Cr(OH)₃, nearly insoluble","Cr(III) in chromite and spinel (geogenic)","Cr(III) bound to organic matter","Cr(VI) sorbed on iron oxides"],
+    sources:["Chrome plating and chromite ore processing, e.g. the former works at Rivera (TI)","Geogenic Cr(VI) in Molasse groundwater between Lausanne and Bern","Tanneries (Cr(III)) and wood preservatives (Cr(VI))","Steel slag and cement"],
+    health:["high","Cr(VI) is a Group 1 carcinogen (lung, by inhalation) and causes small-intestine tumours in animals when swallowed. Cr(III) has low toxicity: EFSA tolerable daily intake 300 µg/kg body weight."],
+    lever:"Turn Cr(VI) into Cr(III) with reducing barriers (zero-valent iron, Fe(II)), and keep Cr(III) waste away from manganese oxides and oxidising conditions."}
+});
+
+const C_EXT = {
+ air:{
+  Cd:{forms:[["CdO and CdCl₂ on fine particles","Incineration and metal industry"],["Cd in resuspended soil dust",""]],
+   what:"Cadmium travels on fine particles and has no lasting gas phase outdoors. Rain and dry deposition remove it within days to weeks.",
+   risk:["low","Swiss air levels are far below the limit; NABEL measured less than 0.05 ng/m³ in PM10 in 2023."],
+   trap:["Fabric filters and wet scrubbers at incinerators","Dust control at metal works"],
+   swiss:"LRV limits: Cd in PM10 1.5 ng/m³ and Cd in dust deposition 2 µg/(m²·d), annual means.",
+   inputs:["emission rate","particle size","stack height","wind & rain"],
+   sc:{storm:[0,"Rain scavenges particles: wet deposition peaks."]}},
+  Cu:{forms:[["Cu on coarse wear particles","Brakes and railway contact wires"],["Cu on fine combustion particles",""]],
+   what:"Airborne copper comes mostly from abrasion: brake pads and railway contact wires. These coarse particles settle close to roads and tracks.",
+   risk:["low","Inhalation is a minor route; deposition along roads and railways matters more for soil."],
+   trap:["Brake pads with less copper","Street sweeping near busy roads"],
+   swiss:"Railways: copper makes up about 3% of the fine dust (PM10) from rail traffic.",
+   inputs:["traffic and rail activity","particle size","distance to source"],
+   sc:{storm:[0,"Rain washes particles out of the air."]}},
+  Zn:{forms:[["Zn on tyre-wear and road-dust particles","Mostly coarse"],["ZnO and ZnCl₂ on fine particles","Incineration and metal works"]],
+   what:"Zinc in air comes from tyre wear, road dust, incineration and metal works. Most of it lands near the source.",
+   risk:["low","No health concern at Swiss air levels."],
+   trap:["Filters at incinerators and metal works","Road-dust control"],
+   swiss:"LRV limit: Zn in dust deposition 400 µg/(m²·d); NABEL 2023 measured about 10 at rural stations and up to 100 in cities.",
+   inputs:["emission rate","particle size","traffic","wind & rain"],
+   sc:{storm:[0,"Wet deposition peaks during rain."]}},
+  Ni:{forms:[["Ni on fine combustion particles","Fuel oil, metal works"],["Ni in mineral dust","Geogenic, from serpentinite areas"]],
+   what:"Nickel travels on particles. Fuel-oil combustion and metal works emit fine particles; dust from serpentinite soil adds coarse ones.",
+   risk:["low","Inhaled nickel compounds are carcinogenic, but Swiss air levels are low."],
+   trap:["Filters on combustion plants and metal works","Dust control when excavating serpentinite"],
+   swiss:"Switzerland sets no air limit for nickel; the EU target value is 20 ng/m³ in PM10.",
+   inputs:["emission rate","particle size","stack height"],
+   sc:{storm:[0,"Rain scavenges particles."]}},
+  Cr:{forms:[["Cr(III) on dust and combustion particles","Most airborne Cr"],["Cr(VI) aerosol","Plating baths, welding, cement"]],
+   what:"Most airborne chromium is Cr(III) on particles. Cr(VI) comes from plating, stainless-steel welding and cement, and slowly reduces to Cr(III) in air and on surfaces.",
+   risk:["med","Inhaled Cr(VI) causes lung cancer, mainly at workplaces; outdoor levels are low."],
+   trap:["Extraction and scrubbers on plating baths","Mist suppressants","Fume extraction when welding stainless steel"],
+   swiss:"Switzerland sets no outdoor air limit for chromium.",
+   inputs:["emission rate","Cr(VI) share","particle size"],
+   sc:{storm:[0,"Rain washes particles out."]}}
+ },
+ glacier:{
+  Cd:{forms:[["Cd on mineral dust and in snow","Deposited from air"]],
+   what:"Snow and ice archive cadmium deposited from air. Melt releases it, partly dissolved, partly on glacial flour.",
+   risk:["low","No direct exposure; a delayed source to rivers."],
+   trap:["Reservoirs and proglacial lakes trap particle-bound Cd"],
+   swiss:"Alpine ice cores record the rise and fall of European cadmium emissions in the 20th century.",
+   inputs:["melt rate","Cd in ice","suspended sediment"],
+   sc:{melt:[1,"Melt moves the stored load into the river."]}},
+  Cu:{forms:[["Cu on mineral dust","Mostly geogenic"]],
+   what:"Glacial flour carries copper from the rock. Deposited copper from air is a small addition.",
+   risk:["low","No direct exposure."],
+   trap:["Reservoirs trap glacial flour"],
+   swiss:"No Swiss glacier copper problem is known.",
+   inputs:["melt rate","suspended sediment"],
+   sc:{melt:[1,"Melt carries particle-bound Cu downstream."]}},
+  Zn:{forms:[["Zn on mineral dust and in snow",""]],
+   what:"Snow and ice store zinc from air and rock dust; melt releases it with glacial flour and meltwater.",
+   risk:["low","No direct exposure."],
+   trap:["Reservoirs trap glacial flour"],
+   swiss:"No Swiss glacier zinc problem is known.",
+   inputs:["melt rate","suspended sediment"],
+   sc:{melt:[1,"Melt carries the stored load downstream."]}},
+  Ni:{forms:[["Ni in rock flour","Geogenic, high below serpentinite"]],
+   what:"Where glaciers erode serpentinite or ophiolite, the glacial flour is rich in nickel and chromium.",
+   risk:["low","No direct exposure."],
+   trap:["Reservoirs and proglacial lakes trap fine sediment"],
+   swiss:"Ophiolite rock occurs in Graubünden and Valais, so some catchments carry naturally Ni-rich sediment.",
+   inputs:["geology of the catchment","suspended sediment"],
+   sc:{melt:[1,"Melt moves Ni-rich flour into the river."]}},
+  Cr:{forms:[["Cr(III) in chromite and silicate rock flour","Geogenic"]],
+   what:"Glacial flour from ultramafic rock carries Cr(III) in resistant minerals; little of it dissolves.",
+   risk:["low","No direct exposure."],
+   trap:["Reservoirs trap fine sediment"],
+   swiss:"Chromium-rich ophiolite rock occurs in Graubünden and Valais.",
+   inputs:["geology of the catchment","suspended sediment"],
+   sc:{melt:[1,"Melt moves Cr-bearing flour downstream."]}}
+ },
+ bedrock:{
+  Cd:{forms:[["Cd in sphalerite and other sulfides","Ore veins"],["Cd in oolitic limestone","Jura"]],
+   what:"Some Jurassic limestones in the Jura are naturally rich in cadmium, and soils weathered from them inherit it.",
+   risk:["med","Geogenic Cd raises soil levels above the guide value in parts of the Jura."],
+   trap:["Lime and use low-uptake crops on naturally Cd-rich soil"],
+   swiss:"Soils on Jurassic limestone in the Jura hold 0.3–2 mg/kg Cd, locally up to about 20 mg/kg (Quezada-Hinojosa et al.).",
+   inputs:["geological map","soil atlas Cd class"],
+   sc:{acidic:[1,"Weathering in acidic water releases more Cd."]}},
+  Cu:{forms:[["Chalcopyrite CuFeS₂ and other sulfides","Ore veins"]],
+   what:"Copper ores are rare and small in Switzerland. Weathering sulfides release Cu with acid, but it binds again to soil and sediment.",
+   risk:["low","Local around old mines."],
+   trap:["Cover old mine waste"],
+   swiss:"Small historical copper mines existed in the Alps, for example in Valais.",
+   inputs:["mine inventory","geology"],
+   sc:{acidic:[1,"Acid rock drainage dissolves Cu."]}},
+  Zn:{forms:[["Sphalerite ZnS","Ore veins"],["Zn in carbonate rock",""]],
+   what:"Zinc ores occur in small Alpine deposits. Weathering sphalerite releases Zn and Cd together.",
+   risk:["low","Local around old mines."],
+   trap:["Cover old mine waste"],
+   swiss:"Historical lead-zinc mining took place in Graubünden, for example at S-charl.",
+   inputs:["mine inventory","geology"],
+   sc:{acidic:[1,"Acid drainage dissolves Zn."]}},
+  Ni:{forms:[["Ni in serpentine, olivine and pentlandite","Ultramafic rock"]],
+   what:"Serpentinite and other ultramafic rocks hold about 0.1–0.3% nickel. Weathering frees Ni²⁺, which partly sorbs to the iron and manganese oxides that form.",
+   risk:["med","Natural source of high Ni in soil and in some springs."],
+   trap:["Map serpentinite areas before using spring water or excavated soil"],
+   swiss:"Elevated nickel in Swiss groundwater is mostly natural, from ultramafic rock.",
+   inputs:["geological map (ophiolites)","spring chemistry"],
+   sc:{acidic:[1,"Acidic weathering releases more Ni."]}},
+  Cr:{forms:[["Cr(III) in chromite and Cr-spinel","Very resistant"],["Cr(III) in pyroxene and serpentine",""]],
+   what:"Ultramafic rock and some sandstones carry Cr(III) minerals. Manganese oxides in soil and aquifer can oxidise released Cr(III) to mobile chromate Cr(VI).",
+   risk:["med","Natural Cr(VI) in springs and groundwater where Mn oxides meet Cr-bearing rock."],
+   trap:["Monitor springs in Molasse sandstone and ophiolite areas for Cr(VI)"],
+   swiss:"Natural Cr(VI) occurs in springs and groundwater of the Molasse between Lausanne and Bern (FOEN NAQUA).",
+   inputs:["geology (Molasse, ophiolite)","Mn oxides","spring Cr(VI)"],
+   sc:{reducing:[-1,"Reducing water keeps Cr as insoluble Cr(III)."]}}
+ },
+ forest:{
+  Cd:{forms:[["Cd²⁺ on humus and clay","Exchangeable"],["Dissolved Cd²⁺","Acidic soil water"]],
+   what:"Acidic forest soils hold cadmium weakly. Below about pH 5 it leaches into deeper soil and springs.",
+   risk:["med","Leaching to springs in acidic, sandy forest soils."],
+   trap:["Avoid acidifying inputs; keep the humus layer"],
+   swiss:"90% of Swiss topsoils hold less than 0.62 mg/kg Cd (geochemical soil atlas); the VBBo guide value is 0.8 mg/kg.",
+   inputs:["pH","organic carbon","atmospheric deposition"],
+   sc:{acidic:[2,"Acidification mobilises Cd strongly."],storm:[1,"Runoff carries litter-bound Cd."]}},
+  Cu:{forms:[["Cu bound to humus","Strongly"],["Cu–DOC complexes","In seepage and streams"]],
+   what:"Copper stays in the humus layer. What moves leaves with dissolved organic carbon into streams.",
+   risk:["low","Low inputs in forests."],
+   trap:["No action normally needed"],
+   swiss:"Forest soils receive copper mainly from air deposition.",
+   inputs:["organic carbon","DOC export"],
+   sc:{storm:[1,"Storms flush DOC-bound Cu into streams."]}},
+  Zn:{forms:[["Zn²⁺ on humus and oxides",""],["Dissolved Zn²⁺","Acidic soil water"]],
+   what:"Like cadmium, zinc leaches from acidic forest soils into deeper soil and springs.",
+   risk:["low","Mainly an ecological concern."],
+   trap:["Avoid acidifying inputs"],
+   swiss:"VBBo guide value: 150 mg/kg Zn.",
+   inputs:["pH","organic carbon"],
+   sc:{acidic:[2,"Acidification mobilises Zn."]}},
+  Ni:{forms:[["Ni in silicate minerals","Geogenic"],["Ni²⁺ on oxides and humus",""]],
+   what:"On serpentinite, forest soils are naturally rich in nickel and chromium, and nickel moves where they are acidic.",
+   risk:["low","Mostly natural; vegetation is adapted."],
+   trap:["Know where serpentinite soils are"],
+   swiss:"VBBo guide value: 50 mg/kg Ni. Soils on serpentinite exceed it naturally.",
+   inputs:["geology","pH"],
+   sc:{acidic:[1,"Acidic water releases Ni."]}},
+  Cr:{forms:[["Cr(III) in minerals and on humus","Immobile"],["Cr(VI)","Only where Mn oxides oxidise Cr(III)"]],
+   what:"Forest humus reduces chromate quickly, so Cr(VI) rarely persists in forest topsoil.",
+   risk:["low","Mostly natural Cr(III)."],
+   trap:["No action normally needed"],
+   swiss:"VBBo guide value: 50 mg/kg Cr (total).",
+   inputs:["geology","organic carbon","Mn oxides"],
+   sc:{}}
+ },
+ farm:{
+  Cd:{forms:[["Cd²⁺ on clay, oxides and organic matter","Exchangeable"],["Otavite CdCO₃","Calcareous soil"],["Cd in phosphate fertiliser residues",""]],
+   what:"Cadmium is one of the most mobile metals in soil. Crops take it up readily, especially in acidic, sandy soils and from leafy vegetables, cereals and tobacco.",
+   risk:["high","Crop uptake is the main route to people. VBBo trigger value for food and fodder crops: 2 mg/kg."],
+   trap:["Liming: raising pH sharply lowers Cd uptake","Phosphate fertilisers low in Cd","Low-uptake crops and cultivars on affected fields"],
+   swiss:"Mineral phosphate fertiliser is the main Cd input to Swiss arable soil: the market median is about 47 mg Cd per kg P.",
+   inputs:["total Cd","pH","organic carbon","P fertiliser history","crop type"],
+   sc:{acidic:[2,"Below pH ~6, Cd uptake and leaching rise sharply."],reducing:[-1,"Waterlogging forms CdS, which holds Cd."],storm:[1,"Erosion moves Cd-rich topsoil."]}},
+  Cu:{forms:[["Cu bound to organic matter","Main binding form"],["Cu on Fe/Mn oxides and clay",""],["Cu carbonates","Calcareous soil"]],
+   what:"Copper accumulates in the topsoil wherever fungicides or manure bring it. It hardly leaches but harms earthworms and soil microbes.",
+   risk:["med","Ecotoxic to soil life; low risk for people. VBBo guide value 40 mg/kg, trigger value 150 mg/kg for fodder crops."],
+   trap:["Reduce copper fungicide (organic farming relies on it)","Reduce Cu in feed additives","Lime acidic vineyard soils"],
+   swiss:"NABO: vineyard soils reach up to 391 mg/kg Cu; Ticino vineyards 35–900 mg/kg.",
+   inputs:["total Cu","organic carbon","pH","fungicide and manure history"],
+   sc:{acidic:[1,"Acidic soil releases more Cu."],storm:[1,"Erosion is the main way Cu leaves the field."]}},
+  Zn:{forms:[["Zn²⁺ on oxides, clay and organic matter",""],["Zn carbonates","Calcareous soil"]],
+   what:"Zinc builds up on grassland fertilised with pig and cattle manure. It leaches more easily than copper or lead in acidic soil.",
+   risk:["low","Mainly ecological; plant toxicity at high levels."],
+   trap:["Reduce zinc in feed additives","Lime acidic soils"],
+   swiss:"Manure brings about 370 g Zn and 80 g Cu per ha and year to intensive grassland.",
+   inputs:["total Zn","pH","manure use"],
+   sc:{acidic:[2,"Acidification leaches Zn."],storm:[1,"Erosion moves Zn-rich topsoil."]}},
+  Ni:{forms:[["Ni in silicate minerals","Geogenic, low availability"],["Ni²⁺ on oxides and clay",""]],
+   what:"Most nickel in farm soil is natural and held in minerals. Acidic soils release more of it to crops.",
+   risk:["low","Plant uptake is limited except on serpentinite soils."],
+   trap:["Liming on naturally Ni-rich soils"],
+   swiss:"VBBo guide value: 50 mg/kg Ni (total), 0.2 mg/kg soluble.",
+   inputs:["geology","pH","total Ni"],
+   sc:{acidic:[1,"Acidic soil makes Ni more available."]}},
+  Cr:{forms:[["Cr(III) in minerals and as Cr(OH)₃","Immobile"],["Cr(VI)","From tannery sludge, slag or chromate spills"]],
+   what:"Soil humus reduces most added Cr(VI) to Cr(III) within weeks to months at neutral pH. Cr(III) then stays in place.",
+   risk:["low","Cr(III) is of low concern; Cr(VI) spills need action."],
+   trap:["Add organic matter or Fe(II) to reduce Cr(VI)","Avoid manganese-rich amendments on Cr-rich soil"],
+   swiss:"VBBo guide value: 50 mg/kg Cr (total).",
+   inputs:["total Cr","Cr(VI) share","organic carbon","Mn oxides"],
+   sc:{reducing:[-1,"Reducing soil turns Cr(VI) into Cr(III)."]}}
+ },
+ town:{
+  Cd:{forms:[["Cd on incineration and road dust",""],["Dissolved Cd in runoff",""]],
+   what:"Urban cadmium comes from incineration, old paint pigments and plastics stabilisers. Runoff carries it into sewers.",
+   risk:["low","Urban Cd levels are usually low today."],
+   trap:["Flue-gas cleaning at incinerators","Separate collection of batteries"],
+   swiss:"Incineration filter ash is rich in Cd, Zn and Pb; acid washing recovers the zinc.",
+   inputs:["incineration plants","runoff"],
+   sc:{storm:[1,"Sewer overflows send untreated runoff to the river."]}},
+  Cu:{forms:[["Dissolved Cu in roof runoff","Mostly Cu–DOC"],["Cu on brake and catenary dust",""]],
+   what:"Copper roofs and façades shed copper with every rain. Brake wear and railways add particles. Runoff goes to sewers, streams or infiltration.",
+   risk:["med","Main source of Cu in urban streams."],
+   trap:["Coat or replace copper roofs","Filter soils or adsorbers for roof runoff","Street sweeping"],
+   swiss:"Runoff from metal roofs averages 1.8 mg/L Cu; copper roofs and façades release 30–60 t Cu a year in Switzerland.",
+   inputs:["roof materials","road traffic","drainage system"],
+   sc:{storm:[2,"First flush carries most of the load."]}},
+  Zn:{forms:[["Dissolved Zn in roof runoff",""],["Zn on tyre-wear particles",""]],
+   what:"Zinc gutters, roofs and crash barriers and tyre wear make zinc the largest metal load in urban runoff.",
+   risk:["med","Zn briefly exceeds the river value after storms."],
+   trap:["Filter soils or swales for roof and road runoff","Coated zinc products"],
+   swiss:"Runoff from a busy road in Burgdorf averaged 440 µg/L Zn and 65 µg/L Cu.",
+   inputs:["roof materials","traffic","drainage system"],
+   sc:{storm:[2,"Storms flush roof and road Zn into streams and sewers."]}},
+  Ni:{forms:[["Ni on combustion and wear particles",""],["Dissolved Ni in plating effluent",""]],
+   what:"Plating shops and metal finishing release nickel to the sewer; combustion and steel wear add particles.",
+   risk:["low","Industrial pre-treatment keeps levels low."],
+   trap:["Pre-treatment of plating effluent (precipitation, ion exchange)"],
+   swiss:"Industrial effluent must be pre-treated before entering public sewers.",
+   inputs:["industries","sewer inflow"],
+   sc:{storm:[1,"Overflows bypass treatment."]}},
+  Cr:{forms:[["Cr(VI) in plating effluent",""],["Cr(III) on dust and slag",""]],
+   what:"Chrome plating and metal finishing are the main urban Cr(VI) sources. Pre-treatment reduces Cr(VI) to Cr(III) before discharge.",
+   risk:["med","Spills and old plating sites are the concern."],
+   trap:["Reduce Cr(VI) to Cr(III) and precipitate before discharge","Bunded plating baths"],
+   swiss:"Old plating sites are listed in the cantonal registers of polluted sites.",
+   inputs:["industries","site history"],
+   sc:{storm:[1,"Overflows bypass treatment."]}}
+ },
+ site:{
+  Cd:{zone:"Incineration ash landfill", forms:[["Cd in filter ash and slag","Partly soluble chlorides"],["Dissolved Cd in leachate","Acidic or chloride-rich"]],
+   what:"Incineration filter ash concentrates cadmium, zinc and lead. Chloride-rich, acidic leachate can mobilise Cd.",
+   risk:["med","Leachate to groundwater if the barrier fails."],
+   trap:["Acid washing of filter ash to recover Zn and Cd","Multi-barrier landfills with leachate collection"],
+   swiss:"Contaminated sites are listed in the cantonal registers. AltlV remediation value for Cd: 20 mg/kg in gardens and playgrounds, 30 mg/kg in agriculture.",
+   inputs:["ash type","leachate pH and chloride","barrier status"],
+   sc:{acidic:[2,"Acidic leachate releases Cd."],storm:[1,"Rain drives leachate."]}},
+  Cu:{zone:"Vineyard slope", forms:[["Cu bound to topsoil organic matter","From fungicides"],["Cu on eroded particles",""]],
+   what:"Decades of copper sprays build up in vineyard topsoil. Copper leaves mainly with eroded soil down the slope.",
+   risk:["med","Soil life harmed; erosion carries Cu to streams."],
+   trap:["Cover crops against erosion","Less copper spraying","Lime acidic vineyard soils"],
+   swiss:"Vineyards receive 1.4–2.4 kg Cu per ha and year from plant protection. AltlV remediation value: 1,000 mg/kg.",
+   inputs:["spray history","slope","erosion","pH"],
+   sc:{storm:[2,"Erosion moves Cu-rich soil."],acidic:[1,"Acidic soil releases Cu."]}},
+  Zn:{zone:"Infiltration swale", forms:[["Zn on filter-soil particles",""],["Dissolved Zn²⁺","Breaks through in acidic soil"]],
+   what:"Swales and infiltration basins catch roof and road runoff. Over years their soil fills with zinc and copper until they need replacing.",
+   risk:["med","Breakthrough to groundwater when the filter soil is saturated or acidic."],
+   trap:["Replace the top layer of filter soil when it is saturated","Keep the filter soil calcareous"],
+   swiss:"Swale soils collect zinc and copper from runoff year after year. AltlV remediation value for Zn: 2,000 mg/kg.",
+   inputs:["catchment roofs and roads","filter-soil pH","age"],
+   sc:{acidic:[2,"Acidic filter soil lets Zn through."],storm:[1,"Storm runoff adds load."]}},
+  Ni:{zone:"Serpentinite soil", forms:[["Ni in serpentine minerals","Geogenic"],["Ni²⁺ on oxides",""]],
+   what:"Soils on serpentinite hold hundreds of mg/kg nickel and chromium by nature. Excavating and moving them spreads it.",
+   risk:["med","Natural, but it can exceed values when the soil is moved elsewhere."],
+   trap:["Test excavated soil before reuse","Keep serpentinite soil where it is"],
+   swiss:"Davos: soils up to 928 mg/kg Ni and 809 mg/kg Cr below serpentinite. AltlV remediation value for Ni in gardens: 1,000 mg/kg.",
+   inputs:["geology","total Ni","excavation plans"],
+   sc:{acidic:[1,"Acidic water mobilises Ni."]}},
+  Cr:{zone:"Former chromate site", forms:[["Chromate Cr(VI) in soil and residue","Mobile"],["Cr(III) hydroxide","After reduction"]],
+   what:"Chromite ore processing residue and plating spills leave Cr(VI) that leaches into groundwater as a plume.",
+   risk:["high","Cr(VI) plumes reach wells and springs."],
+   trap:["Permeable reactive barrier with zero-valent iron","In-situ reduction with Fe(II) or sulfide","Excavation of the source"],
+   swiss:"Rivera (TI): Cr(VI) in the groundwater below a former chromite ore processing site (Wanner et al. 2012). AltlV remediation value for Cr(VI) in gardens: 100 mg/kg.",
+   inputs:["Cr(VI) in soil and water","aquifer redox","Fe(II), sulfide"],
+   sc:{reducing:[-2,"Reducing conditions turn Cr(VI) into immobile Cr(III)."]}}
+ },
+ people:{
+  Cd:{forms:[["Cd in food","Cereals, potatoes, vegetables, shellfish"],["Cd in tobacco smoke",""]],
+   what:"Only a few percent of swallowed cadmium is absorbed, but it stays in the kidneys for decades. Iron deficiency increases uptake.",
+   risk:["high","Kidney damage and bone loss. EFSA tolerable weekly intake: 2.5 µg/kg body weight."],
+   trap:["Limit Cd in fertilisers and soils","Do not smoke"],
+   swiss:"Swiss drinking-water maximum: 3 µg/L (TBDV).",
+   inputs:["diet","smoking","garden produce"], sc:{}},
+  Cu:{forms:[["Cu in food and drinking water",""]],
+   what:"The body regulates copper well. Too much causes stomach upset; Wilson's disease patients cannot excrete it.",
+   risk:["low","EFSA acceptable daily intake: 0.07 mg/kg body weight per day."],
+   trap:["Flush taps after stagnation in copper pipes"],
+   swiss:"Swiss drinking-water maximum: 1 mg/L (TBDV).",
+   inputs:["water pipes","diet"], sc:{}},
+  Zn:{forms:[["Zn in food",""]],
+   what:"Zinc is an essential nutrient; deficiency is more common than excess.",
+   risk:["low","US EPA oral reference dose: 0.3 mg/kg body weight per day."],
+   trap:["No action normally needed"],
+   swiss:"Swiss drinking-water maximum: 5 mg/L (TBDV).",
+   inputs:["diet"], sc:{}},
+  Ni:{forms:[["Ni in food and water",""],["Ni in contact with skin","Jewellery, coins"]],
+   what:"Swallowed nickel can trigger eczema in people already sensitised. Skin contact is the main route of sensitisation.",
+   risk:["med","EFSA tolerable daily intake: 13 µg/kg body weight."],
+   trap:["Flush taps after stagnation (nickel from fittings)"],
+   swiss:"Swiss drinking-water maximum: 20 µg/L (TBDV).",
+   inputs:["water fittings","diet"], sc:{}},
+  Cr:{forms:[["Cr(VI) in drinking water","From plumes or natural sources"],["Cr(III) in food","Low toxicity"]],
+   what:"Stomach acid reduces much of swallowed Cr(VI) to Cr(III), but not all. Cr(VI) in drinking water is the main concern.",
+   risk:["high","Cr(VI) is carcinogenic. Swiss drinking-water maximum for total chromium: 20 µg/L since August 2026."],
+   trap:["Treat Cr(VI) water: reduction with Fe(II) and filtration, or ion exchange","Change the source"],
+   swiss:"Swiss drinking-water maximum: 20 µg/L total chromium (TBDV, in force since 1 August 2026).",
+   inputs:["drinking-water source","Cr(VI) analysis"], sc:{}}
+ },
+ wwtp:{
+  Cd:{forms:[["Cd on sludge particles",""],["Dissolved Cd","In the effluent"]],
+   what:"Treatment moves part of the cadmium into sludge; the rest leaves in the effluent.",
+   risk:["low","Diluted in the river."],
+   trap:["Source control (batteries, pigments)","Sludge goes to incineration"],
+   swiss:"Since 2006 sewage sludge may no longer be spread on Swiss farmland.",
+   inputs:["inflow load","sludge Cd"],
+   sc:{storm:[1,"Combined sewer overflows bypass treatment."]}},
+  Cu:{forms:[["Cu on sludge flocs","Most of the load"],["Cu–DOC complexes","In the effluent"]],
+   what:"Treatment plants catch much of the copper in sludge, but effluent still carries dissolved Cu bound to organic carbon.",
+   risk:["low","Effluent dilution matters in small streams."],
+   trap:["Source control at roofs and industry","Fourth treatment stage (activated carbon) removes part of the Cu"],
+   swiss:"GSchV value for dissolved Cu in rivers: 2 µg/L.",
+   inputs:["inflow load","dilution at Q347"],
+   sc:{storm:[1,"Overflows send untreated runoff to the river."]}},
+  Zn:{forms:[["Zn on sludge particles",""],["Dissolved Zn","In the effluent"]],
+   what:"Zinc is the largest metal load reaching treatment plants. Removal varies from little to most of the dissolved part.",
+   risk:["low","Effluent adds zinc to rivers all year; storm overflows add peaks."],
+   trap:["Source control: separate roof runoff and infiltrate it through filter soil"],
+   swiss:"GSchV value for dissolved Zn in rivers: 5 µg/L.",
+   inputs:["inflow load","dilution"],
+   sc:{storm:[1,"Overflows bypass treatment."]}},
+  Ni:{forms:[["Dissolved Ni","Passes treatment"]],
+   what:"Nickel stays mostly dissolved, so treatment removes less of it than of lead or copper.",
+   risk:["low","Diluted in the river."],
+   trap:["Pre-treat plating effluent at the source"],
+   swiss:"GSchV value for dissolved Ni in rivers: 5 µg/L.",
+   inputs:["industrial inflow","dilution"],
+   sc:{storm:[1,"Overflows bypass treatment."]}},
+  Cr:{forms:[["Cr(III) on sludge",""],["Cr(VI)","Only from untreated industrial discharge"]],
+   what:"Municipal sewage contains mostly Cr(III), which settles with sludge. Cr(VI) reaches plants only through faulty industrial pre-treatment.",
+   risk:["low","Low in normal operation."],
+   trap:["Pre-treatment at plating shops"],
+   swiss:"GSchV value for dissolved Cr (III and VI) in rivers: 2 µg/L.",
+   inputs:["industrial inflow","sludge Cr"],
+   sc:{storm:[1,"Overflows bypass treatment."]}}
+ },
+ river:{
+  Cd:{forms:[["Dissolved Cd²⁺ and chloride complexes",""],["Cd on suspended particles",""]],
+   what:"In Swiss rivers cadmium is mostly very low today. A large part travels on suspended particles.",
+   risk:["low","Large rivers usually meet the GSchV value of 0.05 µg/L dissolved."],
+   trap:["Reduce erosion of Cd-rich soil"],
+   swiss:"GSchV values for Cd: 0.05 µg/L dissolved, 0.2 µg/L total.",
+   inputs:["suspended sediment","hardness","DOC"],
+   sc:{storm:[1,"Suspended sediment and particle-bound Cd rise."]}},
+  Cu:{forms:[["Cu–DOC complexes","Most dissolved Cu"],["Cu on suspended particles",""]],
+   what:"Copper exceeds the river value mainly in small streams fed by roof, road and vineyard runoff. Organic matter binds most dissolved Cu and lowers its toxicity.",
+   risk:["med","Small streams in towns and wine-growing areas can exceed the GSchV value."],
+   trap:["Treat runoff at the source","Buffer strips along vineyards"],
+   swiss:"GSchV values for Cu: 2 µg/L dissolved, 5 µg/L total.",
+   inputs:["DOC","suspended sediment","land use upstream"],
+   sc:{storm:[2,"Runoff peaks carry the Cu load."]}},
+  Zn:{forms:[["Dissolved Zn²⁺",""],["Zn on suspended particles",""]],
+   what:"Zinc peaks after storms, when roof and road runoff reach small streams.",
+   risk:["med","Briefly exceeds the GSchV value of 5 µg/L dissolved after storms."],
+   trap:["Treat road and roof runoff"],
+   swiss:"Road runoff supplies about 30% of the zinc in the Rhine.",
+   inputs:["urban share of catchment","suspended sediment"],
+   sc:{storm:[2,"Storm runoff raises Zn sharply."]}},
+  Ni:{forms:[["Dissolved Ni²⁺","Mostly dissolved"],["Ni on particles","From ultramafic catchments"]],
+   what:"Nickel stays mostly dissolved in rivers. Catchments with serpentinite carry natural nickel on particles.",
+   risk:["low","Below the GSchV value of 5 µg/L dissolved in most rivers."],
+   trap:["Pre-treat industrial effluent"],
+   swiss:"GSchV values for Ni: 5 µg/L dissolved, 10 µg/L total.",
+   inputs:["geology of the catchment","effluent share"],
+   sc:{storm:[1,"Particle-bound Ni rises with sediment."]}},
+  Cr:{forms:[["Cr(III) on particles","Most river Cr"],["Dissolved Cr(VI)","From groundwater or effluent"]],
+   what:"Most chromium in rivers travels as Cr(III) on particles. Dissolved Cr(VI) comes from groundwater, springs and industrial effluent.",
+   risk:["low","Usually below the GSchV value."],
+   trap:["Control industrial effluent"],
+   swiss:"GSchV values for Cr: 2 µg/L dissolved (Cr(III) and Cr(VI)), 5 µg/L total.",
+   inputs:["suspended sediment","Cr(VI) analysis"],
+   sc:{storm:[1,"Suspended Cr(III) rises with sediment."]}}
+ },
+ lake:{
+  Cd:{forms:[["Dissolved Cd²⁺",""],["Cd taken up by plankton","Sinks with it"]],
+   what:"Plankton take up cadmium in summer and carry it to the sediment as they sink.",
+   risk:["low","Low concentrations in Swiss lakes."],
+   trap:["Reduce inputs"],
+   swiss:"Swiss lakes have low cadmium levels today.",
+   inputs:["inflow load","productivity"],
+   sc:{reducing:[-1,"Sulfide in anoxic bottom water precipitates CdS."]}},
+  Cu:{forms:[["Cu–DOC complexes",""],["Cu on settling particles",""]],
+   what:"Strong organic ligands bind almost all dissolved copper in lakes, which lowers free Cu²⁺ to very low levels.",
+   risk:["low","Toxicity is reduced by organic complexation."],
+   trap:["Reduce inputs"],
+   swiss:"Eawag studies in Swiss lakes found strong organic ligands binding almost all dissolved copper.",
+   inputs:["DOC","inflow load"],
+   sc:{}},
+  Zn:{forms:[["Dissolved Zn²⁺",""],["Zn on settling particles",""]],
+   what:"Zinc is taken up by algae and settles with them, like cadmium.",
+   risk:["low","Low in Swiss lakes."],
+   trap:["Reduce inputs"],
+   swiss:"No Swiss lake zinc problem is known.",
+   inputs:["inflow load"],
+   sc:{reducing:[-1,"Sulfide precipitates ZnS in anoxic bottom water."]}},
+  Ni:{forms:[["Dissolved Ni²⁺","Stays in solution"]],
+   what:"Nickel stays longer in lake water than lead or copper because it binds less to particles.",
+   risk:["low","Low in Swiss lakes."],
+   trap:["Reduce inputs"],
+   swiss:"No Swiss lake nickel problem is known.",
+   inputs:["inflow load"],
+   sc:{}},
+  Cr:{forms:[["Dissolved Cr(VI)","Oxic water"],["Cr(III) on particles","Settles"]],
+   what:"In oxic lake water chromium is partly Cr(VI); anoxic bottom water reduces it to Cr(III), which settles.",
+   risk:["low","Low in Swiss lakes."],
+   trap:["Reduce inputs"],
+   swiss:"No Swiss lake chromium problem is known.",
+   inputs:["oxygen","inflow load"],
+   sc:{reducing:[-1,"Anoxic water reduces Cr(VI) to Cr(III), which settles."]}}
+ },
+ sediment:{
+  Cd:{forms:[["CdS","Anoxic sediment"],["Cd on organic matter and oxides",""]],
+   what:"Anoxic sediment binds cadmium as sulfide. Dredging or oxygenation can release it again.",
+   risk:["low","Only a concern where sediment is disturbed."],
+   trap:["Leave contaminated sediment undisturbed or cap it"],
+   swiss:"Lake sediments archive the decline of Cd inputs since the 1970s.",
+   inputs:["sulfide","redox","dredging plans"],
+   sc:{reducing:[-1,"Sulfide holds Cd."]}},
+  Cu:{forms:[["Cu sulfides","Anoxic sediment"],["Cu on organic matter",""]],
+   what:"Sediment is the final sink for copper. Urban stream sediments carry the highest loads.",
+   risk:["med","Urban stream sediments often exceed sediment quality targets."],
+   trap:["Control runoff at the source"],
+   swiss:"Stream sediments downstream of towns carry the highest copper loads.",
+   inputs:["sediment Cu","settled area upstream"],
+   sc:{reducing:[-1,"Sulfides hold Cu."]}},
+  Zn:{forms:[["ZnS","Anoxic sediment"],["Zn on oxides and organic matter",""]],
+   what:"Zinc accumulates in urban stream and lake sediments.",
+   risk:["med","Sediment quality targets are often missed downstream of towns."],
+   trap:["Control runoff at the source"],
+   swiss:"Stream sediments downstream of towns carry the highest zinc loads.",
+   inputs:["sediment Zn","settled area upstream"],
+   sc:{reducing:[-1,"ZnS holds Zn."]}},
+  Ni:{forms:[["Ni on oxides and in minerals",""],["NiS","Anoxic sediment"]],
+   what:"Sediment nickel is mostly natural, from the rocks of the catchment.",
+   risk:["low","Mostly geogenic."],
+   trap:["No action normally needed"],
+   swiss:"Catchments with ophiolite rock have naturally Ni-rich sediment.",
+   inputs:["geology","sediment Ni"],
+   sc:{}},
+  Cr:{forms:[["Cr(III) in minerals and hydroxides","Stable"]],
+   what:"Chromium in sediment is Cr(III) and stays put under reducing conditions.",
+   risk:["low","Stable unless oxidised."],
+   trap:["No action normally needed"],
+   swiss:"Sediment Cr is mostly natural.",
+   inputs:["sediment Cr","redox"],
+   sc:{}}
+ },
+ gw:{
+  Cd:{forms:[["Dissolved Cd²⁺","Oxic, slightly acidic water"],["Cd on aquifer oxides",""]],
+   what:"Cadmium in groundwater is usually below 0.05 µg/L. Higher values occur under arable land and in some Jura aquifers.",
+   risk:["low","Usually far below the drinking-water limit of 3 µg/L."],
+   trap:["Lime acidic soils in the catchment","Limit Cd-rich fertiliser"],
+   swiss:"FOEN NAQUA 2018: Cd above the 0.05 µg/L indicator value at 29 of 524 sites.",
+   inputs:["pH","land use in the catchment","geology"],
+   sc:{acidic:[2,"Acidic water keeps Cd dissolved."],reducing:[-1,"Sulfide precipitates Cd."]}},
+  Cu:{forms:[["Dissolved Cu, mostly organic complexes",""]],
+   what:"Copper rarely moves far in aquifers. Elevated values come from roof, track and road infiltration and from pipes.",
+   risk:["low","Usually far below the drinking-water limit of 1,000 µg/L."],
+   trap:["Filter soils in infiltration systems"],
+   swiss:"FOEN NAQUA 2018: Cu above the 2 µg/L indicator value at 94 of 524 sites (about 18%).",
+   inputs:["infiltration of runoff","DOC"],
+   sc:{acidic:[1,"Acidic water carries more Cu."]}},
+  Zn:{forms:[["Dissolved Zn²⁺",""]],
+   what:"Zinc is the trace metal most often elevated in Swiss groundwater, mostly from infiltrated roof and road runoff. Galvanised well fittings can add Zn to samples.",
+   risk:["low","Usually far below the drinking-water limit of 5,000 µg/L."],
+   trap:["Filter soils in infiltration systems","Replace galvanised well fittings"],
+   swiss:"FOEN NAQUA 2018: Zn above the 5 µg/L indicator value at 145 of 524 sites (about 28%).",
+   inputs:["infiltration of runoff","pH","well materials"],
+   sc:{acidic:[2,"Acidic water keeps Zn dissolved."]}},
+  Ni:{forms:[["Dissolved Ni²⁺",""]],
+   what:"Elevated nickel in Swiss groundwater is mostly natural, from serpentinite and ophiolite rock.",
+   risk:["low","One NAQUA site above the drinking-water limit of 20 µg/L in 2018."],
+   trap:["Blend or change the source where Ni is naturally high"],
+   swiss:"FOEN NAQUA 2018: Ni above the 5 µg/L indicator value at 5 of 524 sites; elevated values are mostly geogenic.",
+   inputs:["geology","pH"],
+   sc:{acidic:[1,"Acidic water releases Ni."]}},
+  Cr:{forms:[["Chromate Cr(VI)","Oxic water; mobile"],["Cr(III)","Reducing water; precipitates"]],
+   what:"Groundwater chromium is mostly Cr(VI). In oxic aquifers it moves almost as fast as the water; Fe(II), sulfide and organic matter reduce it to immobile Cr(III).",
+   risk:["med","Cr(VI) plumes below plating and chromate sites; natural Cr(VI) in Molasse aquifers."],
+   trap:["Permeable reactive barrier with zero-valent iron","In-situ reduction with Fe(II), dithionite or sulfide","Pump-and-treat with reduction and precipitation"],
+   swiss:"FOEN NAQUA 2018: Cr above the 2 µg/L indicator value at 23 of 524 sites, mainly Cr(VI); largely natural in the Molasse between Lausanne and Bern.",
+   inputs:["Cr(VI) analysis","redox (O₂, Fe²⁺)","flow velocity"],
+   sc:{reducing:[-2,"Reducing aquifers turn Cr(VI) into immobile Cr(III)."],acidic:[-1,"Chromate sorbs more strongly at lower pH."]}}
+ }
+};
+const BASE_EXT = {
+  air:{Cd:2,Cu:2,Zn:2,Ni:1,Cr:1}, glacier:{Cd:2,Cu:2,Zn:2,Ni:2,Cr:1}, bedrock:{Cd:1,Cu:1,Zn:1,Ni:2,Cr:2}, forest:{Cd:3,Cu:2,Zn:3,Ni:3,Cr:1},
+  farm:{Cd:3,Cu:1,Zn:2,Ni:2,Cr:2}, town:{Cd:3,Cu:3,Zn:4,Ni:2,Cr:2}, site:{Cd:3,Cu:2,Zn:3,Ni:2,Cr:4}, people:{Cd:0,Cu:0,Zn:0,Ni:0,Cr:0},
+  wwtp:{Cd:3,Cu:2,Zn:3,Ni:3,Cr:2}, river:{Cd:3,Cu:3,Zn:3,Ni:3,Cr:2}, lake:{Cd:3,Cu:3,Zn:3,Ni:2,Cr:2}, sediment:{Cd:1,Cu:1,Zn:1,Ni:1,Cr:1}, gw:{Cd:3,Cu:1,Zn:2,Ni:2,Cr:3}
+};
+for(const k in C_EXT){ Object.assign(C[k], C_EXT[k]); Object.assign(C[k].base, BASE_EXT[k]); }
+Object.assign(W, {
+ Cd:{stack_air:[.5,"p"],air_glacier:[.3,"p"],air_forest:[.3,"p"],air_farm:[.4,"p"],air_lake:[.2,"p"],air_people:[.1,"p"],
+  glacier_river:[.3,"p"],river_lake:[.6,"d"],bedrock_gw:[.2,"d"],bedrock_river:[.2,"d"],forest_gw:[.3,"d"],forest_river:[.3,"d"],
+  farm_gw:[.3,"d"],farm_river:[.4,"p"],site_gw:[.5,"d"],site_river:[.4,"d"],town_wwtp:[.4,"p"],wwtp_river:[.3,"d"],town_river:[.3,"d"],
+  gw_people:[.2,"d"],gw_lake:[.2,"d"],lake_sediment:[.6,"p"],sediment_lake:[.1,"d"],lake_people:[.1,"d"],soil_air:[0,"g"],
+  farm_people:[.8,"p"],glacier_air:[0,"g"],lake_air:[0,"g"]},
+ Cu:{stack_air:[.3,"p"],air_glacier:[.2,"p"],air_forest:[.2,"p"],air_farm:[.3,"p"],air_lake:[.2,"p"],air_people:[.05,"p"],
+  glacier_river:[.3,"p"],river_lake:[.6,"d"],bedrock_gw:[.05,"d"],bedrock_river:[.2,"p"],forest_gw:[.05,"d"],forest_river:[.3,"d"],
+  farm_gw:[.05,"d"],farm_river:[.6,"p"],site_gw:[.1,"d"],site_river:[.6,"p"],town_wwtp:[.6,"d"],wwtp_river:[.3,"d"],town_river:[.7,"d"],
+  gw_people:[.1,"d"],gw_lake:[.05,"d"],lake_sediment:[.7,"p"],sediment_lake:[.05,"d"],lake_people:[.1,"d"],soil_air:[0,"g"],
+  farm_people:[.2,"p"],glacier_air:[0,"g"],lake_air:[0,"g"]},
+ Zn:{stack_air:[.4,"p"],air_glacier:[.2,"p"],air_forest:[.3,"p"],air_farm:[.3,"p"],air_lake:[.2,"p"],air_people:[.05,"p"],
+  glacier_river:[.3,"p"],river_lake:[.6,"d"],bedrock_gw:[.1,"d"],bedrock_river:[.2,"d"],forest_gw:[.2,"d"],forest_river:[.3,"d"],
+  farm_gw:[.15,"d"],farm_river:[.5,"p"],site_gw:[.4,"d"],site_river:[.4,"p"],town_wwtp:[.7,"p"],wwtp_river:[.4,"d"],town_river:[.8,"d"],
+  gw_people:[.1,"d"],gw_lake:[.15,"d"],lake_sediment:[.7,"p"],sediment_lake:[.05,"d"],lake_people:[.05,"d"],soil_air:[0,"g"],
+  farm_people:[.3,"p"],glacier_air:[0,"g"],lake_air:[0,"g"]},
+ Ni:{stack_air:[.3,"p"],air_glacier:[.2,"p"],air_forest:[.2,"p"],air_farm:[.2,"p"],air_lake:[.1,"p"],air_people:[.1,"p"],
+  glacier_river:[.5,"p"],river_lake:[.6,"d"],bedrock_gw:[.5,"d"],bedrock_river:[.5,"d"],forest_gw:[.2,"d"],forest_river:[.3,"d"],
+  farm_gw:[.15,"d"],farm_river:[.4,"p"],site_gw:[.3,"d"],site_river:[.5,"p"],town_wwtp:[.4,"d"],wwtp_river:[.4,"d"],town_river:[.2,"d"],
+  gw_people:[.3,"d"],gw_lake:[.2,"d"],lake_sediment:[.4,"p"],sediment_lake:[.1,"d"],lake_people:[.1,"d"],soil_air:[0,"g"],
+  farm_people:[.2,"p"],glacier_air:[0,"g"],lake_air:[0,"g"]},
+ Cr:{stack_air:[.3,"p"],air_glacier:[.2,"p"],air_forest:[.2,"p"],air_farm:[.2,"p"],air_lake:[.1,"p"],air_people:[.1,"p"],
+  glacier_river:[.5,"p"],river_lake:[.6,"p"],bedrock_gw:[.4,"d"],bedrock_river:[.4,"p"],forest_gw:[.05,"d"],forest_river:[.3,"p"],
+  farm_gw:[.05,"d"],farm_river:[.4,"p"],site_gw:[.8,"d"],site_river:[.4,"d"],town_wwtp:[.4,"p"],wwtp_river:[.2,"d"],town_river:[.2,"p"],
+  gw_people:[.6,"d"],gw_lake:[.3,"d"],lake_sediment:[.6,"p"],sediment_lake:[.02,"d"],lake_people:[.1,"d"],soil_air:[0,"g"],
+  farm_people:[.1,"p"],glacier_air:[0,"g"],lake_air:[0,"g"]}
+});
+Object.assign(MODS.reducing, {
+  Cd:{farm_gw:.5, site_gw:.5, gw_people:.6, sediment_lake:.5, lake_people:.7},
+  Cu:{sediment_lake:.5, farm_gw:.7},
+  Zn:{sediment_lake:.5, site_gw:.6, gw_people:.7},
+  Ni:{sediment_lake:.6},
+  Cr:{site_gw:.1, bedrock_gw:.2, gw_people:.15, gw_lake:.2, farm_gw:.3, forest_gw:.3, site_river:.4, wwtp_river:.5}
+});
+Object.assign(MODS.acid, {
+  Cd:{farm_gw:3, forest_gw:3, site_gw:2.5, gw_people:2, farm_people:1.6, bedrock_gw:1.5},
+  Cu:{farm_gw:2, forest_gw:2, site_gw:2, gw_people:1.5},
+  Zn:{farm_gw:3, forest_gw:3, site_gw:2.5, gw_people:2, farm_people:1.3},
+  Ni:{farm_gw:2.5, forest_gw:2.5, bedrock_gw:1.8, gw_people:1.8, site_gw:2},
+  Cr:{site_gw:.8, bedrock_gw:.8}
+});
 
 /* ================= STATE ================= */
 const reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -743,18 +1302,25 @@ $("#dataGrid").innerHTML = DATA.map(([h,p,f,u])=>`<div class="ds"><span class="f
 
 /* ================= ADVANCED MODE ================= */
 const YEAR_S = 31557600;
-const KDSS = {As:Math.pow(10,4.0), Pb:Math.pow(10,5.7), Hg:Math.pow(10,5.3)};
-const KDRANGE = {As:"2–20,000", Pb:"10–100,000", Hg:"160–630,000"};
+const MLIST = ["As", "Hg", "Pb", "Cd", "Cu", "Zn", "Ni", "Cr"];
+const GLACIER_M = new Set(["As", "Hg", "Pb"]);     // ice-core values exist only for these
+// Kd on suspended matter, L/kg (Allison & Allison 2005 medians; Cr: Cr(III), chromate Cr(VI) below)
+const KDSS = {As:Math.pow(10,4.0), Pb:Math.pow(10,5.7), Hg:Math.pow(10,5.3), Cd:Math.pow(10,5.0), Cu:Math.pow(10,4.7), Zn:Math.pow(10,5.1), Ni:Math.pow(10,4.3), Cr:Math.pow(10,5.1)};
+const kdSSOf = (m, sp) => m === "Cr" && sp === "VI" ? Math.pow(10, 4.2) : KDSS[m];
+const KDRANGE = {As:"2–20,000", Pb:"10–100,000", Hg:"160–630,000", Cd:"1–100,000", Cu:"1–4,000", Zn:"0.1–100,000", Ni:"10–6,300", Cr:"Cr(III) 10–50,000, Cr(VI) 0.2–2,000"};
+// Swiss values. TBDV as amended on 19 June 2026 (Pb 5 µg/L to be met by 1 February 2036; Cr total 20 µg/L, Cr(VI) value deleted); AltlV as of 1 December 2025; VBBo Annex 1; GSchV Annex 2; LRV Annex 7
 const LIM = {
-  tbdv:{As:10, Hg:1, Pb:10},
-  altl1:{As:50, Hg:1, Pb:50},
-  gschv:{Hg:0.01, Pb:1},
-  guide:{Hg:0.5, Pb:50},
-  trigger:{Pb:200},
-  remGarden:{As:50, Hg:2, Pb:1000},
-  remAgri:{Pb:2000},
-  lrvDep:{Pb:100}
+  tbdv:{As:10, Hg:1, Pb:5, Cd:3, Cu:1000, Zn:5000, Ni:20, Cr:20},
+  altl1:{As:10, Hg:1, Pb:50, Cd:5, Cu:1500, Zn:5000, Ni:700, Cr:20},          // Cr: value for Cr(VI); none for Cr(III)
+  gschv:{Hg:0.01, Pb:1, Cd:0.05, Cu:2, Zn:5, Ni:5, Cr:2},
+  guide:{Hg:0.5, Pb:50, Cd:0.8, Cu:40, Zn:150, Ni:50, Cr:50},
+  trigger:{Pb:200, Cd:2, Cu:150},                                               // agriculture: food and fodder crops (Cu: fodder only)
+  triggerFood:{Pb:200, Cd:2},                                                   // gardens: food crops
+  remGarden:{As:50, Hg:2, Pb:300, Cd:20, Cu:1000, Zn:2000, Ni:1000, Cr:100},     // Cr: value for Cr(VI)
+  remAgri:{Pb:2000, Cd:30, Cu:1000, Zn:2000},
+  lrvDep:{Pb:100, Cd:2, Zn:400}
 };
+const trigOf = (m, land) => land === "agri" ? LIM.trigger[m] : land === "garden" ? LIM.triggerFood[m] : null;
 const FORMS = {
   As:[
     {id:"asV", label:"Arsenate As(V), dissolved or salt", fr:100, sp:"V"},
@@ -772,25 +1338,53 @@ const FORMS = {
     {id:"pbo", label:"PbO and other Pb dust", fr:60},
     {id:"pbm", label:"Metallic Pb (ammunition)", fr:10, site:true},
     {id:"pbash", label:"Pb in fly ash", fr:30},
-    {id:"pbs", label:"Galena PbS", fr:2}]
+    {id:"pbs", label:"Galena PbS", fr:2}],
+  Cd:[
+    {id:"cd2", label:"Cd²⁺ salt or dissolved Cd", fr:100},
+    {id:"cdfert", label:"Cd in mineral phosphate fertiliser", fr:80},
+    {id:"cdash", label:"Cd in incineration fly ash or filter ash", fr:50},
+    {id:"cdsulf", label:"Cd in sphalerite or other sulfide ore", fr:5, site:true}],
+  Cu:[
+    {id:"cu2", label:"Cu²⁺ salt or dissolved Cu (roof runoff)", fr:100},
+    {id:"cufung", label:"Copper fungicide (Bordeaux mixture, Cu hydroxide)", fr:80},
+    {id:"cuman", label:"Cu in manure or slurry", fr:60},
+    {id:"cuwear", label:"Brake or contact-wire wear dust", fr:30},
+    {id:"cusulf", label:"Chalcopyrite or other Cu sulfide", fr:2, site:true}],
+  Zn:[
+    {id:"zn2", label:"Zn²⁺ salt or dissolved Zn (roof runoff)", fr:100},
+    {id:"znman", label:"Zn in manure or slurry", fr:60},
+    {id:"zntyre", label:"Tyre-wear particles", fr:20},
+    {id:"znash", label:"Zn in incineration fly ash", fr:50},
+    {id:"znsulf", label:"Sphalerite ZnS", fr:2, site:true}],
+  Ni:[
+    {id:"ni2", label:"Ni²⁺ salt or dissolved Ni (plating)", fr:100},
+    {id:"niash", label:"Ni in fly ash or oil-combustion dust", fr:30},
+    {id:"nimet", label:"Metallic Ni or stainless-steel dust", fr:5},
+    {id:"nigeo", label:"Serpentinite soil or rock (natural)", fr:3, site:true}],
+  Cr:[
+    {id:"cr6", label:"Chromate Cr(VI), dissolved or salt", fr:100, sp:"VI"},
+    {id:"crore", label:"Chromite ore processing residue (Cr(VI)-rich)", fr:30, sp:"VI", site:true},
+    {id:"cr3", label:"Cr(III) salt, e.g. tannery waste", fr:100, sp:"III"},
+    {id:"crslag", label:"Cr(III) in steel slag", fr:5, sp:"III"},
+    {id:"crgeo", label:"Serpentinite or chromite (natural Cr(III))", fr:2, sp:"III", site:true}]
 };
 const PRESETS = {
   visp:{label:"Visp, Rhone valley (VS)", note:"Visp: dry inner-Alpine valley floor, calcareous Rhone alluvium over a shallow gravel aquifer.",
-    v:{precip:600, infil:25, pH:7.5, oc:2, fe:3, pstat:"normal", drain:"well", rhob:1.35, theta:0.25, bg:{As:10,Hg:0.1,Pb:25},
-       aq:"porous", wt:2, K:1e-3, grad:0.002, thick:30, ne:0.2, gwpH:7.6, redox:"suboxic", aqFe:0.5, aqOC:0.1, bgGw:{As:1,Hg:0.01,Pb:0.5},
-       Q:40, ssc:100, bgRiv:{As:1,Hg:0.002,Pb:0.1}, lakeO2:"oxic", doc:1.5, lpH:8, so4:"mod", wet:"none", lakeTau:11.4, troph:"meso", elev:650, pm10:11.6, pm25:6.7}},
+    v:{precip:600, infil:25, pH:7.5, oc:2, fe:3, pstat:"normal", drain:"well", rhob:1.35, theta:0.25, bg:{As:10,Hg:0.1,Pb:25,Cd:0.2,Cu:25,Zn:60,Ni:30,Cr:35},
+       aq:"porous", wt:2, K:1e-3, grad:0.002, thick:30, ne:0.2, gwpH:7.6, redox:"suboxic", aqFe:0.5, aqOC:0.1, bgGw:{As:1,Hg:0.01,Pb:0.5,Cd:0.01,Cu:0.5,Zn:1,Ni:0.5,Cr:0.3},
+       Q:40, ssc:100, bgRiv:{As:1,Hg:0.002,Pb:0.1,Cd:0.01,Cu:1,Zn:2,Ni:0.5,Cr:0.3}, lakeO2:"oxic", doc:1.5, lpH:8, so4:"mod", wet:"none", lakeTau:11.4, troph:"meso", elev:650, pm10:11.6, pm25:6.7}},
   plateau:{label:"Swiss Plateau gravel plain", note:"Swiss Plateau: neutral to slightly acidic arable soils over a productive gravel aquifer; lakes with seasonal bottom-water anoxia.",
-    v:{precip:1100, infil:40, pH:6.5, oc:2, fe:4, pstat:"normal", drain:"well", rhob:1.3, theta:0.3, bg:{As:8,Hg:0.1,Pb:30},
-       aq:"porous", wt:8, K:2e-3, grad:0.003, thick:15, ne:0.2, gwpH:7.4, redox:"oxic", aqFe:0.5, aqOC:0.1, bgGw:{As:0.5,Hg:0.005,Pb:0.3},
-       Q:10, ssc:20, bgRiv:{As:0.8,Hg:0.002,Pb:0.2}, lakeO2:"seasonal", doc:3, lpH:8.2, so4:"mod", wet:"some", lakeTau:1.2, troph:"meso", elev:510, pm10:10.1, pm25:7.5}},
+    v:{precip:1100, infil:40, pH:6.5, oc:2, fe:4, pstat:"normal", drain:"well", rhob:1.3, theta:0.3, bg:{As:8,Hg:0.1,Pb:30,Cd:0.25,Cu:20,Zn:64,Ni:27,Cr:30},
+       aq:"porous", wt:8, K:2e-3, grad:0.003, thick:15, ne:0.2, gwpH:7.4, redox:"oxic", aqFe:0.5, aqOC:0.1, bgGw:{As:0.5,Hg:0.005,Pb:0.3,Cd:0.01,Cu:0.5,Zn:1,Ni:0.5,Cr:0.3},
+       Q:10, ssc:20, bgRiv:{As:0.8,Hg:0.002,Pb:0.2,Cd:0.01,Cu:1,Zn:2,Ni:0.5,Cr:0.2}, lakeO2:"seasonal", doc:3, lpH:8.2, so4:"mod", wet:"some", lakeTau:1.2, troph:"meso", elev:510, pm10:10.1, pm25:7.5}},
   jura:{label:"Jura karst", note:"Jura: clay- and humus-rich soils over karst limestone; thick unsaturated zone but fast conduit flow.",
-    v:{precip:1450, infil:60, pH:6.8, oc:4, fe:6, pstat:"normal", drain:"well", rhob:1.1, theta:0.35, bg:{As:12,Hg:0.15,Pb:40},
-       aq:"karst", wt:30, K:5e-3, grad:0.01, thick:30, ne:0.02, gwpH:7.4, redox:"oxic", aqFe:0.2, aqOC:0.05, bgGw:{As:0.3,Hg:0.005,Pb:0.5},
-       Q:5, ssc:10, bgRiv:{As:0.5,Hg:0.002,Pb:0.3}, lakeO2:"oxic", doc:3, lpH:8, so4:"low", wet:"some", lakeTau:8.2, troph:"oligo", elev:1030, pm10:11.9, pm25:7.5}},
+    v:{precip:1450, infil:60, pH:6.8, oc:4, fe:6, pstat:"normal", drain:"well", rhob:1.1, theta:0.35, bg:{As:12,Hg:0.15,Pb:40,Cd:0.6,Cu:20,Zn:90,Ni:40,Cr:45},
+       aq:"karst", wt:30, K:5e-3, grad:0.01, thick:30, ne:0.02, gwpH:7.4, redox:"oxic", aqFe:0.2, aqOC:0.05, bgGw:{As:0.3,Hg:0.005,Pb:0.5,Cd:0.03,Cu:0.3,Zn:1,Ni:0.3,Cr:0.2},
+       Q:5, ssc:10, bgRiv:{As:0.5,Hg:0.002,Pb:0.3,Cd:0.01,Cu:0.8,Zn:2,Ni:0.4,Cr:0.2}, lakeO2:"oxic", doc:3, lpH:8, so4:"low", wet:"some", lakeTau:8.2, troph:"oligo", elev:1030, pm10:11.9, pm25:7.5}},
   ticino:{label:"Ticino crystalline valley", note:"Ticino: acidic soils on gneiss with naturally high As, a fractured-rock aquifer and a deep lake with permanent bottom-water anoxia, as in the northern basin of Lake Lugano.",
-    v:{precip:1560, infil:40, pH:5.0, oc:4, fe:6, pstat:"normal", drain:"well", rhob:1.1, theta:0.3, bg:{As:25,Hg:0.1,Pb:35},
-       aq:"fractured", wt:5, K:1e-6, grad:0.05, thick:20, ne:0.01, gwpH:6.8, redox:"oxic", aqFe:1, aqOC:0.05, bgGw:{As:3,Hg:0.005,Pb:0.2},
-       Q:15, ssc:30, bgRiv:{As:2,Hg:0.002,Pb:0.1}, lakeO2:"perm", doc:2, lpH:7.8, so4:"low", wet:"none", lakeTau:11.9, troph:"eu", elev:650, pm10:9.7, pm25:7.6}}
+    v:{precip:1560, infil:40, pH:5.0, oc:4, fe:6, pstat:"normal", drain:"well", rhob:1.1, theta:0.3, bg:{As:25,Hg:0.1,Pb:35,Cd:0.2,Cu:25,Zn:70,Ni:20,Cr:30},
+       aq:"fractured", wt:5, K:1e-6, grad:0.05, thick:20, ne:0.01, gwpH:6.8, redox:"oxic", aqFe:1, aqOC:0.05, bgGw:{As:3,Hg:0.005,Pb:0.2,Cd:0.02,Cu:0.5,Zn:3,Ni:0.5,Cr:0.2},
+       Q:15, ssc:30, bgRiv:{As:2,Hg:0.002,Pb:0.1,Cd:0.01,Cu:1,Zn:2,Ni:0.5,Cr:0.2}, lakeO2:"perm", doc:2, lpH:7.8, so4:"low", wet:"none", lakeTau:11.9, troph:"eu", elev:650, pm10:9.7, pm25:7.6}}
 };
 const BASE = {preset:"plateau", medium:"soil", form:"", pattern:"continuous", amount:10, duration:20, horizon:100, reactive:100,
   area:1000, footprint:10, fdep:"", gwWidth:50, gwThick:5, wellDist:200, depthMix:20, bgReactive:20, loss:0,
@@ -801,20 +1395,34 @@ const BASE = {preset:"plateau", medium:"soil", form:"", pattern:"continuous", am
   rlOn:"off", satDays:"", o2In:8, no3In:15, so4In:30, docIn:1, orgType:"none", orgHc:0, orgCod:0, docSrc:0, aqMn:0.2,
   wcT:"", wcCa:"", wcMg:"", wcNa:"", wcK:"", wcCl:"", wcAlk:"", wcFe:"", wcMn:"", wcH2S:"", wcEh:"",
   stackH:30, windU:2.5, windFrom:"", windShare:40, pGas0:"", pRgm:"", pFine:"", pCoarse:"", pLarge:"", forestShare:"", sealedShare:"", drainSys:"urban", resusp:"",
-  snowDays:"", snowReem:50, snowRun:30, hgSoilF:10, bgDep:{As:"", Hg:"", Pb:""}, bgAir:{As:"", Hg:"", Pb:""},
+  snowDays:"", snowReem:50, snowRun:30, hgSoilF:10, bgDep:{As:"", Hg:"", Pb:"", Cd:"", Cu:"", Zn:"", Ni:"", Cr:""}, bgAir:{As:"", Hg:"", Pb:"", Cd:"", Cu:"", Zn:"", Ni:"", Cr:""},
   roadL:1000, aadt:15000, hgv:6, roadEra:"today", efRoad:"", roadDir:"90", glArea:5, glLoss:1.4, glConc:{As:0.1, Hg:0.01, Pb:2}, glShare:20};
 const EXAMPLES = {
   As:{short:"mine-dump seepage", preset:"ticino", v:{medium:"gw", form:"asV", amount:0.01, horizon:100, gwWidth:50, gwThick:10, wellDist:200, land:"agri", drink:"yes", fish:"none"}},
   Hg:{short:"Visp garden", preset:"visp", v:{medium:"soil", form:"hgsed", pattern:"pulse", amount:0.5, horizon:100, area:200, depthMix:30, land:"garden", drink:"no", fish:"monthly", reactive:50}},
-  Pb:{short:"shooting range", preset:"plateau", v:{medium:"soil", form:"pbm", pattern:"continuous", amount:400, duration:50, horizon:100, area:500, depthMix:50, land:"agri", drink:"yes", fish:"none", reactive:10}}
+  Pb:{short:"shooting range", preset:"plateau", v:{medium:"soil", form:"pbm", pattern:"continuous", amount:400, duration:50, horizon:100, area:500, depthMix:50, land:"agri", drink:"yes", fish:"none", reactive:10}},
+  Cd:{short:"fertilised field", preset:"jura", v:{medium:"soil", form:"cdfert", pattern:"continuous", amount:0.02, duration:100, horizon:100, area:100000, depthMix:20, land:"agri", drink:"yes", fish:"none"}},
+  Cu:{short:"vineyard", preset:"visp", v:{medium:"soil", form:"cufung", pattern:"continuous", amount:2, duration:100, horizon:100, area:10000, depthMix:20, land:"agri", drink:"yes", fish:"none", slope:15}},
+  Zn:{short:"infiltration swale", preset:"plateau", v:{medium:"soil", form:"zn2", pattern:"continuous", amount:2, duration:30, horizon:50, area:200, depthMix:30, land:"ind", drink:"yes", fish:"none"}},
+  Ni:{short:"plating-shop spill", preset:"plateau", v:{medium:"soil", form:"ni2", pattern:"pulse", amount:20, horizon:50, area:100, depthMix:20, land:"ind", drink:"yes", fish:"none"}},
+  Cr:{short:"chromate plume", preset:"plateau", v:{medium:"gw", form:"cr6", amount:1, horizon:50, gwWidth:30, gwThick:5, wellDist:300, land:"ind", drink:"yes", fish:"none"}}
 };
 const TABS = [{id:"rel", label:"Release"},{id:"site", label:"Site & climate"},{id:"air", label:"Air & surface"},{id:"soil", label:"Soil"},{id:"gw", label:"Groundwater"},{id:"sw", label:"River & lake"},{id:"bud", label:"Budget & floods"},{id:"redox", label:"Redox (optional)"},{id:"water", label:"Water analysis (optional)"},{id:"exp", label:"Exposure"}];
 const soilLike = I => I.medium === "soil" || I.medium === "air" || I.medium === "road";
+// a single event is possible for releases to soil and air; the other releases are steady by construction
+const isPulse = I => (I.medium === "soil" || I.medium === "air") && I.pattern === "pulse";
+const PATTERN_FIXED = {
+  gw:"Continuous only: a release straight into groundwater is calculated as a steady inflow to the aquifer. For a one-off spill, choose Soil surface (single event), or spread the spilled mass over the years it keeps leaking.",
+  river:"Continuous only: a river release is calculated as a steady load at average discharge. For a one-off spill, spread its mass over a year or enter it for the storm or snowmelt condition.",
+  road:"Continuous only: calculated from the daily traffic.",
+  glacier:"Continuous only: calculated from the yearly ice loss."
+};
 const FIELDS = [
-  {k:"medium", tab:"rel", label:"Released to", type:"select", structural:true, opts:m => [["soil","Soil surface"],["air","Air (stack or chimney)"]].concat(m === "Pb" ? [["road","Road traffic"]] : [], [["gw","Groundwater, directly"],["river","River"],["glacier","Glacier melt (old deposition)"]]), help:"Where the metal first enters the environment. Road traffic and glacier melt calculate the release from their own inputs."},
+  {k:"medium", tab:"rel", label:"Released to", type:"select", structural:true, opts:m => [["soil","Soil surface"],["air","Air (stack or chimney)"]].concat(m === "Pb" ? [["road","Road traffic"]] : [], [["gw","Groundwater, directly"],["river","River"]], GLACIER_M.has(m) ? [["glacier","Glacier melt (old deposition)"]] : []), help:m => "Where the metal first enters the environment. Road traffic and glacier melt calculate the release from their own inputs." + (m === "Pb" ? "" : GLACIER_M.has(m) ? " Road traffic is available for lead only." : " Road traffic is available for lead only, glacier melt for arsenic, mercury and lead, where Alpine ice values exist.")},
   {k:"form", tab:"rel", label:"Chemical form", type:"select", structural:true, opts:m => FORMS[m].map(f => [f.id, f.label]), show:I => I.medium !== "glacier", help:"Sets the default reactive fraction and, for air, the particle sizes."},
-  {k:"pattern", tab:"rel", label:"Release pattern", type:"select", structural:true, opts:[["continuous","Continuous"],["pulse","Single event"]], show:I => I.medium === "soil" || I.medium === "air"},
-  {k:"amount", tab:"rel", label:I => soilLike(I) && I.pattern === "pulse" ? "Mass released" : "Release rate", unit:I => soilLike(I) && I.pattern === "pulse" ? "kg" : "kg/yr", gt:0, show:I => I.medium !== "road" && I.medium !== "glacier", help:I => soilLike(I) ? "" : "Groundwater and river releases are treated as continuous."},
+  {k:"pattern", tab:"rel", label:"Release pattern", type:"select", structural:true, opts:[["continuous","Continuous"],["pulse","Single event"]], fixed:I => PATTERN_FIXED[I.medium] || null,
+    help:I => PATTERN_FIXED[I.medium] || (I.pattern === "pulse" ? "The whole mass arrives at once at year 0." : "A steady release every year for the duration below.")},
+  {k:"amount", tab:"rel", label:I => isPulse(I) ? "Mass released" : "Release rate", unit:I => isPulse(I) ? "kg" : "kg/yr", gt:0, show:I => I.medium !== "road" && I.medium !== "glacier"},
   {k:"roadL", tab:"rel", label:"Road length", unit:"m", gt:0, max:1e6, show:I => I.medium === "road"},
   {k:"aadt", tab:"rel", label:"Traffic", unit:"vehicles/day", min:0, max:300000, show:I => I.medium === "road", help:"Average daily traffic. Swiss counts: ASTRA and cantonal traffic counting stations.", src:"ASTRA traffic counts"},
   {k:"hgv", tab:"rel", label:"Heavy vehicles", unit:"%", min:0, max:100, show:I => I.medium === "road", help:"Each heavy vehicle counts as four cars (assumption)."},
@@ -825,7 +1433,7 @@ const FIELDS = [
   {k:"glLoss", tab:"rel", label:"Ice loss", unit:"m water/yr", min:0, max:10, show:I => I.medium === "glacier", help:"Average thinning in metres of water. Swiss glaciers lost 1.1–1.7 m a year in 2017–2025 (GLAMOS)."},
   {k:"glConc", tab:"rel", perMetal:true, label:() => `${S.metal} in ice from 1950–1990`, unit:"ng/g", min:0, max:1000, show:I => I.medium === "glacier", help:() => ({Pb:"Colle Gnifetti ice core: 1.0–2.7 ng/g as decade means for 1960–1990, peak 5.6 in 1972 (Sigl et al. 2018).", Hg:"Assumption: total Hg in Alpine ice of that period is not well known.", As:"Assumption: arsenic in Alpine ice is not well known."})[S.metal]},
   {k:"glShare", tab:"rel", label:"Share of meltwater from that ice", unit:"%", min:0, max:100, show:I => I.medium === "glacier", help:"The ice of 1950–1990 is only part of what melts each year. Assumption: 20%."},
-  {k:"duration", tab:"rel", label:"Duration of release", unit:"years", gt:0, max:2000, show:I => soilLike(I) && I.pattern === "continuous"},
+  {k:"duration", tab:"rel", label:"Duration of release", unit:"years", gt:0, max:2000, show:I => soilLike(I) && !isPulse(I)},
   {k:"horizon", tab:"rel", label:"Assessment horizon", unit:"years", gt:0, max:100000},
   {k:"reactive", tab:"rel", label:"Reactive fraction", unit:"%", min:0, max:100, show:soilLike, help:"Share that can dissolve and sorb: salts 100%, metallic Pb about 10%, sulfides 1–5%."},
   {k:"area", tab:"rel", label:"Affected area", unit:"m²", gt:0, show:I => I.medium === "soil"},
@@ -859,8 +1467,8 @@ const FIELDS = [
   {k:"snowReem", tab:"air", label:"Hg re-emitted from snow", unit:"%", min:0, max:100, show:I => I.medium === "air" && S.metal === "Hg", help:"Sunlight turns Hg in snow back into Hg⁰ gas before melt: about 50–60% at Swiss latitudes (model, Durnford et al. 2012)."},
   {k:"snowRun", tab:"air", label:"Snowmelt running off to streams", unit:"%", min:0, max:100, show:I => I.medium === "air", help:"Share of what was stored in the snowpack that leaves with surface runoff at melt; the rest enters the soil. Assumption: 30%."},
   {k:"hgSoilF", tab:"air", label:"Hg⁰ emission from soil", unit:"ng/(m²·h) per mg/kg", min:0, max:1000, show:I => soilLike(I) && S.metal === "Hg", help:"Background soils emit 1–2 ng/(m²·h); contaminated soils 20–800 (Zhu et al. 2016; Floreani et al. 2023). Default 10 per mg/kg; ×10 for elemental Hg, ×0.1 for cinnabar."},
-  {k:"bgDep", tab:"air", perMetal:true, label:() => `Background ${S.metal} deposition (optional)`, unit:"µg/(m²·d)", min:0, max:1000, optional:true, show:I => I.medium === "air" || I.medium === "road", help:() => S.metal === "Pb" ? "Empty: the nearest suitable NABEL station (2024)." : S.metal === "Hg" ? "Empty: about 5 µg/m²/yr wet deposition." : "No Swiss measurement is published for arsenic."},
-  {k:"bgAir", tab:"air", perMetal:true, label:() => `Background ${S.metal} in air (optional)`, unit:"ng/m³", min:0, max:10000, optional:true, show:I => I.medium === "air" || I.medium === "road", help:() => S.metal === "Pb" ? "Empty: Pb in PM10 at the nearest NABEL station (2024)." : S.metal === "Hg" ? "Empty: gaseous Hg at the nearest NABEL site (Osterwalder et al. 2024)." : "No Swiss measurement is published for arsenic."},
+  {k:"bgDep", tab:"air", perMetal:true, label:() => `Background ${S.metal} deposition (optional)`, unit:"µg/(m²·d)", min:0, max:1000, optional:true, show:I => I.medium === "air" || I.medium === "road", help:() => ({Pb:"Empty: the nearest suitable NABEL station (2024).", Hg:"Empty: about 5 µg/m²/yr wet deposition.", Cd:"Empty: 0.03 µg/(m²·d), the low end of the NABEL 2023 range (0.03–0.64).", Zn:"Empty: 10 µg/(m²·d), rural NABEL stations 2023 (cities up to 100)."})[S.metal] || `No Swiss background value is used for ${METALS[S.metal].name.toLowerCase()}: enter a measured one.`},
+  {k:"bgAir", tab:"air", perMetal:true, label:() => `Background ${S.metal} in air (optional)`, unit:"ng/m³", min:0, max:10000, optional:true, show:I => I.medium === "air" || I.medium === "road", help:() => ({Pb:"Empty: Pb in PM10 at the nearest NABEL station (2024).", Hg:"Empty: gaseous Hg at the nearest NABEL site (Osterwalder et al. 2024).", Cd:"Empty: 0.05 ng/m³; NABEL measured less than that in PM10 in 2023."})[S.metal] || `No Swiss background value is used for ${METALS[S.metal].name.toLowerCase()}: enter a measured one.`},
   {k:"pH", tab:"soil", label:"Soil pH", unit:"–", min:2, max:11, src:"NABO, cantonal soil surveys"},
   {k:"oc", tab:"soil", label:"Organic carbon", unit:"%", min:0.01, max:60},
   {k:"fe", tab:"soil", label:"Oxalate-extractable Fe", unit:"g/kg", min:0, max:200, help:"Main sink for arsenic."},
@@ -988,7 +1596,7 @@ const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 const SUPS = {"-":"⁻","0":"⁰","1":"¹","2":"²","3":"³","4":"⁴","5":"⁵","6":"⁶","7":"⁷","8":"⁸","9":"⁹"};
 // results are screening estimates, often uncertain by a factor of 10: show two significant figures, not more
 const NF = new Intl.NumberFormat("en-US", {maximumSignificantDigits:2});
-const APP_VERSION = "0.13.0", APP_DATE = "2026-11-03";
+const APP_VERSION = "0.14.0", APP_DATE = "2026-11-25";
 function fmt(v){
   if(v == null || isNaN(v)) return "–";
   if(!isFinite(v)) return "∞";
@@ -1020,7 +1628,7 @@ function loadExample(refresh){
   const f = formOf(); INP.form = f.id; if(ex.v.reactive == null) INP.reactive = f.fr;
   if(refresh !== false){ advMetalChanged(); refreshAll(); saveAdv(); }
 }
-const KD_SIG = {As:0.8, Pb:0.7, Hg:0.7};
+const KD_SIG = {As:0.8, Pb:0.7, Hg:0.7, Cd:0.8, Cu:0.7, Zn:0.8, Ni:0.7, Cr:0.8};
 function kdFn(m, p){
   let lg;
   if(m === "As"){
@@ -1035,6 +1643,17 @@ function kdFn(m, p){
     lg = 1.99 + 0.42 * p.pH;
     if(p.redox === "sulfidic") lg += 0.5;
     lg = clamp(lg, 0.7, 5.0);
+  } else if(SAUVE[m]){
+    // published regressions on pH and organic carbon (Sauvé et al. 2000), kept inside the Allison & Allison (2005) soil range
+    const [a, b, c, lo, hi] = SAUVE[m];
+    lg = a * p.pH + b * Math.log10(Math.max(p.oc, 0.05)) + c;
+    if(p.redox === "sulfidic") lg += 0.5;
+    lg = clamp(lg, lo, hi);
+  } else if(m === "Cr"){
+    // chromate Cr(VI) sorbs weakly (more on iron oxides and at low pH); Cr(III) sorbs and precipitates strongly.
+    // Effective Kd of the mix: dissolved = f6/Kd6 + (1 − f6)/Kd3 per unit of total Cr
+    const f6 = crF6(p);
+    return 1 / (f6 / crKd6(p) + (1 - f6) / CR_KD3);
   } else {
     // Hg(II) bound to organic matter: Kd = Koc x foc with log Koc 5.5 (gives the Allison & Allison median, log 3.8, at 2% OC)
     lg = 5.5 + Math.log10(Math.max(p.oc, 0.02) / 100);
@@ -1043,6 +1662,21 @@ function kdFn(m, p){
   }
   return Math.pow(10, lg);
 }
+// Sauvé et al. (2000): log Kd = a·pH + b·log(OC %) + c; clamp to the Allison & Allison (2005) soil min–max
+const SAUVE = {Cd:[0.48, 0.82, -0.65, 0.1, 5.0], Cu:[0.21, 0.51, 1.75, 0.1, 3.6], Zn:[0.62, 0, -0.97, -1.0, 5.0], Ni:[0.72, 0, -1.75, 1.0, 3.8]};
+// chromium: Cr(III) Kd = Allison & Allison soil median (log 3.9); Cr(VI) Kd from iron oxides and pH (developer assumption,
+// anchored to the Allison & Allison median, log 1.1, at 5 g/kg Fe oxides and pH 7)
+const CR_KD3 = Math.pow(10, 3.9);
+const crKd6 = p => Math.pow(10, clamp(1.1 + 0.5 * Math.log10(Math.max(p.fe == null ? 5 : p.fe, 0.05) / 5) - 0.2 * ((p.pH == null ? 7 : p.pH) - 7), -0.7, 3.3));
+// share of Cr present as Cr(VI): Fe(II), sulfide and organic matter reduce chromate; Mn oxides oxidise a little Cr(III)
+const CR_F6_REDOX = {oxic:1, suboxic:0.5, anoxic:0.05, sulfidic:0.01}, CR_F6_DRAIN = {well:0.8, periodic:0.3, perm:0.05};
+function crF6(p){
+  const v = p.redox ? CR_F6_REDOX[p.redox] : CR_F6_DRAIN[p.drain || "well"];
+  return p.sp === "III" ? (v == null ? 1 : v) * 0.01 : (v == null ? 1 : v);      // released as Cr(III): about 1% oxidised in oxic conditions (assumption)
+}
+// Cr(OH)3 keeps dissolved Cr(III) below about 50 µg/L at pH 5–12 (Palmer & Puls 1994); far more soluble in acidic water
+const crCap = pH => pH >= 5 ? 50 : Math.min(1e5, 50 * Math.pow(10, 1.5 * (5 - pH)));
+const cr6Of = (I, m, added) => m === "Cr" ? Math.max(0, added) * crF6({sp:(FORMS.Cr.find(f => f.id === I.form) || {}).sp, drain:I.drain}) : 0;
 // Pb solubility in soil solution: about 0.3 mg/L (carbonate control) at pH 7-9, about 10 mg/L (sulfate control) in acidic soil
 function pbCap(pH){
   if(pH > 9.5) return 1e5;
@@ -1082,13 +1716,17 @@ function methylIndex(I){
   s += {low:0, mod:1, high:0.5}[I.so4];
   return Math.min(10, s);
 }
-function soilStatus(m, Cs, land){
-  const rem = land === "garden" ? LIM.remGarden[m] : land === "agri" ? LIM.remAgri[m] : null;
-  const trig = (land === "agri" || land === "garden") ? LIM.trigger[m] : null;
+function soilStatus(m, Cs, land, cr6){
+  let rem = land === "garden" ? LIM.remGarden[m] : land === "agri" ? LIM.remAgri[m] : null;
+  const trig = trigOf(m, land);
   const guide = LIM.guide[m];
   const useTxt = land === "garden" ? "gardens and playgrounds" : "agriculture";
+  if(m === "Cr" && rem){
+    if(cr6 > rem) return ["crit","Exceeds remediation value", `AltlV Annex 3 remediation value for Cr(VI) in ${useTxt}: ${rem} mg/kg; Cr(VI) here about ${fmt(cr6)} mg/kg`];
+    rem = null;
+  }
   if(rem && Cs > rem) return ["crit","Exceeds remediation value", `AltlV Annex 3 remediation value for ${useTxt}: ${rem} mg/kg`];
-  if(trig && Cs > trig) return ["warn","Above trigger value", `VBBo trigger value for food and fodder crops: ${trig} mg/kg`];
+  if(trig && Cs > trig) return ["warn","Above trigger value", `VBBo trigger value for ${m === "Cu" ? "fodder crops" : land === "garden" ? "food crops" : "food and fodder crops"}: ${trig} mg/kg`];
   if(guide && Cs > guide) return ["warn","Above guide value", `VBBo guide value: ${guide} mg/kg`];
   const refs = [guide ? `guide ${guide}` : null, trig ? `trigger ${trig}` : null, rem ? `remediation ${rem}` : null].filter(Boolean);
   if(!refs.length) return ["info","No Swiss value", m === "As" ? "No VBBo value for As; the AltlV value (50 mg/kg) covers only gardens and playgrounds" : "No Swiss soil value for this land use"];
@@ -1108,7 +1746,7 @@ function core(I, m, u){
   const kdSub = (kdUser || kdFn(m, {pH:I.pH, oc:I.oc * 0.3, fe:I.fe, pHigh, sp, drain:I.drain})) * u.kd;
   o.kdAqCalc = kdFn(m, {pH:I.gwpH, oc:I.aqOC, fe:I.aqFe, sp, redox:I.redox});
   const kdAq = (num(I.kdAq) || o.kdAqCalc) * u.kdAq;
-  const kdSS = (num(I.kdSS) || KDSS[m]) * u.kdSS;
+  const kdSS = (num(I.kdSS) || kdSSOf(m, sp)) * u.kdSS;
   let Q = I.Q, ssc = I.ssc;
   if(S.water === "melt"){ Q *= 2; ssc *= 3; } else if(S.water === "storm"){ Q *= 5; ssc *= 10; }
   const fd = 1 / (1 + kdSS * ssc * 1e-6);
@@ -1136,7 +1774,7 @@ function core(I, m, u){
     o.kEv = kEv; o.kRs = kRs;
     let J = 0, Speak, SH, tPeak;
     const acc = (J0, kk, t) => kk > 0 ? J0 / kk * (1 - Math.exp(-kk * t)) : J0 * t;
-    if(I.pattern === "pulse"){
+    if(isPulse(I)){
       const S0 = I.amount * 1e6 * share / A; Speak = S0; tPeak = 0; SH = S0 * Math.exp(-k * H);
     } else {
       J = I.amount * 1e6 * share / A; tPeak = Math.min(I.duration, H); Speak = acc(J, k, tPeak);
@@ -1144,8 +1782,13 @@ function core(I, m, u){
     }
     const bg = I.bg[m] * u.bg, dC = Speak / Ms, dCH = SH / Ms, Ctot = bg + dC;
     const den = Kd + I.theta / I.rhob;
-    let cwAdd = fr * dC / den * 1000, cwBg = I.bgReactive / 100 * bg / den * 1000, capped = false, cap = null;
-    if(m === "Pb"){ cap = pbCap(I.pH); if(cwAdd + cwBg > cap){ const s = cap / (cwAdd + cwBg); cwAdd *= s; cwBg *= s; capped = true; } }
+    // background chromium is Cr(III) in minerals and on organic matter, whatever form is released
+    const denBg = m === "Cr" ? CR_KD3 * u.kd + I.theta / I.rhob : den;
+    let cwAdd = fr * dC / den * 1000, cwBg = I.bgReactive / 100 * bg / denBg * 1000, capped = false, cap = null;
+    if(m === "Pb") cap = pbCap(I.pH);
+    else if(m === "Cr" && sp === "III") cap = crCap(I.pH);
+    if(cap != null && cwAdd + cwBg > cap){ const s = cap / (cwAdd + cwBg); cwAdd *= s; cwBg *= s; capped = true; }
+    o.cr6 = cr6Of(I, m, dC);
     const cw = cwAdd + cwBg;
     const leachKg = q * cwAdd * A / 1e6;
     const Lz = Math.max(0, I.wt - d), Rv = 1 + I.rhob * kdSub / I.theta, tArr = Lz * I.theta * Rv / q;
@@ -1154,14 +1797,15 @@ function core(I, m, u){
     const erosKg = Ctot * E * I.er * A * (I.sdr / 100) * 1e-6;
     const rivTot = erosKg * 1e9 / (Q * YEAR_S * 1000);
     const rivD = I.bgRiv[m] * u.bg + rivTot * fd;
-    const dose = I.land === "garden" ? Ctot * I.ir * I.rba / 100 / I.bw : NaN;
-    if(air){ o.depMax = (I.pattern === "pulse" ? I.amount * 1e6 : I.amount * 1e9 / 365) * o.depMaxF; }
+    // child soil ingestion, µg/kg bw per day; for chromium released as Cr(VI), the Cr(VI) part of the added metal
+    const dose = I.land === "garden" ? (m === "Cr" && sp === "VI" ? o.cr6 : Ctot) * I.ir * I.rba / 100 / I.bw : NaN;
+    if(air){ o.depMax = (isPulse(I) ? I.amount * 1e6 : I.amount * 1e9 / 365) * o.depMaxF; }
     Object.assign(o, {A, share, d, Ms, fr, E, kE, kL, kO, k, J, Speak, SH, tPeak, bg, dC, dCH, Ctot, cwAdd, cwBg, cw, cap, capped,
       leachKg, Lz, Rv, tArr, D, cgw, erosKg, rivTot, rivD, dose, half: k > 0 ? Math.LN2 / k : Infinity, dep: J * 1000 / 365});
     if(m === "Pb" && I.form === "pbm" && I.medium === "soil"){
       const kdSb = I.kdSb * u.kd, frSb = Math.min(1, I.sbMobile / 100 * u.react), rel = I.sbShare / 100;
       const kLs = frSb * q / (d * (I.theta + I.rhob * kdSb)), ks = kLs + kO + kE;
-      const Ss = I.pattern === "pulse" ? I.amount * 1e6 * share * rel / A : acc(J * rel, ks, Math.min(I.duration, H));
+      const Ss = isPulse(I) ? I.amount * 1e6 * share * rel / A : acc(J * rel, ks, Math.min(I.duration, H));
       const sbC = Ss / Ms;
       let sbCw = frSb * sbC / (kdSb + I.theta / I.rhob) * 1000, sbCapped = false;
       if(sbCw > SB_CAP){ sbCw = SB_CAP; sbCapped = true; }
@@ -1204,8 +1848,8 @@ function stat(arr, f, lim){
   return {p5:qq(0.05), p50:qq(0.5), p95:qq(0.95), pex: lim != null ? v.filter(x => x > lim).length / v.length : null, lim};
 }
 function soilLimFor(m, land){
-  const rem = land === "garden" ? LIM.remGarden[m] : land === "agri" ? LIM.remAgri[m] : null;
-  return rem || ((land === "agri" || land === "garden") ? LIM.trigger[m] : null) || LIM.guide[m] || null;
+  const rem = m === "Cr" ? null : land === "garden" ? LIM.remGarden[m] : land === "agri" ? LIM.remAgri[m] : null;   // Cr: the AltlV value is for Cr(VI) only
+  return rem || trigOf(m, land) || LIM.guide[m] || null;
 }
 
 /* ================= AIR AND LAND SURFACE =================
@@ -1223,7 +1867,12 @@ const AIR_CLS = [
 // default mass split of an emission by chemical form, % of [Hg⁰ gas, Hg(II) gas, fine, coarse, large]
 const AIR_SPLIT = {asV:[0, 0, 70, 25, 5], asIII:[0, 0, 70, 25, 5], as2o3:[0, 0, 80, 15, 5], aspy:[0, 0, 10, 40, 50], cca:[0, 0, 70, 25, 5],
   hg2:[20, 60, 20, 0, 0], hgsed:[0, 0, 10, 40, 50], hg0:[100, 0, 0, 0, 0], hgs:[0, 0, 10, 40, 50],
-  pb2:[0, 0, 70, 25, 5], pbo:[0, 0, 60, 30, 10], pbm:[0, 0, 5, 25, 70], pbash:[0, 0, 90, 10, 0], pbs:[0, 0, 10, 40, 50]};
+  pb2:[0, 0, 70, 25, 5], pbo:[0, 0, 60, 30, 10], pbm:[0, 0, 5, 25, 70], pbash:[0, 0, 90, 10, 0], pbs:[0, 0, 10, 40, 50],
+  cd2:[0, 0, 70, 25, 5], cdfert:[0, 0, 10, 40, 50], cdash:[0, 0, 90, 10, 0], cdsulf:[0, 0, 10, 40, 50],
+  cu2:[0, 0, 70, 25, 5], cufung:[0, 0, 30, 50, 20], cuman:[0, 0, 10, 40, 50], cuwear:[0, 0, 20, 60, 20], cusulf:[0, 0, 10, 40, 50],
+  zn2:[0, 0, 70, 25, 5], znman:[0, 0, 10, 40, 50], zntyre:[0, 0, 10, 40, 50], znash:[0, 0, 90, 10, 0], znsulf:[0, 0, 10, 40, 50],
+  ni2:[0, 0, 70, 25, 5], niash:[0, 0, 90, 10, 0], nimet:[0, 0, 30, 50, 20], nigeo:[0, 0, 10, 40, 50],
+  cr6:[0, 0, 80, 15, 5], crore:[0, 0, 10, 40, 50], cr3:[0, 0, 70, 25, 5], crslag:[0, 0, 10, 40, 50], crgeo:[0, 0, 10, 40, 50]};
 const SPLIT_KEYS = ["pGas0", "pRgm", "pFine", "pCoarse", "pLarge"];
 const AIR_HMIX = 700, R_FAR = 50000, RESUSP_EXPORT = 0.3, ROAD_STRIP = 5, ROAD_NEAR = 0.75, ROAD_RESUSP = 0.3;
 const airSplitDef = I => AIR_SPLIT[I.form] || [0, 0, 60, 30, 10];
@@ -1411,12 +2060,16 @@ function nabelFor(I, key){
 // background deposition (µg/m²/d) and air (ng/m³) for the metal, with where it comes from
 function bgAirOf(I, m){
   const own = v => v !== "" && v != null && isFinite(Number(v));
-  const dep = own(I.bgDep[m]) ? {v:num(I.bgDep[m]), src:"your value"} : m === "Pb" ? (n => n ? {v:n.st.pbDep, src:`NABEL ${n.st.n} (${n.st.t}), 2024`} : null)(nabelFor(I, "pbDep")) : m === "Hg" ? {v:HG_WETDEP, src:"wet deposition about 5 µg/m²/yr (Schauinsland and German background stations)"} : null;
-  const air = own(I.bgAir[m]) ? {v:num(I.bgAir[m]), src:"your value"} : m === "Pb" ? (n => n ? {v:n.st.pbPM, src:`NABEL ${n.st.n}, Pb in PM10, 2024`} : null)(nabelFor(I, "pbPM")) : m === "Hg" ? (n => n ? {v:n.st.hg, src:`gaseous Hg at NABEL ${n.st.n} (Osterwalder et al. 2024)`} : null)(nabelFor(I, "hg")) : null;
+  const dep = own(I.bgDep[m]) ? {v:num(I.bgDep[m]), src:"your value"} : m === "Pb" ? (n => n ? {v:n.st.pbDep, src:`NABEL ${n.st.n} (${n.st.t}), 2024`} : null)(nabelFor(I, "pbDep")) : m === "Hg" ? {v:HG_WETDEP, src:"wet deposition about 5 µg/m²/yr (Schauinsland and German background stations)"} : BG_DEP[m] || null;
+  const air = own(I.bgAir[m]) ? {v:num(I.bgAir[m]), src:"your value"} : m === "Pb" ? (n => n ? {v:n.st.pbPM, src:`NABEL ${n.st.n}, Pb in PM10, 2024`} : null)(nabelFor(I, "pbPM")) : m === "Hg" ? (n => n ? {v:n.st.hg, src:`gaseous Hg at NABEL ${n.st.n} (Osterwalder et al. 2024)`} : null)(nabelFor(I, "hg")) : BG_AIR[m] || null;
   return {dep, air};
 }
 // air limits for comparison: LRV Pb in PM10; EU target value for As in PM10; WHO guideline for inorganic Hg vapour
-const AIR_LIM = {Pb:{v:500, txt:"LRV limit for Pb in PM10: 500 ng/m³, annual mean"}, As:{v:6, txt:"EU target value for As in PM10: 6 ng/m³ (no Swiss limit)"}, Hg:{v:1000, txt:"WHO guideline for inorganic Hg vapour: 1 µg/m³, annual mean (no Swiss limit)"}};
+// Swiss background without station data: NABEL 2023 ranges (Cd deposition 0.03–0.64, Zn 10–100 µg/(m²·d); Cd in PM10 below 0.05 ng/m³)
+const BG_DEP = {Cd:{v:0.03, src:"NABEL 2023, low end of the station range 0.03–0.64"}, Zn:{v:10, src:"NABEL 2023, rural stations (cities up to 100)"}};
+const BG_AIR = {Cd:{v:0.05, src:"NABEL 2023: below 0.05 ng/m³ at the stations"}};
+const AIR_LIM = {Pb:{v:500, txt:"LRV limit for Pb in PM10: 500 ng/m³, annual mean"}, As:{v:6, txt:"EU target value for As in PM10: 6 ng/m³ (no Swiss limit)"},
+  Cd:{v:1.5, txt:"LRV limit for Cd in PM10: 1.5 ng/m³, annual mean"}, Ni:{v:20, txt:"EU target value for Ni in PM10: 20 ng/m³ (no Swiss limit)"}, Hg:{v:1000, txt:"WHO guideline for inorganic Hg vapour: 1 µg/m³, annual mean (no Swiss limit)"}};
 
 /* ---------- mass budget: where the released kilograms are after T years ---------- */
 const BUD = [
@@ -1473,7 +2126,7 @@ function budget(I, m, u, T, ev, snapT){
   const fast = soil ? (porous ? I.fastShare / 100 : 1) : 0;
   const tArr = soil ? o.tArr : 0, k = soil ? o.k : 0;
   const dA = Math.round(tArr / dt), dR = Math.round(tGR / dt);
-  const pulse = soil && I.pattern === "pulse";
+  const pulse = soil && isPulse(I);
   const gwIn = new Float64Array(n), evAt = new Map();
   ev.forEach(e => { const i = Math.min(n - 1, Math.floor(e.t / dt)); evAt.set(i, (evAt.get(i) || 0) + e.w); });
   const route = (load, flood) => {               // particles settle or pass on; returns the dissolved part
@@ -1589,6 +2242,38 @@ function sensitivity(item, R){
   }).filter(d => isFinite(d.rho)).sort((a, b) => Math.abs(b.rho) - Math.abs(a.rho));
 }
 
+// drinking-water limit text: lead 5 µg/L from the 2026 amendment, to be met by 1 February 2036 (10 µg/L until then)
+const tbdvTxt = m => `Drinking-water limit (TBDV) ${LIM.tbdv[m]} µg/L${m === "Pb" ? "; 10 µg/L still accepted until 31 January 2036" : m === "Cr" ? " total Cr" : ""}`;
+// reference text for the result rows (new metals in 0.14.0)
+const SOIL_BENCH = {
+  Cd:"Geochemical soil atlas: 80% of Swiss topsoils hold 0.10–0.62 mg/kg (median 0.24); soils on Jura limestone 0.3–2, locally about 20 mg/kg",
+  Cu:"Geochemical soil atlas: 80% of Swiss topsoils hold 7.7–35 mg/kg (median 18); vineyard soils up to 391 mg/kg (NABO), Ticino vineyards 35–900",
+  Zn:"Geochemical soil atlas: 80% of Swiss topsoils hold 35–106 mg/kg (median 64)",
+  Ni:"Geochemical soil atlas: 80% of Swiss topsoils hold 10–50 mg/kg (median 27); up to 928 mg/kg on serpentinite near Davos",
+  Cr:"Geochemical soil atlas: 80% of Swiss topsoils hold 14–52 mg/kg total Cr (median 30), nearly all Cr(III); up to 809 mg/kg on serpentinite near Davos"
+};
+const GW_BENCH = {
+  Cd:"NAQUA 2018: Cd above 0.05 µg/L at 29 of 524 stations",
+  Cu:"NAQUA 2018: Cu above 2 µg/L at 94 of 524 stations",
+  Zn:"NAQUA 2018: Zn above 5 µg/L at 145 of 524 stations; galvanised well fittings can add zinc to samples",
+  Ni:"NAQUA 2018: Ni above 5 µg/L at 5 of 524 stations and above 20 µg/L at one; elevated values are mostly natural",
+  Cr:"NAQUA 2018: Cr above 2 µg/L at 23 of 524 stations, mostly as Cr(VI) and largely natural in the Molasse between Lausanne and Bern"
+};
+// tolerable intakes for the child soil-ingestion dose, µg/kg bw per day
+const TDI_REF = {
+  Cd:() => ({v:2.5 / 7, k:"TWI", txt:"Cadmium TWI 2.5 µg/kg bw per week (EFSA 2009), here per day"}),
+  Cu:() => ({v:70, k:"ADI", txt:"Copper ADI 0.07 mg/kg bw per day from all sources (EFSA 2023)"}),
+  Zn:() => ({v:300, k:"RfD", txt:"Zinc oral reference dose 0.3 mg/kg bw per day (US EPA IRIS)"}),
+  Ni:() => ({v:13, k:"TDI", txt:"Nickel TDI 13 µg/kg bw per day (EFSA 2020)"}),
+  Cr:f => f.sp === "VI" ? {v:1.1, k:"TDI", txt:"Cr(VI) TDI 1.1 µg/kg bw per day (Food Safety Commission of Japan 2019: BMDL10 0.11 mg/kg bw per day for duodenal hyperplasia in mice ÷ 100). EFSA (2014) uses the same effect with a margin-of-exposure approach"}
+    : {v:300, k:"TDI", txt:"Cr(III) TDI 0.3 mg/kg bw per day (EFSA 2014)"}
+};
+function kdRefTxt(m, o, I, form){
+  const lg = Math.log10(o.Kd).toFixed(2);
+  if(SAUVE[m]){ const [a, b, c] = SAUVE[m]; return `log Kd = ${a}·pH${b ? ` + ${b}·log OC` : ""} ${c < 0 ? "−" : "+"} ${Math.abs(c)} (Sauvé et al. 2000), kept within ${KDRANGE[m]} L/kg → log Kd ${lg}`; }
+  if(m === "Cr"){ const f6 = crF6({sp:form.sp, drain:I.drain}); return `${fmtPct(f6)} as chromate Cr(VI) (Kd ${fmt(crKd6({fe:I.fe, pH:I.pH}))} L/kg from Fe oxides and pH), the rest Cr(III) (Kd ${fmt(CR_KD3)} L/kg) → log Kd ${lg}`; }
+  return ({Pb:`log Kd = 1.99 + 0.42·pH (Carlon et al. 2004) = ${lg}`, Hg:`Kd = Koc·foc, log Koc 5.5 → log Kd ${lg}`, As:`Semi-empirical (Fe oxides, pH, redox) → log Kd ${lg}; US EPA advises site-measured Kd for As`})[m];
+}
 function compute(){
   const m = S.metal, I = INP, rows = [], sugg = [];
   const form = formOf(), o = core(I, m, ONES), MC = monteCarlo(m);
@@ -1611,7 +2296,7 @@ function compute(){
     if(air){
       const sh = o.air, lv = LIM.lrvDep[m], bgA = bgAirOf(I, m), dirTxt = I.windFrom !== "" ? ` ${compass((Number(I.windFrom) + 180) % 360)} of the source` : "";
       const pct = x => fmtPct(x), within = `${pct(sh.loc * o.airScale)} of the release lands within the footprint (${pct(sh.dryLoc / Math.max(1e-12, sh.loc))} of it dry, ${pct(sh.wetLoc / Math.max(1e-12, sh.loc))} with rain)`;
-      if(I.pattern === "pulse"){
+      if(isPulse(I)){
         add({id:"dep", comp:["air"], label:"Deposited at the most exposed point", v:o.depMax, unit:"mg/m²", mc:st(x => x.depMax), status:"info", tag:"Info", ref:`${fmt(o.depX)} m${dirTxt}; footprint average ${fmt(o.Speak)} mg/m²`, how:`Single event; the LRV limit applies to annual means. ${within}`});
       } else {
         const bg = bgA.dep ? bgA.dep.v : 0, tot = o.depMax + bg;
@@ -1620,9 +2305,10 @@ function compute(){
           how:`Footprint average on this land use: ${fmt(o.dep)} µg/(m²·d). ${within}`,
           bench: m === "Pb" ? "NABEL 2024: 1.2 µg/(m²·d) at rural Payerne to 8.9 at Lausanne city centre; 92 next to the Gerlafingen steel works in 2010" : ""});
         const al = AIR_LIM[m], cAdd = (o.airPM + o.airGasC) * I.amount, bgc = bgA.air ? bgA.air.v : 0, ctot = cAdd + bgc;
-        add({id:"airC", comp:["air", "people"], label:m === "Hg" ? "Mercury in air at the most exposed point" : `${m} in fine dust at the most exposed point`, v:ctot, unit:"ng/m³", mc:st(x => (x.airPM + x.airGasC) * I.amount + bgc, al.v),
-          status: ctot > al.v ? "crit" : "ok", tag: ctot > al.v ? (m === "Pb" ? "Exceeds LRV" : "Above guideline") : (m === "Pb" ? "Below LRV" : "Below guideline"),
-          ref:`Added ${fmt(cAdd)} at ${fmt(o.airX)} m${dirTxt}${bgA.air ? ` + background ${fmt(bgc)} (${bgA.air.src})` : " (no Swiss background value)"}. ${al.txt}`,
+        const lrv = m === "Pb" || m === "Cd";
+        add({id:"airC", comp:["air", "people"], label:m === "Hg" ? "Mercury in air at the most exposed point" : `${m} in fine dust at the most exposed point`, v:ctot, unit:"ng/m³", mc:st(x => (x.airPM + x.airGasC) * I.amount + bgc, al ? al.v : null),
+          status: !al ? "info" : ctot > al.v ? "crit" : "ok", tag: !al ? "No air limit" : ctot > al.v ? (lrv ? "Exceeds LRV" : "Above guideline") : (lrv ? "Below LRV" : "Below guideline"),
+          ref:`Added ${fmt(cAdd)} at ${fmt(o.airX)} m${dirTxt}${bgA.air ? ` + background ${fmt(bgc)} (${bgA.air.src})` : " (no Swiss background value)"}. ${al ? al.txt : `Neither Switzerland nor the EU sets an air limit for ${METALS[m].name.toLowerCase()}`}`,
           how:`Annual mean at ground level, ${m === "Hg" ? "gas and particles" : "PM10 particles"}; stack ${fmt(I.stackH)} m, wind ${fmt(I.windU)} m/s`});
         const big = sh.cls.filter(c => c.w > 0).map(c => `${c.label.toLowerCase()} ${pct(c.w)}: ${pct(c.loc / c.w)} lands in the footprint`).join("; ");
         add({id:"airSplit", comp:["air"], label:"Where the emission goes", v:sh.loc * o.airScale * 100, unit:"% in the footprint", status:"info", tag:"Info",
@@ -1646,29 +2332,29 @@ function compute(){
       add({id:"hgEv", comp:[soilComp, "air"], label:"Hg⁰ emission from the topsoil", v:fx, unit:"ng/(m²·h)", status:"info", tag:"Info", ref:`At the peak topsoil Hg; the topsoil loses ${fmt(o.kEv * 100)}%/yr of the added Hg to air this way`,
         how:"Proportional to soil Hg; summer fluxes are higher, winter fluxes lower", bench:"Background soils 1–2 ng/(m²·h); contaminated soils of 2–25 mg/kg 15–800 ng/(m²·h), highest in summer (Zhu et al. 2016; Floreani et al. 2023)"});
     }
-    const ss = soilStatus(m, o.Ctot, I.land);
+    const ss = soilStatus(m, o.Ctot, I.land, o.cr6);
     add({id:"soilC", key:true, comp:[soilComp], label:"Peak topsoil concentration", v:o.Ctot, unit:"mg/kg", mc:st(x => x.Ctot, soilLimFor(m, I.land)), status:ss[0], tag:ss[1], ref:ss[2], how:`Background ${fmt(o.bg)} + added ${fmt(o.dC)} mg/kg at year ${fmt(o.tPeak)}, mixed into ${fmt(I.depthMix)} cm`,
-      bench: m === "Hg" ? "NABO background in Swiss topsoils: 0.03–0.29 mg/kg" : (I.form === "pbm" && !air ? "Bullet-trap soils (< 0.5 mm fraction) at 7 Swiss ranges: about 1,400 to 516,000 mg/kg (GEOTEST 2007 for FOEN)" : "")});
+      bench: m === "Hg" ? "NABO background in Swiss topsoils: 0.03–0.29 mg/kg" : SOIL_BENCH[m] ? SOIL_BENCH[m] : (I.form === "pbm" && !air ? "Bullet-trap soils (< 0.5 mm fraction) at 7 Swiss ranges: about 1,400 to 516,000 mg/kg (GEOTEST 2007 for FOEN)" : "")});
     add({id:"soilH", comp:[soilComp], label:`Topsoil after ${fmt(o.H)} years`, v:o.bg + o.dCH, unit:"mg/kg", status:"info", tag:"Info", ref:`Topsoil half-life ${fmtYr(o.half)} years`, how:`Loss rates per year: leaching ${fmt(o.kL)}, erosion ${fmt(o.kE)}, other ${fmt(o.kO)}`,
       bench: m === "Pb" ? "NABO 1985–2009: topsoil Pb unchanged at 70 of 100 sites and lower at 29, as a long half-life predicts; part of the decline is mixing into deeper soil, which this model does not include (Gubler et al. 2015)" : m === "Hg" ? "NABO 1985–2009: topsoil Hg fell at 63 sites, 27 unchanged, 3 rose (Gubler et al. 2015). That is faster than leaching and erosion explain: re-emission and mixing into deeper soil are missing by default, so set Other losses to test them" : ""});
-    add({id:"kd", comp:[soilComp], label:"Kd in topsoil", v:o.Kd, unit:"L/kg", status:"info", tag: num(I.kdSoil) ? "Your value" : (m === "Pb" ? "Published fit" : "Estimated"), ref: num(I.kdSoil) ? `Your value; the default relation gives ${fmt(o.kdCalc)} L/kg` : ({Pb:`log Kd = 1.99 + 0.42·pH (Carlon et al. 2004) = ${Math.log10(o.Kd).toFixed(2)}`, Hg:`Kd = Koc·foc, log Koc 5.5 → log Kd ${Math.log10(o.Kd).toFixed(2)}`, As:`Semi-empirical (Fe oxides, pH, redox) → log Kd ${Math.log10(o.Kd).toFixed(2)}; US EPA advises site-measured Kd for As`})[m], how:`Uncertainty σ ${num(I.kdSoil) ? 0.3 : KD_SIG[m]} log units${range}`});
+    add({id:"kd", comp:[soilComp], label:"Kd in topsoil", v:o.Kd, unit:"L/kg", status:"info", tag: num(I.kdSoil) ? "Your value" : (m === "Pb" || SAUVE[m] ? "Published fit" : "Estimated"), ref: num(I.kdSoil) ? `Your value; the default relation gives ${fmt(o.kdCalc)} L/kg` : kdRefTxt(m, o, I, form), how:`Uncertainty σ ${num(I.kdSoil) ? 0.3 : KD_SIG[m]} log units${range}`});
     const al = LIM.altl1[m];
     add({id:"pore", key:true, comp:[soilComp], label:"Seepage water leaving the topsoil", v:o.cw, unit:"µg/L", mc:st(x => x.cw, al), status: o.cw > al ? "crit" : "ok", tag: o.cw > al ? "Exceeds AltlV" : "Below AltlV",
-      ref:`AltlV Annex 1 concentration value: ${al} µg/L` + (m === "As" ? " (10 µg/L proposed in 2024)" : "") + (o.capped ? `. Capped at Pb solubility, about ${fmt(o.cap)} µg/L at pH ${fmt(I.pH)}` : ""),
+      ref:`AltlV Annex 1 concentration value: ${al} µg/L` + (m === "Cr" ? " for Cr(VI); there is none for Cr(III), so total dissolved Cr is compared (cautious)" : "") + (o.capped ? `. Capped at ${m === "Cr" ? "Cr(OH)₃" : "Pb"} solubility, about ${fmt(o.cap)} µg/L at pH ${fmt(I.pH)}` : ""),
       how:`Added ${fmt(o.cwAdd)} + background ${fmt(o.cwBg)} µg/L; reactive fraction ${fmt(I.reactive)}%`,
       bench: I.form === "pbm" && !air ? "Bullet-trap eluates (lab test, water:solid 10:1, < 0.5 mm): 40–700 µg/L at 5 of 7 Swiss ranges (GEOTEST 2007 for FOEN). Pore water and eluate are nearly equal when Kd is far above 10 L/kg" : ""});
     add({id:"leach", comp:[soilComp, "gw"], label:"Leaching below the topsoil", v:o.leachKg, unit:"kg/yr", status:"info", tag:"Info", ref:`Net infiltration ${fmt(o.q * 1000)} mm/yr`, how:`Flux ${fmt(o.q * o.cwAdd)} mg/(m²·yr) over ${fmt(o.A)} m²`});
     add({id:"eros", comp:[soilComp, "river"], label:"Eroded to surface water", v:o.erosKg, unit:"kg/yr", status:"info", tag: o.kE > 5 * o.kL ? "Main loss path" : "Info", ref:`Erosion ${fmt(o.E * 10)} t/ha/yr${num(I.eros) ? "" : (num(I.slope) > 0 ? ` (land-use default × ${fmt(slopeFactor(I))} for a ${fmt(I.slope)}% slope)` : " (default for this land use)")} × enrichment ${fmt(I.er)} × delivery ${fmt(I.sdr)}%`, how:`At peak topsoil concentration, over ${fmt(o.A)} m²`,
       bench: I.land === "agri" && !form.site ? "Measured mean on arable land, Frienisberg (BE), 1997–2007: 0.7 t/ha/yr (Prasuhn)" : ""});
     const g = LIM.gschv[m];
-    add({id:"rivE", comp:["river"], label:"River, dissolved, from erosion", v:o.rivD, unit:"µg/L", mc:st(x => x.rivD, g || null), status: g ? (o.rivD > g ? "crit" : "ok") : "info", tag: g ? (o.rivD > g ? "Exceeds GSchV" : "Below GSchV") : "No GSchV value", ref: g ? `GSchV Annex 2: ${g} µg/L dissolved` : "No GSchV value for As", how:`Background ${fmt(I.bgRiv[m])} + ${fmt(o.rivTot)} µg/L × ${fmt(o.fd * 100)}% dissolved; Q ${fmt(o.Q)} m³/s`});
+    add({id:"rivE", comp:["river"], label:"River, dissolved, from erosion", v:o.rivD, unit:"µg/L", mc:st(x => x.rivD, g || null), status: g ? (o.rivD > g ? "crit" : "ok") : "info", tag: g ? (o.rivD > g ? "Exceeds GSchV" : "Below GSchV") : "No GSchV value", ref: g ? `GSchV Annex 2: ${g} µg/L dissolved${m === "Cr" ? " (Cr(III) and Cr(VI))" : ""}` : "No GSchV value for As", how:`Background ${fmt(I.bgRiv[m])} + ${fmt(o.rivTot)} µg/L × ${fmt(o.fd * 100)}% dissolved; Q ${fmt(o.Q)} m³/s`});
     const fast = I.aq !== "porous";
     add({id:"tarr", comp:["gw"], label:"Travel time to the water table", v:o.tArr, vtxt:fmtYr(o.tArr), unit:"years", mc:st(x => x.tArr), status: fast ? "check" : (o.tArr <= o.H ? "warn" : "check"), tag: fast ? "Fast paths likely" : (o.tArr <= o.H ? "Within horizon" : "Matrix flow only"), ref: fast ? "Karst or fractured rock: preferential flow can arrive within days to months" : `${fmt(o.Lz)} m unsaturated zone, retardation R = ${fmt(o.Rv)}. Fast paths can be much quicker: test them with the fast-path share (Budget & floods tab)`, how:`Subsoil Kd ${fmt(o.kdSub)} L/kg; matrix flow only`,
       bench: m === "Pb" || I.form === "pbm" ? "Shooting ranges: Pb 0.5–3 µg/L and Sb 2–50 µg/L already found directly downgradient after decades of use (GEOTEST 2007 for FOEN), far sooner than matrix flow predicts. The report names preferential flow paths as a key factor" : ""});
     const arrived = fast || o.tArr <= o.H;
     const gs = o.cgw > tbdv ? (arrived ? ["crit","Exceeds TBDV"] : ["check","Exceeds if it arrives"]) : ["ok","Below TBDV"];
-    add({id:"gwPot", key:true, noUpgrade:!arrived, comp:drinkC("gw"), label:"Groundwater under the source, long term", v:o.cgw, unit:"µg/L", mc:st(x => x.cgw, tbdv), status:gs[0], tag:gs[1], ref:`Drinking-water limit (TBDV) ${tbdv} µg/L · ${drinkTxt}`, how:`Background ${fmt(I.bgGw[m])} + ${fmt(o.cwAdd)} / DAF ${fmt(o.D.daf)} (mixing depth ${fmt(o.D.d)} m)`,
-      bench: I.form === "pbm" && !air ? "Directly downgradient of bullet traps: 0.5–3 µg/L at 4 Swiss ranges, about 30 µg/L at an acidic one (GEOTEST 2007 for FOEN)" : (m === "As" ? "NAQUA 2018: As above 10 µg/L at 2 of 524 stations and above 5 µg/L at 7; mostly below 1 µg/L on the Plateau. Higher values come from crystalline rock, not soil: enter them as background" : "")});
+    add({id:"gwPot", key:true, noUpgrade:!arrived, comp:drinkC("gw"), label:"Groundwater under the source, long term", v:o.cgw, unit:"µg/L", mc:st(x => x.cgw, tbdv), status:gs[0], tag:gs[1], ref:`${tbdvTxt(m)} · ${drinkTxt}`, how:`Background ${fmt(I.bgGw[m])} + ${fmt(o.cwAdd)} / DAF ${fmt(o.D.daf)} (mixing depth ${fmt(o.D.d)} m)`,
+      bench: I.form === "pbm" && !air ? "Directly downgradient of bullet traps: 0.5–3 µg/L at 4 Swiss ranges, about 30 µg/L at an acidic one (GEOTEST 2007 for FOEN)" : (m === "As" ? "NAQUA 2018: As above 10 µg/L at 2 of 524 stations and above 5 µg/L at 7; mostly below 1 µg/L on the Plateau. Higher values come from crystalline rock, not soil: enter them as background" : GW_BENCH[m] || "")});
     if(o.sb){
       const sb = o.sb;
       add({id:"sbPore", key:true, comp:[soilComp], label:"Antimony in seepage water", v:sb.sbCw, unit:"µg/L", mc:st(x => x.sb && x.sb.sbCw, 10), status: sb.sbCw > 10 ? "crit" : "ok", tag: sb.sbCw > 10 ? "Exceeds AltlV" : "Below AltlV", ref:"AltlV concentration value for Sb in eluate: 10 µg/L" + (sb.sbCapped ? ". Capped at Ca-antimonate solubility, about 5,000 µg/L" : ""), how:`${fmt(I.sbShare)}% Sb in bullets, ${fmt(sb.sbC)} mg/kg in topsoil, Kd ${fmt(I.kdSb)} L/kg, mobile ${fmt(I.sbMobile)}%`, bench:"Batch eluates (water:solid 10:1): 200–5,000 µg/L (GEOTEST 2007 for FOEN). Field lysimeter seepage from a calcareous range soil is far lower: 40–110 µg/L drained, 2–5 µg/L waterlogged (Hockmann et al. 2015)"});
@@ -1676,14 +2362,16 @@ function compute(){
     }
     if(I.land === "garden"){
       let s, tag, ref, lim;
+      const tv = TDI_REF[m] && TDI_REF[m](form);
       if(m === "Hg"){ const sh = o.dose / 0.571; s = sh > 1 ? "crit" : sh > 0.1 ? "warn" : "ok"; tag = `${fmt(sh * 100)}% of TWI`; lim = 0.571; ref = "Inorganic Hg TWI 4 µg/kg bw per week (EFSA 2012). The Swiss Hg value allots 10% of it to soil."; }
+      else if(tv){ const sh = o.dose / tv.v; s = sh > 1 ? "crit" : sh > 0.1 ? "warn" : "ok"; tag = `${fmt(sh * 100)}% of ${tv.k}`; lim = tv.v; ref = tv.txt; }
       else { const bm = m === "As" ? 0.06 : 0.5, moe = bm / o.dose; s = moe < 1 ? "crit" : moe < 10 ? "warn" : "ok"; tag = `MOE ${fmt(moe)}`; lim = bm; ref = m === "As" ? "EFSA 2024 BMDL05 0.06 µg/kg bw per day (skin cancer); no safe intake identified" : "EFSA 2010 BMDL01 0.50 µg/kg bw per day (children's IQ); no threshold"; }
-      add({id:"dose", key:true, comp:["people"], label:"Child soil-ingestion dose", v:o.dose, unit:"µg/kg bw per day", mc:st(x => x.dose, lim), status:s, tag, ref, how:`${fmt(o.Ctot)} mg/kg × ${fmt(I.ir)} g/d × ${fmt(I.rba)}% ÷ ${fmt(I.bw)} kg`});
+      add({id:"dose", key:true, comp:["people"], label:"Child soil-ingestion dose", v:o.dose, unit:"µg/kg bw per day", mc:st(x => x.dose, lim), status:s, tag, ref, how:`${fmt(m === "Cr" && form.sp === "VI" ? o.cr6 : o.Ctot)} mg/kg${m === "Cr" && form.sp === "VI" ? " Cr(VI)" : ""} × ${fmt(I.ir)} g/d × ${fmt(I.rba)}% ÷ ${fmt(I.bw)} kg`});
     }
   } else if(I.medium === "gw"){
     const gs = o.cgw > tbdv ? (o.tW <= o.H ? ["crit","Exceeds TBDV"] : ["check","Exceeds if it arrives"]) : ["ok","Below TBDV"];
-    add({id:"gwC", key:true, comp:drinkC("gw"), label:"Groundwater in the plume", v:o.cgw, unit:"µg/L", mc:st(x => x.cgw, tbdv), status:gs[0], tag:gs[1], ref:`Drinking-water limit (TBDV) ${tbdv} µg/L · ${drinkTxt}`, how:`Background ${fmt(I.bgGw[m])} + ${fmt(I.amount)} kg/yr in ${fmt(o.flowL / 1000)} m³/yr of groundwater`,
-      bench: m === "As" ? "NAQUA 2018: As above 10 µg/L at 2 of 524 stations and above 5 µg/L at 7; mostly below 1 µg/L on the Plateau, higher locally in crystalline fractured-rock aquifers" : ""});
+    add({id:"gwC", key:true, comp:drinkC("gw"), label:"Groundwater in the plume", v:o.cgw, unit:"µg/L", mc:st(x => x.cgw, tbdv), status:gs[0], tag:gs[1], ref:`${tbdvTxt(m)} · ${drinkTxt}`, how:`Background ${fmt(I.bgGw[m])} + ${fmt(I.amount)} kg/yr in ${fmt(o.flowL / 1000)} m³/yr of groundwater`,
+      bench: m === "As" ? "NAQUA 2018: As above 10 µg/L at 2 of 524 stations and above 5 µg/L at 7; mostly below 1 µg/L on the Plateau, higher locally in crystalline fractured-rock aquifers" : GW_BENCH[m] || ""});
     add({id:"tW", key:true, comp:["gw"], label:"Travel time to the well", v:o.tW, vtxt:fmtYr(o.tW), unit:"years", mc:st(x => x.tW), status:"info", tag: o.tW <= o.H ? "Within horizon" : "Beyond horizon", ref: o.porous ? `Retardation R = ${fmt(o.Raq)} (aquifer Kd ${fmt(o.kdAq)} L/kg)` : "No retardation assumed: karst and fractured rock have fast paths", how:`${fmt(I.wellDist)} m at ${fmt(o.v)} m/yr seepage velocity`});
     add({id:"darcy", comp:["gw"], label:"Groundwater flux (Darcy)", v:o.qAq, unit:"m/yr", status:"info", tag:"Info", ref:`K ${I.K} m/s × gradient ${I.grad}`, how:`Plume ${fmt(I.gwWidth)} m wide × ${fmt(o.b)} m thick`});
     relPos = RPOS.gw;
@@ -1717,11 +2405,17 @@ function compute(){
   const stOf = id => R(id).status;
   if(stOf("soilC") === "crit") sugg.push("Excavate and dispose of soil above the AltlV remediation value, or restrict its use for gardens, playgrounds and crops.");
   else if(stOf("soilC") === "warn") sugg.push("Stop further input and check use restrictions: the soil is above a VBBo guide or trigger value.");
-  if(stOf("pore") === "crit") sugg.push({As:"Cut oxygen and water inflow with a cover or cap, and fix arsenic with iron: Fe-oxide amendments or a zero-valent-iron barrier in the seepage path.", Pb:"Immobilise lead with phosphate (not on As-rich soils) or by liming acidic soil; at active ranges install artificial bullet traps.", Hg:"Remove mercury hotspots or contain them with a sealing wall; keep the soil aerated to avoid methylation."}[m]);
+  if(stOf("pore") === "crit") sugg.push({As:"Cut oxygen and water inflow with a cover or cap, and fix arsenic with iron: Fe-oxide amendments or a zero-valent-iron barrier in the seepage path.", Pb:"Immobilise lead with phosphate (not on As-rich soils) or by liming acidic soil; at active ranges install artificial bullet traps.", Hg:"Remove mercury hotspots or contain them with a sealing wall; keep the soil aerated to avoid methylation.",
+    Cd:"Lime the soil to near-neutral pH, which binds cadmium strongly, and stop Cd-rich inputs (phosphate fertiliser, ash).", Cu:"Lime acidic soil, add organic matter, and cut copper inputs (fungicides, feed additives); keep the soil covered against erosion.",
+    Zn:"Lime acidic soil or filter material, and replace saturated swale or filter soil before zinc breaks through.", Ni:"Lime acidic soil and remove the source; nickel binds less than lead or copper, so monitor seepage.",
+    Cr:"Reduce Cr(VI) to Cr(III) in place (Fe(II), zero-valent iron or organic amendments) and keep the soil away from manganese-oxide-rich material."}[m]);
   if(stOf("sbPore") === "crit") sugg.push("Antimony leaches much faster than lead and phosphate does not hold it: collect or treat seepage with iron-based sorbents and monitor Sb in groundwater.");
   if(soilLike(I) && o.kE > 5 * o.kL) sugg.push("Erosion, not leaching, is the main way the metal leaves this soil: keep vegetation cover, add buffer strips or sediment traps, and avoid bare ground.");
   if(stOf("gwPot") === "check" || stOf("gwC") === "check") sugg.push("Groundwater could exceed the limit in part of the uncertainty range or if fast paths exist: monitor seepage and groundwater below the source.");
-  if(stOf("gwPot") === "crit" || stOf("gwC") === "crit") sugg.push({As:"Protect the water supply: iron-hydroxide (GFH) adsorbers, oxidation with Fe(III) coagulation, or blending with low-arsenic water.", Pb:"Contain the plume hydraulically, or treat the water by coagulation-filtration or ion exchange.", Hg:"Contain the plume with sealing walls; treat the water with activated carbon or thiol resins."}[m]);
+  if(stOf("gwPot") === "crit" || stOf("gwC") === "crit") sugg.push({As:"Protect the water supply: iron-hydroxide (GFH) adsorbers, oxidation with Fe(III) coagulation, or blending with low-arsenic water.", Pb:"Contain the plume hydraulically, or treat the water by coagulation-filtration or ion exchange.", Hg:"Contain the plume with sealing walls; treat the water with activated carbon or thiol resins.",
+    Cd:"Contain the plume hydraulically, or treat the water by precipitation at raised pH or ion exchange.", Cu:"Treat the water by coagulation-filtration or ion exchange, and check copper pipes and fittings as a source.",
+    Zn:"Treat the water by precipitation or ion exchange, and check galvanised pipes and well fittings as a source.", Ni:"Blend with low-nickel water or treat by ion exchange; check whether serpentinite is the natural source.",
+    Cr:"Install a permeable reactive barrier with zero-valent iron, or reduce Cr(VI) in place with Fe(II) or dithionite; for drinking water, reduce and filter or use ion exchange."}[m]);
   if(I.aq !== "porous" && !riverLike(I)) sugg.push("Karst or fractured rock: fast paths bypass soil retention. Protect recharge areas and sample springs after heavy rain.");
   if(stOf("rivD") === "crit" || stOf("rivE") === "crit") sugg.push("Retain particles before they reach the river: settling basins, runoff treatment and sediment traps below the source.");
   if(stOf("dep") === "crit") sugg.push("Upgrade flue-gas cleaning (fabric filters or electrostatic precipitators) and monitor dust deposition around the stack.");
@@ -1731,6 +2425,11 @@ function compute(){
   if(m === "Hg" && I.form === "hg0") sugg.push("Elemental mercury re-emits to air: measure soil-gas Hg, ventilate buildings and set Other losses to include re-emission.");
   if(m === "As" && I.drain !== "well") sugg.push("Waterlogging releases As(III): improve drainage or add iron, and avoid phosphate fertiliser on this soil.");
   if(m === "Pb" && I.pH < 5.5) sugg.push("Lime the soil: lead mobility rises sharply below pH 5 to 5.5.");
+  if((m === "Cd" || m === "Zn" || m === "Ni") && soilLike(I) && I.pH < 6) sugg.push(`Lime the soil: ${METALS[m].name.toLowerCase()} becomes markedly more mobile and more available to crops below about pH 6.`);
+  if(m === "Cd" && soilLike(I) && (I.land === "agri" || I.land === "garden")) sugg.push("Grow low-uptake crops on this soil: leafy vegetables, celery, spinach and tobacco take up most cadmium; fruit crops and legumes less.");
+  if(m === "Cu" && soilLike(I)) sugg.push("Copper harms earthworms and soil microbes long before it reaches water: compare the topsoil with the VBBo guide value and limit further sprays.");
+  if(m === "Cr" && formOf().sp === "VI") sugg.push("Measure Cr(VI) separately from total Cr (e.g. EN 15192 for soil, ion chromatography for water): the Swiss values for contaminated sites refer to Cr(VI).");
+  if(m === "Cr" && formOf().sp === "III" && (I.aqMn > 0.5 || I.redox === "oxic")) sugg.push("Cr(III) is stable, but manganese oxides in oxic soil and aquifers can turn part of it into Cr(VI): check Cr(VI) in springs and wells downgradient.");
   if(["crit","warn"].includes(stOf("dose"))) sugg.push("Reduce direct contact: clean topsoil cover or raised beds in gardens, and keep children off bare contaminated soil.");
   if(soilLike(I) && !num(I.kdSoil)) sugg.push("Measure Kd (or a leaching test) on site samples: it is the largest source of uncertainty in these results.");
   if(I.medium === "road") sugg.push("Most traffic metal stays within 5 m of the road: keep the shoulders vegetated, don't grow food there, and send road runoff over shoulders, retention soil filters or a road-runoff treatment plant (SABA) rather than straight into streams.");
@@ -1771,7 +2470,7 @@ function compute(){
   rows.forEach(r => r.comp.forEach(c => { compStatus[c] = worse(compStatus[c], r.status); }));
   const nC = rows.filter(r => r.status === "crit").length, nW = rows.filter(r => r.status === "warn" || r.status === "check").length;
   const summary = (nC ? `${nC} result${nC > 1 ? "s exceed" : " exceeds"} a Swiss limit or health reference point.` : nW ? `No limit exceeded at the best estimate; ${nW} result${nW > 1 ? "s need" : " needs"} checking.` : "All screened results are below Swiss limits.") + ` Ranges come from ${MC_N} Monte Carlo runs. Screening only: confirm with site data.`;
-  return {rows, sugg:[...new Set(sugg)], compStatus, relPos, summary, bud, sens, MC, ser, forms, o0:o, title:`Release to ${MEDIUM_LBL[I.medium]}`, form, kdCalc:o.kdCalc, kdAqCalc:o.kdAqCalc, kdSSdef:KDSS[m]};
+  return {rows, sugg:[...new Set(sugg)], compStatus, relPos, summary, bud, sens, MC, ser, forms, o0:o, title:`Release to ${MEDIUM_LBL[I.medium]}`, form, kdCalc:o.kdCalc, kdAqCalc:o.kdAqCalc, kdSSdef:kdSSOf(m, form.sp)};
 }
 
 function deriveConditions(){
@@ -1795,7 +2494,7 @@ function rangeHTML(r){
 }
 function renderResults(){
   const R = RES, I = INP;
-  const amt = soilLike(I) && I.pattern === "pulse" ? `${fmt(I.amount)} kg once` : `${fmt(I.amount)} kg/yr` + (soilLike(I) ? ` for ${fmt(I.duration)} years` : "");
+  const amt = isPulse(I) ? `${fmt(I.amount)} kg once` : `${fmt(I.amount)} kg/yr` + (soilLike(I) ? ` for ${fmt(I.duration)} years` : "");
   $("#resIntro").textContent = `${METALS[S.metal].name} · ${R.form.label} · released to ${MEDIUM_LBL[I.medium]} · ${amt} · ${I.preset === "custom" ? "custom site" : PRESETS[I.preset].label}. ${R.summary}`;
   $("#resGrid").innerHTML = R.rows.map(r => `<div class="res" data-s="${r.status}"><div class="rl"><span>${esc(r.label)}</span><span class="pill ${r.status}">${esc(r.tag)}</span></div><div class="rv">${esc(r.vtxt)}<small>${esc(r.unit)}</small></div>${rangeHTML(r)}<div class="rr">${esc(r.ref)}</div><div class="rh">${esc(r.how)}</div>${r.bench ? `<div class="bench"><b>Measured</b>${esc(r.bench)}</div>` : ""}</div>`).join("");
   $("#suggList").innerHTML = R.sugg.map(s => `<li>${esc(s)}</li>`).join("");
@@ -1808,7 +2507,7 @@ function renderResults(){
   const ls = landShares(Object.assign({}, I, {forestShare:"", sealedShare:""})); ph("f-forestShare", ls.fF * 100); ph("f-sealedShare", ls.fS * 100);
   ph("f-snowDays", snowSeason(Object.assign({}, I, {snowDays:""})).D); ph("f-resusp", resuspOf(Object.assign({}, I, {resusp:""})));
   ph("f-efRoad", (ROAD_EF[I.roadEra] || ROAD_EF.today)[m] || 0);
-  const bga = bgAirOf(Object.assign({}, I, {bgDep:{As:"", Hg:"", Pb:""}, bgAir:{As:"", Hg:"", Pb:""}}), m);
+  const bga = bgAirOf(Object.assign({}, I, {bgDep:{[m]:""}, bgAir:{[m]:""}}), m);
   if(bga.dep) ph("f-bgDep", bga.dep.v); if(bga.air) ph("f-bgAir", bga.air.v);
 }
 function renderBudget(){
@@ -1867,7 +2566,7 @@ function reportText(){
   L.push(`${new Date().toISOString().slice(0, 10)}`);
   L.push("");
   L.push(`Metal: ${M.name} (${S.metal}) · form: ${R.form.label}`);
-  L.push(`Release: to ${MEDIUM_LBL[I.medium]}, ${soilLike(I) && I.pattern === "pulse" ? fmt(I.amount) + " kg once" : fmt(I.amount) + " kg/yr" + (soilLike(I) ? " for " + fmt(I.duration) + " years" : "")}, horizon ${fmt(I.horizon)} years`);
+  L.push(`Release: to ${MEDIUM_LBL[I.medium]}, ${isPulse(I) ? fmt(I.amount) + " kg once" : fmt(I.amount) + " kg/yr" + (soilLike(I) ? " for " + fmt(I.duration) + " years" : "")}, horizon ${fmt(I.horizon)} years`);
   L.push(`Site: ${I.preset === "custom" ? (I.siteName ? "map location LV95 " + I.siteName : "custom values") : PRESETS[I.preset].label} · soil pH ${fmt(I.pH)}, OC ${fmt(I.oc)}%, Fe-ox ${fmt(I.fe)} g/kg · aquifer ${I.aq}, redox ${I.redox} · land use ${I.land}`);
   if(I.medium === "air") L.push(`Air: release height ${fmt(I.stackH)} m, wind ${fmt(I.windU)} m/s${I.windFrom !== "" ? ` mostly from ${compass(Number(I.windFrom))} (${fmt(I.windShare)}% of the time)` : ", direction not set"}, particle split ${airSplit(I).map((v, i) => AIR_CLS[i].label + " " + fmtPct(v)).filter(x => !/ 0%$/.test(x)).join(", ")}, forest ${fmtPct(landShares(I).fF)}, sealed ${fmtPct(landShares(I).fS)}, elevation ${fmt(I.elev)} m, background PM10 ${fmt(I.pm10)} µg/m³`);
   if(I.medium === "road") L.push(`Road: ${fmt(I.roadL)} m, ${fmt(I.aadt)} vehicles/day, ${fmt(I.hgv)}% heavy, ${I.roadEra === "leaded" ? "leaded-petrol era" : "today's traffic"}, emission factor ${fmt(roadEF(I, S.metal))} mg per car-km, drainage: ${(DRAIN[I.drainSys] || DRAIN.urban).label}`);
@@ -2013,12 +2712,13 @@ function fieldHTML(f){
   let ctl;
   if(f.type === "select"){
     const opts = typeof f.opts === "function" ? f.opts(S.metal) : f.opts;
-    const lk = (f.k === "redox" || f.k === "drain") && ladderLocks(INP)[f.k];
-    ctl = `<select id="${id}" data-k="${f.k}"${lk ? ' disabled title="Set by the redox ladder (Redox tab)"' : ""}>${opts.map(([val, l]) => `<option value="${val}"${String(v) === String(val) ? " selected" : ""}>${esc(l)}</option>`).join("")}</select>`;
+    const lk = (f.k === "redox" || f.k === "drain") && ladderLocks(INP)[f.k], fx = f.fixed && f.fixed(INP);
+    if(fx) ctl = `<select id="${id}" data-k="${f.k}" disabled aria-describedby="${id}-h"><option selected>${esc(opts[0][1])}</option></select>`;
+    else ctl = `<select id="${id}" data-k="${f.k}"${lk ? ' disabled title="Set by the redox ladder (Redox tab)"' : ""}>${opts.map(([val, l]) => `<option value="${val}"${String(v) === String(val) ? " selected" : ""}>${esc(l)}</option>`).join("")}</select>`;
   } else {
     ctl = `<input id="${id}" data-k="${f.k}" type="number" step="any" inputmode="decimal" value="${v === "" || v == null ? "" : v}"${f.optional ? ` placeholder="${esc(f.ph || "calculated")}"` : ""}>`;
   }
-  return `<div class="fld"><label for="${id}">${esc(lab)}${unit ? `<span class="u">${esc(unit)}</span>` : ""}</label>${ctl}${(typeof f.help === "function" ? f.help(INP) : f.help) ? `<span class="help">${esc(typeof f.help === "function" ? f.help(INP) : f.help)}</span>` : ""}${f.src ? `<span class="src">${esc(f.src)}</span>` : ""}<span class="err" hidden></span></div>`;
+  return `<div class="fld"><label for="${id}">${esc(lab)}${unit ? `<span class="u">${esc(unit)}</span>` : ""}</label>${ctl}${(typeof f.help === "function" ? f.help(f.k === "medium" ? S.metal : INP) : f.help) ? `<span class="help" id="${id}-h">${esc(typeof f.help === "function" ? f.help(f.k === "medium" ? S.metal : INP) : f.help)}</span>` : ""}${f.src ? `<span class="src">${esc(f.src)}</span>` : ""}<span class="err" hidden></span></div>`;
 }
 function renderForm(){
   $("#advTabs").innerHTML = TABS.map(t => `<button role="tab" id="tab-${t.id}" data-tab="${t.id}" aria-selected="${S.tab === t.id}" aria-controls="tp-${t.id}" tabindex="${S.tab === t.id ? 0 : -1}">${esc(t.label)}</button>`).join("");
@@ -2036,7 +2736,7 @@ function selectTab(id, focus){
 }
 function advMetalChanged(){
   if(!FORMS[S.metal].some(f => f.id === INP.form)){ const f = FORMS[S.metal][0]; INP.form = f.id; INP.reactive = f.fr; }
-  if(INP.medium === "road" && S.metal !== "Pb") INP.medium = "soil";
+  if((INP.medium === "road" && S.metal !== "Pb") || (INP.medium === "glacier" && !GLACIER_M.has(S.metal))) INP.medium = "soil";
   $("#presetSel").value = INP.preset;
   $("#loadExample").textContent = "Load example: " + EXAMPLES[S.metal].short;
   renderForm();
@@ -2055,7 +2755,7 @@ function sanitize(src){
   if(typeof src.siteName === "string") out.siteName = src.siteName.slice(0, 80);
   for(const f of FIELDS){
     const v = src[f.k]; if(v === undefined) continue;
-    if(f.perMetal){ if(v && typeof v === "object") ["As","Hg","Pb"].forEach(mm => { if(typeof v[mm] === "number" && !validate(f, v[mm])) out[f.k][mm] = v[mm]; }); continue; }
+    if(f.perMetal){ if(v && typeof v === "object") MLIST.forEach(mm => { if(typeof v[mm] === "number" && !validate(f, v[mm])) out[f.k][mm] = v[mm]; }); continue; }
     if(f.type === "select"){
       if(f.k === "form"){ if(typeof v === "string") out.form = v; }
       else if((typeof f.opts === "function" ? f.opts(S.metal) : f.opts).some(o => o[0] === v)) out[f.k] = v;
@@ -2169,7 +2869,9 @@ function initAdv(){
 /* ================= SITE LOOKUP (map + Swiss data grid) ================= */
 const GRID = {meta:null, layers:{}, ok:null};
 // Geochemical soil atlas (Agroscope/FOEN): topsoil 0-20 cm percentiles, mg/kg (Reusser, soil.ch presentation)
-const ATLAS_PCT = {As:{p:[2.7,5.5,7.9,12.1,35.2], tif:40}, Hg:{p:[0.027,0.046,0.066,0.097,0.181], tif:0.302}, Pb:{p:[13,19,24,31,52], tif:64}};
+const ATLAS_PCT = {As:{p:[2.7,5.5,7.9,12.1,35.2], tif:40}, Hg:{p:[0.027,0.046,0.066,0.097,0.181], tif:0.302}, Pb:{p:[13,19,24,31,52], tif:64},
+  // Cd, Cr, Cu, Ni, Zn: lognormal fitted to the published 10th, 50th and 90th percentiles (Reusser et al. 2023), separately below and above the median
+  Cd:{p:[0.078,0.151,0.24,0.395,0.811], tif:1.34}, Cr:{p:[11.0,20.0,30.3,40.3,60.8], tif:81.0}, Cu:{p:[6.04,11.5,18.1,25.6,42.2], tif:59.9}, Ni:{p:[7.72,16.3,27.3,37.5,59.1], tif:81.3}, Zn:{p:[29.5,46.6,64.0,83.5,122.0], tif:160.0}};
 const CLASS_LBL = ["", "lowest 5%", "5–10th percentile", "10–25th percentile", "25–50th percentile", "50–75th percentile", "75–90th percentile", "90–95th percentile", "highest 5%"];
 const FE_OX = [null, 1.5, 2, 2.5, 3.5, 4.5, 6, 7.5, 9]; // assumed oxalate-Fe (g/kg) per total-Fe percentile class
 const HYDRO = {
@@ -2231,7 +2933,7 @@ function readSite(E, N){
   const v = k => { const s = sampleGrid(k, E, N); return s ? s.v : null; };
   const site = {E:Math.round(E), N:Math.round(N), precip:v("precip"), temp:v("temp"), ph:v("ph"), clay:v("clay"), soc:v("soc"),
     hydro:v("hydro"), rock:v("rock"), lu4:v("lu4"), luSet:v("lu_set"), pm10:v("pm10"), pm25:v("pm25"), atl:{}};
-  ["As","Pb","Hg","Sb","Fe","Ca"].forEach(k => { site.atl[k] = v("atl_" + k); });
+  MLIST.concat(["Sb","Fe","Ca"]).forEach(k => { site.atl[k] = v("atl_" + k); });
   site.oc = site.soc != null ? site.soc / 60 : null;
   site.inside = site.precip != null && E > 2480000 && E < 2840000 && N > 1070000 && N < 1300000;
   return site;
@@ -2250,7 +2952,9 @@ function siteRows(s){
   add("Aquifer", s.hydro && HYDRO[s.hydro] ? esc(HYDRO[s.hydro].lbl) : "–", "Hydrogeological map 1:500,000");
   add("Bedrock", s.rock && ROCK[s.rock] ? esc(ROCK[s.rock]) : "–", "Hydrogeological map 1:500,000");
   add("Land use", s.lu4 && LU4[s.lu4] ? `${esc(LU4[s.lu4].lbl)}${s.luSet != null && s.lu4 !== 1 && s.luSet > 20 ? ` (${fmt(s.luSet)}% settlement)` : ""}` : "–", "BFS land-use statistics");
-  ["As","Pb","Hg"].forEach(k => { const c = s.atl[k]; add(`Background ${k}`, c ? `≈ ${fmt(atlasValue(k, c))} mg/kg <span class="mini">(${CLASS_LBL[c]})</span>` : "–", "Geochemical soil atlas"); });
+  const c0 = s.atl[S.metal], oth = MLIST.filter(k => k !== S.metal && s.atl[k]).map(k => `${k} ≈ ${fmt(atlasValue(k, s.atl[k]))}`).join(" · ");
+  add(`Background ${S.metal}`, c0 ? `≈ ${fmt(atlasValue(S.metal, c0))} mg/kg <span class="mini">(${CLASS_LBL[c0]})</span>` : "–", "Geochemical soil atlas");
+  if(oth) add("Other metals", `${oth} <span class="mini">mg/kg</span>`, "Geochemical soil atlas");
   ["Sb","Fe","Ca"].forEach(k => { const c = s.atl[k]; add(`${({Sb:"Antimony", Fe:"Iron", Ca:"Calcium"})[k]} in topsoil`, c ? CLASS_LBL[c] : "–", "Geochemical soil atlas"); });
   add("Fine dust PM10 / PM2.5", s.pm10 != null ? `${fmt(s.pm10)} / ${fmt(s.pm25)} µg/m³ <span class="mini">(LRV 20 / 10)</span>` : "–", "FOEN annual maps, mean 2023–2025");
   const nb = NABEL.map(st => [st, Math.hypot(st.E - s.E, st.N - s.N)]).sort((a, b) => a[1] - b[1])[0];
@@ -2265,6 +2969,8 @@ function showSite(s){
   if(s.rock === 3 || s.rock === 4) notes.push("Crystalline bedrock: springs and wells can carry natural arsenic (NAQUA).");
   if(s.atl.Ca >= 6) notes.push("High soil calcium: probably calcareous, which keeps lead immobile.");
   if(s.hydro === 4) notes.push("Karst: water can travel from the surface to springs within days.");
+  if(s.atl.Ni >= 8 || s.atl.Cr >= 8) notes.push("Nickel or chromium in the top 5% of Swiss topsoils: possibly serpentinite or other ultramafic rock. Natural Cr(VI) can occur in springs here.");
+  if(s.atl.Cd >= 8) notes.push("Cadmium in the top 5% of Swiss topsoils: often natural on Jura limestone; crops take it up more in acidic soil.");
   info.innerHTML = `<table class="sp-table"><tbody>${siteRows(s)}</tbody></table>${notes.length ? `<ul class="sp-notes">${notes.map(n => `<li>${esc(n)}</li>`).join("")}</ul>` : ""}<p class="mini">1 km grid; values are regional estimates, not measurements at this spot.</p>`;
   btn.disabled = false;
   $("#spE").value = s.E; $("#spN").value = s.N;
@@ -2290,7 +2996,7 @@ function applySite(){
   if(s.ph != null) INP.pH = Math.round(s.ph * 10) / 10;
   if(s.oc != null) INP.oc = Math.round(s.oc * 10) / 10;
   if(s.atl.Fe) INP.fe = FE_OX[s.atl.Fe];
-  ["As","Pb","Hg"].forEach(k => { const c = s.atl[k]; if(c){ const v = atlasValue(k, c); INP.bg[k] = Number(v.toPrecision(2)); } });
+  MLIST.forEach(k => { const c = s.atl[k]; if(c){ const v = atlasValue(k, c); INP.bg[k] = Number(v.toPrecision(2)); } });
   const h = HYDRO[s.hydro];
   if(h && h.aq){ INP.aq = h.aq; INP.K = h.K; INP.ne = h.ne; }
   if(s.lu4 && LU4[s.lu4]) INP.land = LU4[s.lu4].land;
@@ -2302,12 +3008,33 @@ function applySite(){
   $("#spApply").textContent = "Inputs filled ✓";
   setTimeout(() => { $("#spApply").textContent = "Fill inputs from this site"; }, 1800);
 }
+// base maps: swisstopo grey map or SWISSIMAGE aerial photographs; the choice is shared by both maps and remembered
+const BASEMAPS = {map:{label:"Map", url:"https://wmts.geo.admin.ch/1.0.0/ch.swisstopo.pixelkarte-grau/default/current/3857/{z}/{x}/{y}.jpeg"},
+  aerial:{label:"Aerial image", url:"https://wmts.geo.admin.ch/1.0.0/ch.swisstopo.swissimage/default/current/3857/{z}/{x}/{y}.jpeg"}};
+const BASE_MAPS_ON = [];
+function addBaseLayers(LF, mp, maxZoom){
+  const attr = '© <a href="https://www.swisstopo.admin.ch/" target="_blank" rel="noopener">swisstopo</a>', T = {};
+  for(const k in BASEMAPS) T[k] = LF.tileLayer(BASEMAPS[k].url, {maxZoom, attribution:attr});
+  let cur = "map"; try{ const v = localStorage.getItem("smp-base"); if(T[v]) cur = v; }catch(e){}
+  T[cur].addTo(mp); mp.getContainer().dataset.base = cur;
+  LF.control.layers({[BASEMAPS.map.label]:T.map, [BASEMAPS.aerial.label]:T.aerial}, null, {position:"topright", collapsed:false}).addTo(mp);
+  const rec = {mp, T};
+  mp.on("baselayerchange", e => {
+    const k = e.layer === T.aerial ? "aerial" : "map"; mp.getContainer().dataset.base = k;
+    try{ localStorage.setItem("smp-base", k); }catch(err){}
+    BASE_MAPS_ON.forEach(o => { if(o !== rec && !o.mp.hasLayer(o.T[k])){ for(const j in o.T) if(o.mp.hasLayer(o.T[j])) o.mp.removeLayer(o.T[j]); o.T[k].addTo(o.mp); o.mp.getContainer().dataset.base = k; syncBaseRadio(o.mp, k); } });
+  });
+  BASE_MAPS_ON.push(rec);
+}
+function syncBaseRadio(mp, k){
+  const want = BASEMAPS[k].label;
+  mp.getContainer().querySelectorAll(".leaflet-control-layers-base label").forEach(l => { const i = l.querySelector("input"); if(i) i.checked = l.textContent.trim() === want; });
+}
 function initMap(){
   if(map || typeof window.L === "undefined" || !document.getElementById("spMap")) return;
   const LF = window.L;
   map = LF.map("spMap", {minZoom:7, maxZoom:17, maxBounds:[[45.4, 5.4], [48.2, 11.0]], maxBoundsViscosity:0.8}).setView([46.82, 8.23], 7);
-  LF.tileLayer("https://wmts.geo.admin.ch/1.0.0/ch.swisstopo.pixelkarte-grau/default/current/3857/{z}/{x}/{y}.jpeg",
-    {maxZoom:18, attribution:'© <a href="https://www.swisstopo.admin.ch/" target="_blank" rel="noopener">swisstopo</a>'}).addTo(map);
+  addBaseLayers(LF, map, 18);
   map.on("click", e => { const p = wgsToLv95(e.latlng.lat, e.latlng.lng); pickLv95(p.E, p.N); });
   if(SITE && SITE.inside){ const ll = lv95ToWgs(SITE.E, SITE.N); mapMarker = LF.circleMarker([ll.lat, ll.lng], {radius:8, className:"sp-marker"}).addTo(map); }
 }
@@ -2563,7 +3290,7 @@ function initSpreadMap(){
   const LF = window.L;
   SP.map = LF.map("spMap2", {minZoom:8, maxZoom:18, maxBounds:[[45.4, 5.4], [48.2, 11.0]], maxBoundsViscosity:0.8, preferCanvas:true, zoomSnap:0.5}).setView([46.82, 8.23], 8);
   SP.canvas = LF.canvas({padding:0.3});
-  LF.tileLayer("https://wmts.geo.admin.ch/1.0.0/ch.swisstopo.pixelkarte-grau/default/current/3857/{z}/{x}/{y}.jpeg", {maxZoom:19, attribution:'© <a href="https://www.swisstopo.admin.ch/" target="_blank" rel="noopener">swisstopo</a>'}).addTo(SP.map);
+  addBaseLayers(LF, SP.map, 19);
   SP.ov.cant = null;   // cantonal protection zones: one image per map view, see cantWms()
   SP.ov.hk100 = LF.tileLayer("https://wmts.geo.admin.ch/1.0.0/ch.bafu.hydrogeologische-karte_100/default/current/3857/{z}/{x}/{y}.png", {maxZoom:19, opacity:0.75, attribution:"Hydrogeological map 1:100,000 © FOEN"});
   SP.ov.tracer = LF.tileLayer("https://wmts.geo.admin.ch/1.0.0/ch.bafu.hydrogeologie-markierversuche/default/current/3857/{z}/{x}/{y}.png", {maxZoom:19, attribution:"Tracer tests © FOEN"});
@@ -2649,7 +3376,7 @@ function depSetup(){
   if(!R || I.medium !== "air") return null;
   if(SP.dep && SP.dep.key === R) return SP.dep;
   // the lowest Swiss soil value for this land use: VBBo guide value, else trigger value, else AltlV remediation value
-  const g = LIM.guide[m], tr = (I.land === "agri" || I.land === "garden") ? LIM.trigger[m] : null, rv = I.land === "garden" ? LIM.remGarden[m] : I.land === "agri" ? LIM.remAgri[m] : null;
+  const g = LIM.guide[m], tr = trigOf(m, I.land), rv = m === "Cr" ? null : I.land === "garden" ? LIM.remGarden[m] : I.land === "agri" ? LIM.remAgri[m] : null;
   const lim = g || tr || rv || null, limName = g ? "VBBo guide value" : tr ? "VBBo trigger value" : rv ? "AltlV remediation value" : "", forest = I.land === "forest";
   const o = core(I, m, ONES), runs = R.MC.slice(0, 100);
   const re = snowReemOf(I, m), snowF = o => { const sn = o.air.sn; return sn.perennial ? 0 : 1 - sn.f * (re + (1 - re) * num(I.snowRun) / 100); };
@@ -2657,7 +3384,7 @@ function depSetup(){
   const C = prep(o), Rr = runs.map(prep), Ms = I.depthMix / 100 * I.rhob * 1000;
   const conc = (P, j, rho, t) => {
     const k = P.x.k, J = I.amount * 1e6 * P.d[j] * rho, D = I.duration;
-    const Sm = I.pattern === "pulse" ? J * Math.exp(-k * t) : (k > 0 ? J / k * (1 - Math.exp(-k * Math.min(t, D))) * Math.exp(-k * Math.max(0, t - D)) : J * Math.min(t, D));
+    const Sm = isPulse(I) ? J * Math.exp(-k * t) : (k > 0 ? J / k * (1 - Math.exp(-k * Math.min(t, D))) * Math.exp(-k * Math.max(0, t - D)) : J * Math.min(t, D));
     return P.bg + Sm / Ms;
   };
   SP.dep = {key:R, lim, limName, C, Rr, conc, frames:{}};
@@ -2700,7 +3427,7 @@ function drawSpread(){
     soilTxt = {};
     const air = I.medium === "air", A = air ? I.footprint * 1e6 : I.area, h = Math.sqrt(A) / 2;
     const corner = (a, b) => toLL(s.E + a * fE - b * fN, s.N + a * fN + b * fE);
-    const conc = ser ? I.bg[m] + ser.B.top * 1e6 / (A * Ms) : null, ss = conc != null ? soilStatus(m, conc, I.land) : ["info"];
+    const conc = ser ? I.bg[m] + ser.B.top * 1e6 / (A * Ms) : null, ss = conc != null ? soilStatus(m, conc, I.land, cr6Of(I, m, conc - I.bg[m])) : ["info"];
     const col = ss[0] === "crit" ? crit : ss[0] === "warn" ? warn : soilC;
     let shape;
     if(air) shape = LF.circle(toLL(s.E, s.N), {radius:Math.sqrt(A / Math.PI), renderer:SP.canvas, color:col, weight:2, fillColor:col, fillOpacity:0.06});
@@ -2820,7 +3547,16 @@ const FORM_DEF = {
   Hg:[{k:"orig", label:"Original form, not yet weathered"}, {k:"hgOM", label:"Hg(II) bound to organic matter"}, {k:"hgS", label:"Mercury sulfide HgS, formed"}, {k:"meHg", label:"Methylmercury"},
       {k:"hgD", label:"Dissolved Hg(II), bound to dissolved organic carbon"}, {k:"hg0", label:"Elemental Hg⁰ gas"}, {k:"dust", label:"Hg(II) on dust particles"}],
   Pb:[{k:"orig", label:"Original form, not yet weathered"}, {k:"pbSorb", label:"Pb on organic matter and oxides"}, {k:"pbCO3", label:"Lead carbonates"}, {k:"pbS", label:"Lead sulfide, formed"},
-      {k:"pbPO4", label:"Lead phosphate (pyromorphite)"}, {k:"pbD", label:"Dissolved Pb, free and with organic carbon"}, {k:"dust", label:"Lead in dust particles"}]
+      {k:"pbPO4", label:"Lead phosphate (pyromorphite)"}, {k:"pbD", label:"Dissolved Pb, free and with organic carbon"}, {k:"dust", label:"Lead in dust particles"}],
+  Cd:[{k:"orig", label:"Original form, not yet weathered"}, {k:"cdSorb", label:"Cd on clay, oxides and organic matter"}, {k:"cdCO3", label:"Cadmium carbonate (otavite)"}, {k:"cdS", label:"Cadmium sulfide, formed"},
+      {k:"cdD", label:"Dissolved Cd²⁺ and chloride complexes"}, {k:"dust", label:"Cadmium on dust particles"}],
+  Cu:[{k:"orig", label:"Original form, not yet weathered"}, {k:"cuOM", label:"Cu bound to organic matter"}, {k:"cuOx", label:"Cu on iron and manganese oxides and clay"}, {k:"cuCO3", label:"Copper carbonates (malachite)"},
+      {k:"cuS", label:"Copper sulfide, formed"}, {k:"cuDOC", label:"Dissolved Cu bound to organic carbon"}, {k:"cuD", label:"Free Cu²⁺ and inorganic complexes"}, {k:"dust", label:"Copper on dust particles"}],
+  Zn:[{k:"orig", label:"Original form, not yet weathered"}, {k:"znSorb", label:"Zn on oxides, clay and organic matter"}, {k:"znCO3", label:"Zinc carbonates (smithsonite, hydrozincite)"}, {k:"znS", label:"Zinc sulfide, formed"},
+      {k:"znD", label:"Dissolved Zn²⁺"}, {k:"dust", label:"Zinc on dust particles"}],
+  Ni:[{k:"orig", label:"Original form, not yet weathered"}, {k:"niSorb", label:"Ni on oxides, clay and organic matter"}, {k:"niS", label:"Nickel sulfide, formed"}, {k:"niD", label:"Dissolved Ni²⁺"}, {k:"dust", label:"Nickel on dust particles"}],
+  Cr:[{k:"orig", label:"Original form, not yet weathered"}, {k:"cr3s", label:"Cr(III) hydroxide and Cr(III) on organic matter"}, {k:"cr6s", label:"Chromate Cr(VI) on iron oxides"},
+      {k:"cr6d", label:"Chromate Cr(VI), dissolved"}, {k:"cr3d", label:"Cr(III), dissolved with organic carbon"}, {k:"dust", label:"Chromium on dust particles"}]
 };
 const PHASES = [{k:"soil", label:"Soil and sediment"}, {k:"water", label:"Water"}, {k:"air", label:"Air"}];
 // Indicative shares (assumptions from general geochemistry; see methods). r = soil redox 0 oxic / 1 periodically waterlogged / 2 permanently,
@@ -2855,14 +3591,60 @@ const FORM_RULES = {
     sed:(x, c) => { const ps = [0, 0.2, 0.5][c.lY] * c.s; return {pbS:x * ps, pbSorb:x * (1 - ps)}; },
     riverD:x => ({pbD:x}), riverP:x => ({pbSorb:x}),
     air:x => ({dust:x})
+  },
+  Cd:{
+    soilSolid:(x, c) => { const cb = c.pH >= 7.5 ? 0.3 : c.pH >= 7 ? 0.1 : 0, cs = [0, 0.05, 0.2][c.r]; return {cdCO3:x * cb, cdS:x * cs, cdSorb:x * (1 - cb - cs)}; },
+    soilWater:x => ({cdD:x}), gwWater:x => ({cdD:x}),
+    gwSolid:(x, c) => c.a === 3 ? {cdS:x * 0.6, cdSorb:x * 0.4} : {cdSorb:x},
+    lakeWater:x => ({cdD:x}),
+    sed:(x, c) => { const cs = [0, 0.3, 0.6][c.lY] * c.s; return {cdS:x * cs, cdSorb:x * (1 - cs)}; },
+    riverD:x => ({cdD:x}), riverP:x => ({cdSorb:x}), air:x => ({dust:x})
+  },
+  Cu:{
+    soilSolid:(x, c) => { const cb = c.pH >= 7.5 ? 0.15 : 0, cs = [0, 0.05, 0.2][c.r], r = 1 - cb - cs; return {cuCO3:x * cb, cuS:x * cs, cuOM:x * r * 0.65, cuOx:x * r * 0.35}; },
+    soilWater:x => ({cuDOC:x * 0.98, cuD:x * 0.02}),          // > 99% organically complexed in Swiss drainage water (Aldrich et al. 2002)
+    gwWater:x => ({cuDOC:x * 0.7, cuD:x * 0.3}),
+    gwSolid:(x, c) => c.a === 3 ? {cuS:x * 0.6, cuOx:x * 0.4} : {cuOx:x},
+    lakeWater:x => ({cuDOC:x * 0.95, cuD:x * 0.05}),
+    sed:(x, c) => { const cs = [0.1, 0.3, 0.6][c.lY] * c.s; return {cuS:x * cs, cuOM:x * (1 - cs)}; },
+    riverD:x => ({cuDOC:x * 0.9, cuD:x * 0.1}), riverP:x => ({cuOM:x}), air:x => ({dust:x})
+  },
+  Zn:{
+    soilSolid:(x, c) => { const cb = c.pH >= 7.5 ? 0.25 : c.pH >= 7 ? 0.1 : 0, zs = [0, 0.05, 0.2][c.r]; return {znCO3:x * cb, znS:x * zs, znSorb:x * (1 - cb - zs)}; },
+    soilWater:x => ({znD:x}), gwWater:x => ({znD:x}),
+    gwSolid:(x, c) => c.a === 3 ? {znS:x * 0.6, znSorb:x * 0.4} : {znSorb:x},
+    lakeWater:x => ({znD:x}),
+    sed:(x, c) => { const zs = [0, 0.3, 0.6][c.lY] * c.s; return {znS:x * zs, znSorb:x * (1 - zs)}; },
+    riverD:x => ({znD:x}), riverP:x => ({znSorb:x}), air:x => ({dust:x})
+  },
+  Ni:{
+    soilSolid:(x, c) => { const ns = [0, 0.03, 0.1][c.r]; return {niS:x * ns, niSorb:x * (1 - ns)}; },
+    soilWater:x => ({niD:x}), gwWater:x => ({niD:x}),
+    gwSolid:(x, c) => c.a === 3 ? {niS:x * 0.5, niSorb:x * 0.5} : {niSorb:x},
+    lakeWater:x => ({niD:x}),
+    sed:(x, c) => { const ns = [0, 0.2, 0.4][c.lY] * c.s; return {niS:x * ns, niSorb:x * (1 - ns)}; },
+    riverD:x => ({niD:x}), riverP:x => ({niSorb:x}), air:x => ({dust:x})
+  },
+  Cr:{
+    // f6: share of Cr as chromate, by soil drainage or aquifer redox (crF6); dissolved Cr(VI) share follows from its far lower Kd
+    soilSolid:(x, c) => { const f6 = crF6({sp:c.sp, drain:CR_DRAIN[c.r]}); return {cr6s:x * f6, cr3s:x * (1 - f6)}; },
+    soilWater:(x, c) => { const w6 = crW6(crF6({sp:c.sp, drain:CR_DRAIN[c.r]})); return {cr6d:x * w6, cr3d:x * (1 - w6)}; },
+    gwWater:(x, c) => { const w6 = crW6(crF6({sp:c.sp, redox:CR_REDOX[c.a]})); return {cr6d:x * w6, cr3d:x * (1 - w6)}; },
+    gwSolid:(x, c) => { const f6 = crF6({sp:c.sp, redox:CR_REDOX[c.a]}); return {cr6s:x * f6, cr3s:x * (1 - f6)}; },
+    lakeWater:(x, c) => { const f6 = [0.7, 0.5, 0.2][c.l]; return {cr6d:x * f6, cr3d:x * (1 - f6)}; },
+    sed:(x, c) => { const f6 = [0.05, 0.01, 0][c.lY]; return {cr6s:x * f6, cr3s:x * (1 - f6)}; },
+    riverD:(x, c) => { const f6 = c.sp === "VI" ? 0.7 : 0.2; return {cr6d:x * f6, cr3d:x * (1 - f6)}; }, riverP:x => ({cr3s:x}), air:x => ({dust:x})
   }
 };
+const CR_DRAIN = ["well", "periodic", "perm"], CR_REDOX = ["oxic", "suboxic", "anoxic", "sulfidic"];
+// share of dissolved Cr that is Cr(VI) when a share f6 of all Cr is Cr(VI): chromate is about 500 times less sorbed than Cr(III)
+const crW6 = f6 => f6 > 0 ? f6 * 500 / (f6 * 500 + 1 - f6) : 0;
 function formSplit(I, m, b){
   const o = b.o, B = b.B, R = FORM_RULES[m], F = {soil:{}, water:{}, air:{}}, form = FORMS[m].find(f => f.id === I.form) || FORMS[m][0];
   let harvest = 0;
   const put = (ph, obj) => { for(const k in obj){ const v = obj[k]; if(v > 0) F[ph][k] = (F[ph][k] || 0) + v; } };
   const c = {r:I.drain === "perm" ? 2 : I.drain === "periodic" ? 1 : 0, a:{oxic:0, suboxic:1, anoxic:2, sulfidic:3}[I.redox] || 0,
-    l:lakeLevel(I), lY:lakeLevel(I, true), season:I.season || "year", troph:I.troph || "meso", s:I.so4 === "low" ? 0.5 : 1, wet:{none:0, some:0.02, many:0.05}[I.wet] || 0, pH:I.pH, pHigh:I.pstat === "high", form:I.form};
+    l:lakeLevel(I), lY:lakeLevel(I, true), season:I.season || "year", troph:I.troph || "meso", s:I.so4 === "low" ? 0.5 : 1, wet:{none:0, some:0.02, many:0.05}[I.wet] || 0, pH:I.pH, pHigh:I.pstat === "high", form:I.form, sp:form.sp};
   if(soilLike(I)){
     const fr = Math.min(1, I.reactive / 100), soilM = B.top + B.down + B.fp + B.regDep;
     const fwTop = I.theta / (I.theta + I.rhob * o.Kd), fwSub = I.theta / (I.theta + I.rhob * o.kdSub);
@@ -2945,13 +3727,32 @@ window.SMP = window.CHemTrace = Object.freeze({
       ok("Hg Kd equals Koc × organic carbon fraction", Math.abs(kdFn("Hg", {oc:2}) / (Math.pow(10, 5.5) * 0.02) - 1) < 1e-9, "2% organic carbon");
       const lo = kdFn("As", {fe:0.01, pH:12, drain:"perm", redox:"anoxic", sp:"III", pHigh:true}), hi = kdFn("Pb", {pH:14});
       ok("Kd stays inside the literature ranges at extreme inputs", lo >= Math.pow(10, 0.3) - 1e-9 && hi <= 1e5 + 1e-6, `As ${fmt(lo)} L/kg, Pb ${fmt(hi)} L/kg`);
+      const sv = ["Cd", "Cu", "Zn", "Ni"].map(mm => { const [a, b, c0] = SAUVE[mm]; return Math.abs(Math.log10(kdFn(mm, {pH:6.5, oc:2})) - (a * 6.5 + b * Math.log10(2) + c0)); });
+      const svx = ["Cd", "Cu", "Zn", "Ni"].every(mm => { const k1 = Math.log10(kdFn(mm, {pH:14, oc:50})), k0 = Math.log10(kdFn(mm, {pH:0, oc:0})); return k1 <= SAUVE[mm][4] + 1e-9 && k0 >= SAUVE[mm][3] - 1e-9; });
+      ok("Cd, Cu, Zn and Ni Kd follow Sauvé et al. (2000) within the Allison & Allison range", Math.max(...sv) < 1e-9 && svx, "pH 6.5, 2% organic carbon; clamped at pH 0 and 14");
+      const crO = kdFn("Cr", {sp:"VI", redox:"oxic", fe:0.5, pH:7.4}), crA = kdFn("Cr", {sp:"VI", redox:"anoxic", fe:0.5, pH:7.4}), crIII = kdFn("Cr", {sp:"III", redox:"oxic", fe:0.5, pH:7.4});
+      setup("Cr", {preset:"plateau", medium:"soil", form:"cr3", pattern:"pulse", amount:1000, area:100});
+      const oCr = core(INP, "Cr", ONES);
+      ok("Chromium: Kd rises as Cr(VI) is reduced; dissolved Cr(III) stays below its hydroxide solubility", crO < crA && crA < crIII && oCr.cw <= crCap(INP.pH) * (1 + 1e-9), `Kd oxic Cr(VI) ${fmt(crO)}, anoxic ${fmt(crA)}, Cr(III) ${fmt(crIII)} L/kg; 1 t Cr(III) on 100 m²: ${fmt(oCr.cw)} µg/L`);
+      setup("Pb", {preset:"plateau", medium:"gw", pattern:"pulse", amount:1}); const gP = core(INP, "Pb", ONES).cgw;
+      setup("Pb", {preset:"plateau", medium:"gw", pattern:"continuous", amount:1}); const gC = core(INP, "Pb", ONES).cgw;
+      ok("A single event applies only to soil and air releases", gP === gC && !isPulse({medium:"gw", pattern:"pulse"}) && isPulse({medium:"air", pattern:"pulse"}), `groundwater with the pattern set to single event: ${fmt(gP)} µg/L, same as continuous`);
+      const miss = [];
+      for(const mm of MLIST){
+        if(!METALS[mm] || !W[mm] || !FORMS[mm] || !EXAMPLES[mm] || !FORM_DEF[mm] || !FORM_RULES[mm] || !MWT[mm] || !PQ_MIN[mm] || !ATLAS_PCT[mm] || !KDSS[mm] || !KD_SIG[mm] || !KDRANGE[mm] || LIM.tbdv[mm] == null || LIM.altl1[mm] == null) miss.push(mm);
+        ORDER.forEach(cc => { const d = C[cc][mm]; if(!d || !d.forms || !d.risk || C[cc].base[mm] == null) miss.push(mm + "/" + cc); });
+        Object.keys(PRESETS).forEach(p => { const v = PRESETS[p].v; if(v.bg[mm] == null || v.bgGw[mm] == null || v.bgRiv[mm] == null) miss.push(mm + "/" + p); });
+        PATHS.forEach(([id]) => { if(!W[mm][id]) miss.push(mm + "/" + id); });
+        FORMS[mm].forEach(f => { if(!AIR_SPLIT[f.id]) miss.push(mm + "/" + f.id); });
+      }
+      ok("Every metal has data for every compartment, pathway, form and limit", !miss.length, miss.length ? miss.slice(0, 6).join(", ") : `${MLIST.length} metals`);
       // topsoil mass balance against its analytical solution
       setup("As", {preset:"plateau", medium:"soil", form:"asV", pattern:"continuous", amount:50, duration:1000, drain:"perm", land:"agri"});
       const oA = core(INP, "As", ONES), b10 = budget(INP, "As", ONES, 10, []), an = 50 / oA.k * (1 - Math.exp(-oA.k * 10));
       ok("Topsoil follows S(t) = J/k·(1 − e^(−kt))", Math.abs(b10.B.top / an - 1) < 1e-6, `year 10: ${fmt(b10.B.top)} kg vs ${fmt(an)} kg`);
       // mass conservation everywhere
       let worst = 0, nCase = 0, worstF = 0;
-      for(const m of ["As", "Hg", "Pb"]) for(const medium of ["soil", "air", "gw", "river"]) for(const flood of ["none", "once", "rp10"]) for(const T of [1, 25, 100]){
+      for(const m of MLIST) for(const medium of ["soil", "air", "gw", "river"]) for(const flood of ["none", "once", "rp10"]) for(const T of [1, 25, 100]){
         setup(m, {preset:"plateau", medium, pattern:medium === "soil" ? "pulse" : "continuous", amount:10, duration:50, flood, budT:T, fastShare:10, loss:1});
         const b = budget(INP, m, ONES, T, floodPlan(flood, T, null)), sum = Object.values(b.B).reduce((a, v) => a + v, 0);
         worst = Math.max(worst, Math.abs(sum / b.rel - 1)); nCase++;
@@ -3029,7 +3830,7 @@ window.SMP = window.CHemTrace = Object.freeze({
     if(!EXPORTS[kind]) throw new Error("kind must be " + Object.keys(EXPORTS).join(", "));
     const keepM = S.metal, keepI = INP, keepW = S.water;
     try{
-      if(metal){ if(!METALS[metal]) throw new Error("metal must be As, Hg or Pb"); S.metal = metal; }
+      if(metal){ if(!METALS[metal]) throw new Error("metal must be one of " + MLIST.join(", ")); S.metal = metal; }
       S.water = "base";
       if(inputs){ INP = Object.assign(freshInputs(PRESETS[inputs.preset] ? inputs.preset : "plateau"), clone(inputs)); migrateOrg(inputs, INP); if(!FORMS[S.metal].some(f => f.id === INP.form)) INP.form = FORMS[S.metal][0].id; const f = formOf(); if(inputs.reactive == null) INP.reactive = f.fr; applyLadder(INP); applyDerived(INP); }
       if(!INP) throw new Error("no inputs");
@@ -3038,7 +3839,7 @@ window.SMP = window.CHemTrace = Object.freeze({
     } finally { S.metal = keepM; INP = keepI; S.water = keepW; }
   },
   run(metal, inputs){
-    if(!METALS[metal]) throw new Error("metal must be As, Hg or Pb");
+    if(!METALS[metal]) throw new Error("metal must be one of " + MLIST.join(", "));
     const keepM = S.metal, keepI = INP, keepW = S.water;
     try{
       S.metal = metal; S.water = "base";
@@ -3067,9 +3868,13 @@ window.SMP = window.CHemTrace = Object.freeze({
    PHREEQC (speciation, sorption, 1D reactive transport), HYDRUS-1D (unsaturated flow and transport),
    MODFLOW 6 with GWT (groundwater flow and plume). Every value comes from the current inputs;
    placeholders are marked ASSUMED. */
-const MWT = {As:74.92, Hg:200.59, Pb:207.2};
+const MWT = {As:74.92, Hg:200.59, Pb:207.2, Cd:112.41, Cu:63.546, Zn:65.39, Ni:58.69, Cr:51.996};
 const SOIL_REDOX = {well:"oxic", periodic:"suboxic", perm:"anoxic"};
-const PQ_MIN = {Pb:["Cerussite", "Hydrocerussite", "Anglesite", "Pb(OH)2", "Galena"], Hg:["Montroydite", "Cinnabar", "Metacinnabar", "Hgmetal(l)"], As:["Arsenolite", "Orpiment", "Realgar"]};
+const PQ_MIN = {Pb:["Cerussite", "Hydrocerussite", "Anglesite", "Pb(OH)2", "Galena"], Hg:["Montroydite", "Cinnabar", "Metacinnabar", "Hgmetal(l)"], As:["Arsenolite", "Orpiment", "Realgar"],
+  Cd:["Otavite", "Cd(OH)2", "Greenockite"], Cu:["Malachite", "Azurite", "Tenorite", "Cu(OH)2", "Brochantite", "Covellite", "Chalcocite"],
+  Zn:["Smithsonite", "Zincite", "Zn(OH)2", "Sphalerite"], Ni:["Ni(OH)2", "NiCO3", "Bunsenite"], Cr:["Cr(OH)3(am)", "Cr2O3"]};
+// how the reactive metal is added in the batch reaction
+const PQ_SALT = {Pb:"PbCO3", Hg:"Hg(OH)2", Cd:"CdCO3", Cu:"CuCO3", Zn:"ZnCO3", Ni:"NiCO3"};
 // pe held in PHREEQC: oxic water is left to its dissolved O₂; the others are held by adding H₂ (a stand-in for organic carbon)
 const PQ_PE = {oxic:null, suboxic:4, anoxic:0, sulfidic:-3.5};
 const pq = v => { if(!isFinite(v) || v === 0) return "0"; const a = Math.abs(v); return a >= 1e4 || a < 1e-2 ? v.toExponential(3) : String(Number(v.toPrecision(4))); };
@@ -3103,7 +3908,7 @@ function phreeqcInput(){
   const where = soil ? "seepage water below the topsoil" : riv ? "river water" : "groundwater at the source";
   const srcOf = k => isDef(k) ? "ASSUMED default, Water analysis tab" : "entered, Water analysis tab";
   const alkOK = W("wcAlk") != null && !(pH < 5.6 && W("wcAlk") > 30);     // alkalinity above 30 mg/L at pH < 5.6 is inconsistent
-  const reag = m === "Pb" && alkOK ? "NaOH" : pH < 6.5 ? "HCl" : "CO2";
+  const reag = PQ_SALT[m] && m !== "Hg" && alkOK ? "NaOH" : pH < 6.5 ? "HCl" : "CO2";
   const pe0 = {oxic:"oxic", suboxic:"suboxic", anoxic:"anoxic", sulfidic:"sulfidic"}[zone];
   const L = [];
   L.push(`DATABASE minteq.v4.dat`);
@@ -3123,9 +3928,12 @@ function phreeqcInput(){
   L.push(riv ? `# Question: which dissolved species and minerals control ${m} in the river water?` :
     `# Question 1 (batch, chemtrace_batch.sel): do sorption on iron oxides and mineral solubility give the same dissolved ${m} and Kd?`);
   if(!riv) L.push(`# Question 2 (column, chemtrace_column.sel): when does ${m} arrive at the ${soil ? "water table" : "receptor"}, and at what concentration?`);
-  L.push(`# Not represented: binding to organic matter (large for Hg and Pb: add humic sites, e.g. SURFACE with Hum or a`);
+  L.push(`# Not represented: binding to organic matter (large for Hg, Pb and Cu: add humic sites, e.g. SURFACE with Hum or a`);
   L.push(`#   NICA-Donnan or WHAM model), clay exchange, redox kinetics, colloids and preferential flow.`);
   if(m === "Hg") L.push(`# For Hg the website Kd comes from organic matter (Koc), so expect a much lower Kd here until humic binding is added.`);
+  if(m === "Cu") L.push(`# For Cu the website Kd includes organic matter (Sauvé et al. 2000), so expect a lower Kd here until humic binding is added.`);
+  if(m === "Cr") L.push(`# For Cr the website splits Cr(VI) and Cr(III) by redox class; here PHREEQC sets the split from pe (Cr(3) and Cr(6) in minteq.v4.dat).`);
+  if(m === "Cd" || m === "Zn" || m === "Ni") L.push(`# Clay exchange matters for ${m} in acidic soil: add EXCHANGE with the measured CEC if you have it.`);
   L.push(``);
   L.push(`PHASES`);
   L.push(`Fix_pe          # holds pe at the chosen redox class (see EQUILIBRIUM_PHASES)`);
@@ -3173,7 +3981,7 @@ function phreeqcInput(){
   };
   const phases = n => {
     L.push(`EQUILIBRIUM_PHASES ${n}`);
-    L.push(`    Fix_H+    ${-pH}   ${reag}   10    # holds pH ${pq(pH)}${reag === "NaOH" ? ": lead carbonate and sorption release acid, so a base is needed" : ""}`);
+    L.push(`    Fix_H+    ${-pH}   ${reag}   10    # holds pH ${pq(pH)}${reag === "NaOH" ? ": sorption releases acid, so a base is needed" : ""}`);
     if(pe != null) L.push(`    Fix_pe    ${-pe}   H2   1    # adds H2 (stand-in for organic carbon) until pe = ${pe}`);
     PQ_MIN[m].forEach(p => L.push(`    ${p.padEnd(15)} 0  0    # may precipitate; none present at the start`));
   };
@@ -3202,10 +4010,11 @@ function phreeqcInput(){
   // As(V) is added as a sodium arsenate mix matched to the pH (pKa2 6.96), so the addition itself barely shifts the pH;
   // H3AsO4 would add up to 2 mol of acid per mol of As, which the CO2 pH control cannot neutralise at high loads
   const asV = m === "As" && c.form.sp !== "III", fHA = asV ? 1 / (1 + Math.pow(10, 6.96 - pH)) : 0;
-  const salt = m === "Pb" ? "PbCO3" : m === "Hg" ? "Hg(OH)2" : !asV ? "H3AsO3" : "sodium arsenate (NaH2AsO4 and Na2HAsO4 in the ratio of their species at this pH)";
+  const crS = m === "Cr" ? (c.form.sp === "VI" ? "Na2CrO4" : "Cr(OH)3") : null;
+  const salt = crS ? (crS === "Na2CrO4" ? "sodium chromate Na2CrO4" : "Cr(OH)3") : PQ_SALT[m] ? PQ_SALT[m] : !asV ? "H3AsO3" : "sodium arsenate (NaH2AsO4 and Na2HAsO4 in the ratio of their species at this pH)";
   L.push(`REACTION 100  total reactive ${m} per litre of pore water (screening estimate: dissolved + sorbed), added as ${salt}`);
   if(asV){ L.push(`    NaH2AsO4   ${pq(1 - fHA)}`); L.push(`    Na2HAsO4   ${pq(fHA)}`); }
-  else L.push(`    ${m === "Pb" ? "PbCO3" : m === "Hg" ? "Hg(OH)2" : "H3AsO3"}   1`);
+  else L.push(`    ${crS || PQ_SALT[m] || "H3AsO3"}   1`);
   L.push(`    ${pq(tot)} moles in 1 steps`);
   L.push(`SELECTED_OUTPUT 1`);
   L.push(`    -file     chemtrace_batch.sel`);
@@ -3275,7 +4084,7 @@ function hydrusSheet(){
   const c = exportCtx(), {m, I, o} = c;
   const prof = Math.max(o.d + 0.1, I.wt) * 100, top = o.d * 100;      // cm
   const qcm = o.q * 100 / 365.25;                                    // cm/d
-  const cTop = I.pattern === "pulse" ? 0 : (o.J > 0 && o.q > 0 ? o.fr * o.J / o.q : 0);  // reactive input per infiltrating water, continuous release (mg/m²/yr ÷ m/yr = µg/L)
+  const cTop = isPulse(I) ? 0 : (o.J > 0 && o.q > 0 ? o.fr * o.J / o.q : 0);  // reactive input per infiltrating water, continuous release (mg/m²/yr ÷ m/yr = µg/L)
   const cIni = o.cwAdd;                                               // µg/L in topsoil water at the peak
   const R = [["Section", "HYDRUS-1D field", "Value", "Unit", "Source", "Note"]];
   const add = (s, f, v, u, src, n) => R.push([s, f, v, u, src, n || ""]);
@@ -3301,10 +4110,10 @@ function hydrusSheet(){
   add("Reaction, material 1", "Kd / Nu / Beta", `${pq(o.Kd)} / 0 / 1`, "cm3/g / - / -", num(I.kdSoil) ? "Your measured Kd" : "Website estimate (Soil tab)", "Linear sorption; 1 L/kg = 1 cm3/g. Better: fit Freundlich (Beta) to a batch test");
   add("Reaction, material 2", "Kd / Nu / Beta", `${pq(o.kdSub)} / 0 / 1`, "cm3/g / - / -", "Website estimate: subsoil with 30% of the topsoil organic carbon", "");
   if(o.fr < 1) add("Reaction", "Non-reactive share", pq((1 - o.fr) * 100), "%", "Release tab: reactive share", "HYDRUS treats all metal as reactive: enter only the reactive part below");
-  add("Solute BC", "Upper boundary", I.pattern === "pulse" ? "Concentration flux BC, cTop = 0" : "Concentration flux BC", "", "", "");
-  add("Solute BC", "cTop (continuous release)", I.pattern === "pulse" ? "0" : `${pq(cTop / 1000)}`, "ug/cm3", "Release tab: deposition or load ÷ infiltration", I.pattern === "pulse" ? "Pulse release: the metal starts in the topsoil (initial condition)" : `= ${pq(cTop)} ug/L for ${pq(Math.min(I.duration, I.horizon) * 365.25)} days, then 0; reactive share only`);
+  add("Solute BC", "Upper boundary", isPulse(I) ? "Concentration flux BC, cTop = 0" : "Concentration flux BC", "", "", "");
+  add("Solute BC", "cTop (continuous release)", isPulse(I) ? "0" : `${pq(cTop / 1000)}`, "ug/cm3", "Release tab: deposition or load ÷ infiltration", isPulse(I) ? "Pulse release: the metal starts in the topsoil (initial condition)" : `= ${pq(cTop)} ug/L for ${pq(Math.min(I.duration, I.horizon) * 365.25)} days, then 0; reactive share only`);
   add("Solute BC", "Lower boundary", "Zero concentration gradient", "", "", "");
-  add("Solute IC", "Liquid concentration in material 1", I.pattern === "pulse" ? pq(cIni / 1000) : "0", "ug/cm3", I.pattern === "pulse" ? "Website: topsoil seepage water after the release" : "", I.pattern === "pulse" ? `= ${pq(cIni)} ug/L; HYDRUS adds the sorbed part with Kd` : "Add background if you model it");
+  add("Solute IC", "Liquid concentration in material 1", isPulse(I) ? pq(cIni / 1000) : "0", "ug/cm3", isPulse(I) ? "Website: topsoil seepage water after the release" : "", isPulse(I) ? `= ${pq(cIni)} ug/L; HYDRUS adds the sorbed part with Kd` : "Add background if you model it");
   add("Observation", "Observation node", pq(prof), "cm", "", "At the water table: compare its breakthrough with the website");
   add("Compare", "Website: arrival at the water table", fmtYr(o.tArr), "years", "Screening, slow matrix flow", "");
   add("Compare", "Website: seepage water at the peak", pq(o.cw), "ug/L", "Screening", "Includes the reactive background");
