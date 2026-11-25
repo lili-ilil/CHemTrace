@@ -143,7 +143,47 @@
    "nodata": 65535,
    "byteOffset": 1588544,
    "source": "FOEN annual mean maps 2023-2025, mean of 100 m cells"
+  },
+  {
+   "name": "atl_Cd",
+   "type": "u8",
+   "scale": 1,
+   "offset": 0,
+   "nodata": 0,
+   "byteOffset": 1747396
+  },
+  {
+   "name": "atl_Cu",
+   "type": "u8",
+   "scale": 1,
+   "offset": 0,
+   "nodata": 0,
+   "byteOffset": 1826824
+  },
+  {
+   "name": "atl_Zn",
+   "type": "u8",
+   "scale": 1,
+   "offset": 0,
+   "nodata": 0,
+   "byteOffset": 1906252
+  },
+  {
+   "name": "atl_Ni",
+   "type": "u8",
+   "scale": 1,
+   "offset": 0,
+   "nodata": 0,
+   "byteOffset": 1985680
+  },
+  {
+   "name": "atl_Cr",
+   "type": "u8",
+   "scale": 1,
+   "offset": 0,
+   "nodata": 0,
+   "byteOffset": 2065108
   }
  ],
- "generated": "2026-10-28"
+ "generated": "2026-11-25"
 }
