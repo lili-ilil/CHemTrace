@@ -283,9 +283,26 @@
     </div>
     <aside class="intended" aria-label="Intended use">
       <p><b>Intended use.</b> An overview of the whole system: where the metal goes, which place to act on first and what to measure, so you can form assumptions and a first plan. Check that plan with site data and the specialised models under <a href="#further">Take it further</a>. Also for teaching and comparing scenarios. <b>Not for</b> deciding under the AltlV whether a site must be investigated further or remediated, designing remediation, predicting concentrations or arrival times at a specific well, or individual health-risk assessments. Several defaults are assumptions that experts have not yet reviewed.</p>
-      <p class="imeta"><a href="manual.html#intended">Intended use and limits</a> · <a href="assumptions.html">All assumptions</a> · <a href="validation.html">Validation</a> · Version 0.14.0, 25 November 2026 · Feedback: <a href="mailto:litail@ethz.ch">litail@ethz.ch</a></p>
+      <p class="imeta"><a href="manual.html#intended">Intended use and limits</a> · <a href="assumptions.html">All assumptions</a> · <a href="validation.html">Validation</a> · Version 0.15.0, 25 November 2026 · Feedback: <a href="mailto:litail@ethz.ch">litail@ethz.ch</a></p>
     </aside>
     <div class="res-grid" id="resGrid"></div>
+    <div class="prio" id="prio">
+      <div class="bud-head">
+        <h3>Where to act first: screening priority</h3>
+        <p>Each link from the source to someone or something exposed, rated by consequence, time to impact, the share of uncertainty runs above the Swiss value, your measured values (Import data tab) and a stress test with harsher conditions. The rules are listed under <a href="manual.html#priority">Where to act first</a> in the manual. You decide: change any rating and give a reason; both go into the report.</p>
+      </div>
+      <div id="prioBody"></div>
+      <div id="prioNoRegret"></div>
+      <p class="sp-note"><b>Screening priority, not a legal classification.</b> Under the AltlV the canton decides whether a contaminated site needs monitoring or remediation, and how urgently. Use this to plan the next steps and to talk with the authority.</p>
+    </div>
+    <div class="plan" id="plan">
+      <div class="bud-head">
+        <h3>What to measure next</h3>
+        <p>Measurements that would decide an open outcome or confirm an exceedance, in order of priority, with where, how and when. Values you import on the Import data tab are counted here.</p>
+      </div>
+      <div id="planBody"></div>
+      <p class="sp-note">A starting point for a sampling plan. Investigations under the AltlV and VBBo follow the federal sampling guidance and need a specialist; the canton can tell you what applies.</p>
+    </div>
     <div class="spread" id="spread">
       <div class="bud-head">
         <h3>Where to act: how it spreads over time</h3>
@@ -327,6 +344,25 @@
                   <p>Only 8 map sheets exist (e.g. Basel, Biel, Lake Constance); elsewhere the layer is empty. Full legend: click a feature in map.geo.admin.ch (link below).</p>
                   <a class="src" href="https://www.bafu.admin.ch/en/groundwater-maps" target="_blank" rel="noopener">Source: FOEN groundwater maps ↗</a>
                 </div>
+                <label><input type="checkbox" data-ov="sewer" autocomplete="off"><span>Sewer network <small>Cantonal utility cadastre: pipes, manholes and structures for wastewater and rainwater, where the canton publishes it</small></span></label>
+                <div class="lyr-leg" id="leg-sewer" hidden>
+                  <p id="sewerHint" class="sp-hint" hidden>Zoom in to about 1:25,000 or closer to see the pipes.</p>
+                  <p>Shown only where the canton makes its utility cadastre public: in a test in November 2026 that was Aargau, Geneva and Glarus. Elsewhere the layer stays empty; ask the municipality for the general drainage plan (GEP). Fees and terms are set by the cantons and utilities.</p>
+                  <a class="src" href="https://www.geodienste.ch/services/leitungskataster" target="_blank" rel="noopener">Source: cantons and utilities via geodienste.ch ↗</a>
+                </div>
+                <label><input type="checkbox" data-ov="ara" autocomplete="off"><span>Wastewater treatment plants <small>FOEN; each plant, coloured by the share of its treated wastewater in the receiving river at low flow (Q347)</small></span></label>
+                <div class="lyr-leg" id="leg-ara" hidden>
+                  <ul>
+                    <li><i style="--c:#008FE6"></i>Below 2% of the river at low flow</li>
+                    <li><i style="--c:#24994D"></i>2–5%</li>
+                    <li><i style="--c:#D0F086"></i>5–10%</li>
+                    <li><i style="--c:#EDB05A"></i>10–20%</li>
+                    <li><i style="--c:#E60000"></i>20–50%</li>
+                    <li><i style="--c:#A83800"></i>Above 50%: the stream is mostly treated wastewater at low flow</li>
+                  </ul>
+                  <p>Metals not held back in a plant reach these rivers; the higher the share, the less dilution. Database of wastewater treatment plants, based on a 2011 survey.</p>
+                  <a class="src" href="https://www.bafu.admin.ch/de/kommunale-abwasserreinigung" target="_blank" rel="noopener">Source: FOEN ↗</a>
+                </div>
                 <label><input type="checkbox" data-ov="tracer" autocomplete="off"><span>Tracer tests <small>FOEN; where groundwater tracer tests were run, mainly in karst</small></span></label>
                 <div class="lyr-leg" id="leg-tracer" hidden>
                   <ul>
@@ -341,7 +377,7 @@
           </div>
         </div>
         <div class="sp-side">
-          <button type="button" class="sp-layers-btn" id="spLayersBtn" aria-expanded="false" aria-controls="spDrawer"><span class="chev" aria-hidden="true">‹</span><span>Support layers<small>Protection zones, hydrogeology, tracer tests</small></span><span class="cnt" id="spLayersCnt"></span></button>
+          <button type="button" class="sp-layers-btn" id="spLayersBtn" aria-expanded="false" aria-controls="spDrawer"><span class="chev" aria-hidden="true">‹</span><span>Support layers<small>Protection zones, hydrogeology, sewers, treatment plants, tracer tests</small></span><span class="cnt" id="spLayersCnt"></span></button>
           <ul class="sp-legend" aria-label="Map legend">
             <li><i class="lg-fill crit"></i>Above the standard (best estimate)</li>
             <li><i class="lg-fill warn"></i>Possibly above (at least 10% of runs)</li>
@@ -550,7 +586,7 @@
     </ul>
   </section>
 
-  <footer>Built from literature and Swiss federal sources, checked November 2026. Explore mode is qualitative: flow weights and mobility levels are indicative. Advanced mode gives screening estimates from documented equations and does not replace a site investigation. Map data © swisstopo; climate data: Source MeteoSwiss; soil maps © KOBO (CC BY 4.0); soil atlas © FOEN/Agroscope; land use © BFS.<span class="copy">© 2026 Li-Ling T. ETH Zürich · Version 0.14.0, 25 November 2026 · Contact: <a href="mailto:litail@ethz.ch">litail@ethz.ch</a></span></footer>
+  <footer>Built from literature and Swiss federal sources, checked November 2026. Explore mode is qualitative: flow weights and mobility levels are indicative. Advanced mode gives screening estimates from documented equations and does not replace a site investigation. Map data © swisstopo; climate data: Source MeteoSwiss; soil maps © KOBO (CC BY 4.0); soil atlas © FOEN/Agroscope; land use © BFS.<span class="copy">© 2026 Li-Ling T. ETH Zürich · Version 0.15.0, 25 November 2026 · Contact: <a href="mailto:litail@ethz.ch">litail@ethz.ch</a></span></footer>
 </div>
 <script>
 window.addEventListener("load", function(){

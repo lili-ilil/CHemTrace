@@ -1396,7 +1396,8 @@ const BASE = {preset:"plateau", medium:"soil", form:"", pattern:"continuous", am
   wcT:"", wcCa:"", wcMg:"", wcNa:"", wcK:"", wcCl:"", wcAlk:"", wcFe:"", wcMn:"", wcH2S:"", wcEh:"",
   stackH:30, windU:2.5, windFrom:"", windShare:40, pGas0:"", pRgm:"", pFine:"", pCoarse:"", pLarge:"", forestShare:"", sealedShare:"", drainSys:"urban", resusp:"",
   snowDays:"", snowReem:50, snowRun:30, hgSoilF:10, bgDep:{As:"", Hg:"", Pb:"", Cd:"", Cu:"", Zn:"", Ni:"", Cr:""}, bgAir:{As:"", Hg:"", Pb:"", Cd:"", Cu:"", Zn:"", Ni:"", Cr:""},
-  roadL:1000, aadt:15000, hgv:6, roadEra:"today", efRoad:"", roadDir:"90", glArea:5, glLoss:1.4, glConc:{As:0.1, Hg:0.01, Pb:2}, glShare:20};
+  roadL:1000, aadt:15000, hgv:6, roadEra:"today", efRoad:"", roadDir:"90", glArea:5, glLoss:1.4, glConc:{As:0.1, Hg:0.01, Pb:2}, glShare:20,
+  meas:[], prio:{}, q347:"", impSrc:{}};
 const EXAMPLES = {
   As:{short:"mine-dump seepage", preset:"ticino", v:{medium:"gw", form:"asV", amount:0.01, horizon:100, gwWidth:50, gwThick:10, wellDist:200, land:"agri", drink:"yes", fish:"none"}},
   Hg:{short:"Visp garden", preset:"visp", v:{medium:"soil", form:"hgsed", pattern:"pulse", amount:0.5, horizon:100, area:200, depthMix:30, land:"garden", drink:"no", fish:"monthly", reactive:50}},
@@ -1407,7 +1408,7 @@ const EXAMPLES = {
   Ni:{short:"plating-shop spill", preset:"plateau", v:{medium:"soil", form:"ni2", pattern:"pulse", amount:20, horizon:50, area:100, depthMix:20, land:"ind", drink:"yes", fish:"none"}},
   Cr:{short:"chromate plume", preset:"plateau", v:{medium:"gw", form:"cr6", amount:1, horizon:50, gwWidth:30, gwThick:5, wellDist:300, land:"ind", drink:"yes", fish:"none"}}
 };
-const TABS = [{id:"rel", label:"Release"},{id:"site", label:"Site & climate"},{id:"air", label:"Air & surface"},{id:"soil", label:"Soil"},{id:"gw", label:"Groundwater"},{id:"sw", label:"River & lake"},{id:"bud", label:"Budget & floods"},{id:"redox", label:"Redox (optional)"},{id:"water", label:"Water analysis (optional)"},{id:"exp", label:"Exposure"}];
+const TABS = [{id:"rel", label:"Release"},{id:"site", label:"Site & climate"},{id:"air", label:"Air & surface"},{id:"soil", label:"Soil"},{id:"gw", label:"Groundwater"},{id:"sw", label:"River & lake"},{id:"bud", label:"Budget & floods"},{id:"redox", label:"Redox (optional)"},{id:"water", label:"Water analysis (optional)"},{id:"exp", label:"Exposure"},{id:"imp", label:"Import data"}];
 const soilLike = I => I.medium === "soil" || I.medium === "air" || I.medium === "road";
 // a single event is possible for releases to soil and air; the other releases are steady by construction
 const isPulse = I => (I.medium === "soil" || I.medium === "air") && I.pattern === "pulse";
@@ -1558,7 +1559,8 @@ const TABNOTES = {
   bud: () => "These settings drive the mass budget below the results. Flood values are assumptions: replace them with event data if you have it.",
   redox: I => I.rlOn === "on" ? "The ladder finds the predominant terminal electron-accepting process below the source. CHemTrace uses it as the aquifer redox condition (and as the soil water regime if you give saturation days); its electron balance appears among the results. It is a first indication only: species distributions need thermodynamics with measured pH and concentrations (PHREEQC export). Switching it off keeps the last calculated values." : "Off. Switch on if you have oxygen, nitrate, sulfate and organic-carbon data for the water reaching the aquifer.",
   water: () => "Optional. Enter your water analysis (filtered samples). The PHREEQC export uses these values in place of its assumed ones, which is what a thermodynamic species calculation needs; oxygen, nitrate and sulfate also feed the redox ladder. pH comes from the Soil, Groundwater or River & lake tab.",
-  exp: () => "The child soil-ingestion dose is calculated for gardens and playgrounds."
+  exp: () => "The child soil-ingestion dose is calculated for gardens and playgrounds.",
+  imp: () => ""
 };
 const MEDIUM_LBL = {soil:"soil", air:"air", road:"a road (traffic)", gw:"groundwater", river:"a river", glacier:"a glacier-fed river (melt)"};
 const BPOS = {air:[1046,58], forest:[470,300], farm:[692,350], site:[740,354], people:[854,330], gw:[790,500], river:[712,432], lake:[1010,436], sediment:[1100,549]};
@@ -1596,7 +1598,7 @@ const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 const SUPS = {"-":"⁻","0":"⁰","1":"¹","2":"²","3":"³","4":"⁴","5":"⁵","6":"⁶","7":"⁷","8":"⁸","9":"⁹"};
 // results are screening estimates, often uncertain by a factor of 10: show two significant figures, not more
 const NF = new Intl.NumberFormat("en-US", {maximumSignificantDigits:2});
-const APP_VERSION = "0.14.0", APP_DATE = "2026-11-25";
+const APP_VERSION = "0.15.0", APP_DATE = "2026-11-25";
 function fmt(v){
   if(v == null || isNaN(v)) return "–";
   if(!isFinite(v)) return "∞";
@@ -2470,7 +2472,8 @@ function compute(){
   rows.forEach(r => r.comp.forEach(c => { compStatus[c] = worse(compStatus[c], r.status); }));
   const nC = rows.filter(r => r.status === "crit").length, nW = rows.filter(r => r.status === "warn" || r.status === "check").length;
   const summary = (nC ? `${nC} result${nC > 1 ? "s exceed" : " exceeds"} a Swiss limit or health reference point.` : nW ? `No limit exceeded at the best estimate; ${nW} result${nW > 1 ? "s need" : " needs"} checking.` : "All screened results are below Swiss limits.") + ` Ranges come from ${MC_N} Monte Carlo runs. Screening only: confirm with site data.`;
-  return {rows, sugg:[...new Set(sugg)], compStatus, relPos, summary, bud, sens, MC, ser, forms, o0:o, title:`Release to ${MEDIUM_LBL[I.medium]}`, form, kdCalc:o.kdCalc, kdAqCalc:o.kdAqCalc, kdSSdef:kdSSOf(m, form.sp)};
+  const prio = prioLinks(I, m, {rows, MC}, o), plan = planOf(I, m, {rows, MC, sens, bud}, prio);
+  return {rows, sugg:[...new Set(sugg)], compStatus, relPos, summary, bud, sens, MC, ser, forms, o0:o, prio, plan, title:`Release to ${MEDIUM_LBL[I.medium]}`, form, kdCalc:o.kdCalc, kdAqCalc:o.kdAqCalc, kdSSdef:kdSSOf(m, form.sp)};
 }
 
 function deriveConditions(){
@@ -2498,7 +2501,8 @@ function renderResults(){
   $("#resIntro").textContent = `${METALS[S.metal].name} · ${R.form.label} · released to ${MEDIUM_LBL[I.medium]} · ${amt} · ${I.preset === "custom" ? "custom site" : PRESETS[I.preset].label}. ${R.summary}`;
   $("#resGrid").innerHTML = R.rows.map(r => `<div class="res" data-s="${r.status}"><div class="rl"><span>${esc(r.label)}</span><span class="pill ${r.status}">${esc(r.tag)}</span></div><div class="rv">${esc(r.vtxt)}<small>${esc(r.unit)}</small></div>${rangeHTML(r)}<div class="rr">${esc(r.ref)}</div><div class="rh">${esc(r.how)}</div>${r.bench ? `<div class="bench"><b>Measured</b>${esc(r.bench)}</div>` : ""}</div>`).join("");
   $("#suggList").innerHTML = R.sugg.map(s => `<li>${esc(s)}</li>`).join("");
-  renderBudget(); renderSens(); renderSeries(); renderForms(); renderSpread(); renderFurther();
+  renderBudget(); renderSens(); renderSeries(); renderForms(); renderSpread(); renderFurther(); renderPrio(); renderPlan();
+  if(S.tab === "imp") renderImport();
   const ph = (id, v) => { const el = document.getElementById(id); if(el) el.placeholder = "default: " + fmt(v); };
   ph("f-kdSoil", R.kdCalc); ph("f-kdAq", R.kdAqCalc); ph("f-kdSS", R.kdSSdef); ph("f-eros", erosDefault(INP));
   const m = S.metal, o0 = R.o0 || {};
@@ -2596,6 +2600,7 @@ function reportText(){
     SP.act.forEach(x => L.push(`- ${x}`));
     L.push("");
   }
+  prioReport(L);
   L.push("Main uncertainty drivers (Spearman rank correlation over the Monte Carlo runs)");
   R.sens.filter(it => R.rows.some(r => r.id === it.id && r.key)).forEach(it => { const d = sensitivity(it, R).filter(x => Math.abs(x.rho) >= 0.1).slice(0, 2); if(d.length) L.push(`- ${it.label}: ${d.map(x => `${x.f.label} ${x.rho >= 0 ? "+" : "−"}${Math.abs(x.rho).toFixed(2)}`).join(", ")}`); });
   L.push("");
@@ -2725,8 +2730,10 @@ function renderForm(){
   $("#advPanels").innerHTML = TABS.map(t => {
     const note = TABNOTES[t.id](INP);
     const fs = FIELDS.filter(f => f.tab === t.id && (!f.show || f.show(INP)));
+    if(t.id === "imp") return `<div class="imp-panel" role="tabpanel" id="tp-imp" aria-labelledby="tab-imp"${S.tab === t.id ? "" : " hidden"}><div id="impBox"></div></div>`;
     return `<div class="fields" role="tabpanel" id="tp-${t.id}" aria-labelledby="tab-${t.id}"${S.tab === t.id ? "" : " hidden"}>${note ? `<p class="tabnote">${esc(note)}</p>` : ""}${fs.map(fieldHTML).join("")}</div>`;
   }).join("");
+  renderImport();
 }
 function selectTab(id, focus){
   S.tab = id;
@@ -2768,6 +2775,9 @@ function sanitize(src){
   if(FLOODS[src.flood]) out.flood = src.flood;
   if(src.mapLim === "tbdv" || src.mapLim === "altl") out.mapLim = src.mapLim;
   if(src.slopeSrc === "terrain") out.slopeSrc = "terrain";
+  out.meas = measSanitize(src.meas); out.prio = prioSanitize(src.prio);
+  if(Number(src.q347) > 0 && Number(src.q347) < 1e5) out.q347 = Number(src.q347);
+  if(src.impSrc && typeof src.impSrc === "object") Object.entries(src.impSrc).forEach(([k, v]) => { if(/^(Q|q347|precip|wt|wcT)$/.test(k) && typeof v === "string") out.impSrc[k] = v.slice(0, 80); });
   migrateOrg(src, out);   // inputs saved before organic contamination types existed
   return out;
 }
@@ -3261,29 +3271,48 @@ function cssVar(n){ return getComputedStyle(document.documentElement).getPropert
 // So the cantonal layer is one image per map view, requested after panning stops and only while it is switched on.
 const CW = {on:false, img:null, timer:0, times:[], seq:0, attr:'Groundwater protection: cantons via <a href="https://www.geodienste.ch" target="_blank" rel="noopener">geodienste.ch</a>'};
 const CW_URL = "https://geodienste.ch/db/planerischer_gewaesserschutz_v1_2_0/deu", CW_MAXPX = 360000, CW_PER_MIN = 9;
-function cantWms(on){
-  CW.on = on; clearTimeout(CW.timer);
-  if(on){ SP.map.attributionControl.addAttribution(CW.attr); cantSchedule(0); }
-  else { SP.map.attributionControl.removeAttribution(CW.attr); if(CW.img){ SP.map.removeLayer(CW.img); CW.img = null; } CW.seq++; }
+// Both geodienste.ch layers share one request log, so together they stay under the fair-use limit.
+// The sewer network comes from the national utility cadastre (Leitungskataster), medium wastewater; cantons decide
+// what is public, and pipes appear only at about 1:25,000 or closer (map zoom 15).
+const WMS_DEF = {
+  cant:{url:CW_URL, layers:"gewaesserschutzbereiche,grundwasserschutzareale,grundwasserschutzzonen", opacity:0.45, z:350, attr:CW.attr},
+  sewer:{url:"https://wfs.geodienste.ch/leitungskataster_v2_0_0/deu", layers:"abwasser", opacity:0.95, z:352, minZoom:15,
+    attr:'Sewer network: cantons and utilities via <a href="https://www.geodienste.ch/services/leitungskataster" target="_blank" rel="noopener">geodienste.ch</a>'}
+};
+const WMS_ST = {cant:CW, sewer:{on:false, img:null, timer:0, seq:0}};
+function wmsOv(key, on){
+  const st = WMS_ST[key], d = WMS_DEF[key];
+  st.on = on; clearTimeout(st.timer);
+  if(on){ SP.map.attributionControl.addAttribution(d.attr); wmsSchedule(key, 0); }
+  else { SP.map.attributionControl.removeAttribution(d.attr); if(st.img){ SP.map.removeLayer(st.img); st.img = null; } st.seq++; }
+  wmsHint();
 }
-function cantSchedule(delay){
-  clearTimeout(CW.timer);
+const cantWms = on => wmsOv("cant", on);
+function wmsSchedule(key, delay){
+  const st = WMS_ST[key]; clearTimeout(st.timer);
   const now = Date.now(); CW.times = CW.times.filter(t => now - t < 60000);
   const wait = CW.times.length >= CW_PER_MIN ? 60000 - (now - CW.times[0]) + 50 : 0;     // stay under the per-minute limit
-  CW.timer = setTimeout(cantLoad, Math.max(delay == null ? 600 : delay, wait));
+  st.timer = setTimeout(() => wmsLoad(key), Math.max(delay == null ? 600 : delay, wait));
 }
-function cantLoad(){
-  if(!CW.on || !SP.map) return;
+function wmsHint(){
+  const el = document.getElementById("sewerHint"); if(!el || !SP.map) return;
+  el.hidden = !(WMS_ST.sewer.on && SP.map.getZoom() < WMS_DEF.sewer.minZoom);
+}
+function wmsLoad(key){
+  const st = WMS_ST[key], d = WMS_DEF[key];
+  if(!st.on || !SP.map) return;
+  if(d.minZoom && SP.map.getZoom() < d.minZoom){ if(st.img){ SP.map.removeLayer(st.img); st.img = null; } wmsHint(); return; }
   const LF = window.L, b = SP.map.getBounds(), sz = SP.map.getSize();
   const k = Math.min(1, Math.sqrt(CW_MAXPX / Math.max(1, sz.x * sz.y))), w = Math.max(1, Math.floor(sz.x * k)), h = Math.max(1, Math.floor(sz.y * k));
   const sw = LF.CRS.EPSG3857.project(b.getSouthWest()), ne = LF.CRS.EPSG3857.project(b.getNorthEast());
-  const url = `${CW_URL}?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetMap&LAYERS=gewaesserschutzbereiche,grundwasserschutzareale,grundwasserschutzzonen&STYLES=&CRS=EPSG:3857&BBOX=${sw.x.toFixed(1)},${sw.y.toFixed(1)},${ne.x.toFixed(1)},${ne.y.toFixed(1)}&WIDTH=${w}&HEIGHT=${h}&FORMAT=image/png&TRANSPARENT=true`;
-  const seq = ++CW.seq; CW.times.push(Date.now());
-  if(!SP.map.getPane("cantPane")){ const pn = SP.map.createPane("cantPane"); pn.style.zIndex = 350; pn.style.pointerEvents = "none"; }   // under the plume and markers
-  const img = LF.imageOverlay(url, b, {opacity:0.45, interactive:false, pane:"cantPane"});
-  img.once("load", () => { if(seq !== CW.seq || !CW.on){ SP.map.removeLayer(img); return; } if(CW.img) SP.map.removeLayer(CW.img); CW.img = img; });
-  img.once("error", () => { if(seq === CW.seq) SP.map.removeLayer(img); });
-  img.addTo(SP.map);
+  const url = `${d.url}?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetMap&LAYERS=${d.layers}&STYLES=&CRS=EPSG:3857&BBOX=${sw.x.toFixed(1)},${sw.y.toFixed(1)},${ne.x.toFixed(1)},${ne.y.toFixed(1)}&WIDTH=${w}&HEIGHT=${h}&FORMAT=image/png&TRANSPARENT=true`;
+  const seq = ++st.seq; CW.times.push(Date.now());
+  const pane = key + "Pane";
+  if(!SP.map.getPane(pane)){ const pn = SP.map.createPane(pane); pn.style.zIndex = d.z; pn.style.pointerEvents = "none"; }   // under the plume and markers
+  const img = LF.imageOverlay(url, b, {opacity:d.opacity, interactive:false, pane});
+  img.once("load", () => { if(seq !== st.seq || !st.on){ SP.map.removeLayer(img); return; } if(st.img) SP.map.removeLayer(st.img); st.img = img; });
+  img.once("error", () => { if(seq === st.seq) SP.map.removeLayer(img); });
+  img.addTo(SP.map); wmsHint();
 }
 function initSpreadMap(){
   if(SP.map || typeof window.L === "undefined" || !document.getElementById("spMap2")) return;
@@ -3293,6 +3322,7 @@ function initSpreadMap(){
   addBaseLayers(LF, SP.map, 19);
   SP.ov.cant = null;   // cantonal protection zones: one image per map view, see cantWms()
   SP.ov.hk100 = LF.tileLayer("https://wmts.geo.admin.ch/1.0.0/ch.bafu.hydrogeologische-karte_100/default/current/3857/{z}/{x}/{y}.png", {maxZoom:19, opacity:0.75, attribution:"Hydrogeological map 1:100,000 © FOEN"});
+  SP.ov.ara = LF.tileLayer("https://wmts.geo.admin.ch/1.0.0/ch.bafu.gewaesserschutz-klaeranlagen_anteilq347/default/current/3857/{z}/{x}/{y}.png", {maxZoom:19, attribution:"Wastewater treatment plants © FOEN"});
   SP.ov.tracer = LF.tileLayer("https://wmts.geo.admin.ch/1.0.0/ch.bafu.hydrogeologie-markierversuche/default/current/3857/{z}/{x}/{y}.png", {maxZoom:19, attribution:"Tracer tests © FOEN"});
   SP.draw = LF.layerGroup().addTo(SP.map);
   SP.map.on("click", e => {
@@ -3304,10 +3334,10 @@ function initSpreadMap(){
   });
   document.querySelectorAll("#spLayers input[data-ov]").forEach(cb => cb.addEventListener("change", () => {
     const leg = document.getElementById("leg-" + cb.dataset.ov); if(leg) leg.hidden = !cb.checked;
-    if(cb.dataset.ov === "cant"){ cantWms(cb.checked); return; }
+    if(WMS_DEF[cb.dataset.ov]){ wmsOv(cb.dataset.ov, cb.checked); return; }
     const l = SP.ov[cb.dataset.ov]; if(l){ if(cb.checked) l.addTo(SP.map); else SP.map.removeLayer(l); }
   }));
-  SP.map.on("moveend", () => { if(CW.on) cantSchedule(); });
+  SP.map.on("moveend", () => { Object.keys(WMS_ST).forEach(k => { if(WMS_ST[k].on) wmsSchedule(k); }); wmsHint(); });
   $("#spTerrDir").addEventListener("change", () => drawSpread());
   $("#spT").addEventListener("input", e => { SP.frame = Number(e.target.value); drawSpread(); });
   $("#spPlay").addEventListener("click", () => setSpreadPlay(!SP.playing));
@@ -3350,7 +3380,7 @@ function renderSpreadStatus(){
   el.innerHTML = `<p>${srcTxt}. <button class="btn ghost sm" data-act="src" aria-pressed="${picking === "src"}">${picking === "src" ? "Click the map…" : "Move source"}</button>${num(INP.srcE) ? ` <button class="btn ghost sm" data-act="home">Use preset place</button>` : ""}</p>
     <p>${dirTxt} <button class="btn sm" data-act="dir" aria-pressed="${picking === "dir"}">${picking === "dir" ? "Click a point downstream…" : (d && d.src === "user" ? "Change direction" : "Set direction")}</button>${d && d.src === "user" ? ` <button class="btn ghost sm" data-act="clear">Clear</button>` : ""}</p>
     ${terr ? `<p class="mini">${terr}</p>` : ""}`;
-  const a = $("#spGeoLink"); if(a) a.href = `https://map.geo.admin.ch/?lang=en&E=${Math.round(s.E)}&N=${Math.round(s.N)}&zoom=9&layers=ch.bafu.hydrogeologische-karte_100,ch.swisstopo.geologie-hydrogeologische_karte-grundwasservorkommen,ch.bafu.hydrogeologie-markierversuche`;
+  const a = $("#spGeoLink"); if(a) a.href = `https://map.geo.admin.ch/?lang=en&E=${Math.round(s.E)}&N=${Math.round(s.N)}&zoom=9&layers=ch.bafu.hydrogeologische-karte_100,ch.swisstopo.geologie-hydrogeologische_karte-grundwasservorkommen,ch.bafu.hydrogeologie-markierversuche,ch.bafu.gewaesserschutz-klaeranlagen_anteilq347`;
 }
 function renderSpread(){
   if(!S.adv || !RES || !$("#spread")) return;
@@ -3710,6 +3740,621 @@ function renderForms(){
     <p class="fsum">${mainW.some(Boolean) ? `<b>Main form in water:</b> ${runs.map((r, i) => `${i + 1}. ${esc(mainW[i] || "none")}`).join(" · ")}.` : ""}</p>${tbl}`;
 }
 
+/* ================= WHERE TO ACT FIRST: SCREENING PRIORITY (0.15.0) =================
+   A transparent rule set, not a legal classification. Each source–pathway–receptor link is rated by
+   consequence (who or what is exposed), time to impact, the share of uncertainty runs above the Swiss value,
+   measured values the user imported, and a stress test under harsher conditions. The user can override it. */
+const PRIO_CAT = {
+  act:{label:"Act now", pill:"crit", rank:0},
+  measure:{label:"Measure first", pill:"check", rank:1},
+  monitor:{label:"Monitor", pill:"warn", rank:2},
+  record:{label:"Record only", pill:"info", rank:3}
+};
+const PRIO_SEV = {3:"High: people directly (drinking water, children, breathing, fish eaters)", 2:"Medium: crops, streams, groundwater, seepage at a contaminated site", 1:"Low: soil life and fertility"};
+const PRIO_TCOL = [{k:0, label:"Now"}, {k:1, label:"Within 5 years"}, {k:2, label:"5–25 years"}, {k:3, label:"Later or not expected"}];
+const ACT_LEAD = 5;   // years a remedy typically needs from planning to effect (assumption)
+// measured media in the import, and which links they inform
+const MEAS_MED = {gw:"Groundwater or spring", seep:"Seepage water or eluate", river:"River or lake water", soil:"Topsoil", air:"Air (PM10)", dep:"Dust deposition"};
+const MEAS_UNIT = {gw:"µg/L", seep:"µg/L", river:"µg/L", soil:"mg/kg", air:"ng/m³", dep:"µg/(m²·d)"};
+const MEAS_POS = {src:"At or below the source", down:"Downstream or downgradient", ref:"Reference (background)"};
+function measFor(I, m, med){
+  const xs = (I.meas || []).filter(x => x.metal === m && x.med === med && x.pos !== "ref");
+  if(!xs.length) return null;
+  const det = xs.filter(x => !x.nd), max = det.length ? Math.max(...det.map(x => x.v)) : Math.max(...xs.map(x => x.v));
+  return {n:xs.length, max, allNd:!det.length, unit:MEAS_UNIT[med]};
+}
+// stress scenarios: harsher but plausible conditions; the same core equations with changed inputs
+const STRESS = [
+  {k:"wet", label:"waterlogged soil, anoxic aquifer", mod:I => Object.assign(I, {drain:"perm", redox:I.redox === "sulfidic" ? "sulfidic" : "anoxic"})},
+  {k:"acid", label:"soil pH 1.5 units lower", mod:I => Object.assign(I, {pH:Math.max(3.5, Math.round((I.pH - 1.5) * 10) / 10)})},
+  {k:"storm", label:"storm runoff", water:"storm", mod:I => I},
+  {k:"low", label:"low river flow", mod:I => Object.assign(I, {Q:num(I.q347) > 0 ? num(I.q347) : I.Q / 3})}
+];
+const STRESS_FIELD = {gw:o => o.cgw, seep:o => o.cw, soil:o => o.Ctot, riverE:o => o.rivD, riverD:o => o.cD};
+function stressOf(I, m, fieldKey, lim){
+  if(!STRESS_FIELD[fieldKey] || !(lim > 0)) return [];
+  const out = [], keepW = S.water;
+  for(const sc of STRESS){
+    if((sc.k === "storm" || sc.k === "low") && !fieldKey.startsWith("river")) continue;
+    if((sc.k === "wet" || sc.k === "acid") && fieldKey.startsWith("river") && !soilLike(I)) continue;
+    try{
+      if(sc.water) S.water = sc.water;
+      const o = core(sc.mod(clone(I)), m, ONES), v = STRESS_FIELD[fieldKey](o);
+      if(v > lim) out.push(sc.label);
+    } finally { S.water = keepW; }
+  }
+  return out;
+}
+// for crops and gardens: the lowest of the VBBo trigger value and the AltlV remediation value for that use, else the VBBo guide value
+function soilLimLow(m, land){
+  const c = [trigOf(m, land), m === "Cr" ? null : land === "garden" ? LIM.remGarden[m] : LIM.remAgri[m]].filter(x => x > 0);
+  if(c.length){ const v = Math.min(...c); return {v, name:v === trigOf(m, land) ? `VBBo trigger value for ${land === "garden" ? "food crops" : m === "Cu" ? "fodder crops" : "food and fodder crops"}` : `AltlV remediation value for ${land === "garden" ? "gardens and playgrounds" : "agriculture"}`}; }
+  return LIM.guide[m] ? {v:LIM.guide[m], name:"VBBo guide value"} : null;
+}
+const tCol = t => !(t > 0.1) ? 0 : t <= ACT_LEAD ? 1 : t <= 25 ? 2 : 3;
+function prioLinks(I, m, R, o){
+  const rows = R.rows, row = id => rows.find(r => r.id === id), MC = R.MC, links = [];
+  const pexOf = (r, lim) => { if(!r || !(lim > 0)) return null; if(r.mc && r.mc.f){ const v = MC.map(r.mc.f).filter(x => isFinite(x)); return v.length ? v.filter(x => x > lim).length / v.length : null; } return r.v > lim ? 1 : 0; };
+  const add = L => { if(!L.row) return; L.v = L.row.v; L.ratio = L.lim > 0 ? L.v / L.lim : null; L.pex = L.lim > 0 ? pexOf(L.row, L.lim) : null; links.push(L); };
+  const gwRel = I.medium === "gw", fastSet = I.aq !== "porous" || num(I.fastShare) > 0;
+  // groundwater: drinking water or the groundwater resource (protected by the GSchV whether used or not)
+  const gwRow = row("gwPot") || row("gwC");
+  if(gwRow){
+    const drink = I.drink === "yes", lim = drink ? LIM.tbdv[m] : LIM.altl1[m];
+    const t = gwRel ? o.tW : fastSet ? 0.5 : o.tArr;
+    add({id:"gw", rec:drink ? "Drinking water from groundwater" : "Groundwater resource", path:gwRel ? "Plume in the aquifer to the well or spring" : "Seepage from the topsoil to the water table",
+      sev:drink ? 3 : 2, row:gwRow, lim, limName:drink ? "drinking-water limit (TBDV)" : "AltlV concentration value", med:"gw", field:"gw", t,
+      ttxt:gwRel ? `travel time to the well about ${fmtYr(o.tW)} years` : fastSet ? "fast paths (karst, fractured rock or your fast-path share): months to a few years" : `about ${fmtYr(o.tArr)} years to the water table by matrix flow`,
+      slowTiming:!gwRel && !fastSet});
+  }
+  const pore = row("pore");
+  if(pore) add({id:"seep", rec:"Groundwater below the site (AltlV seepage value)", path:"Seepage water leaving the topsoil", sev:2, row:pore, lim:LIM.altl1[m], limName:"AltlV concentration value", med:"seep", field:"seep", t:0, ttxt:"seepage leaves the topsoil now"});
+  const sb = row("sbPore");
+  if(sb) add({id:"sb", rec:"Groundwater below the range (antimony)", path:"Antimony in seepage water", sev:2, row:sb, lim:10, limName:"AltlV value for antimony", med:null, t:0, ttxt:"seepage leaves the topsoil now"});
+  const soilC = row("soilC");
+  if(soilC){
+    const L0 = {path:"Topsoil at the source", row:soilC, med:"soil", field:"soil", t:0, ttxt:"the topsoil is affected now"};
+    if(I.land === "garden"){
+      const sl = soilLimLow(m, "garden");
+      if(sl) add(Object.assign({}, L0, {id:"child", rec:"Children playing, garden produce", sev:3, lim:sl.v, limName:sl.name}));
+      const dose = row("dose");
+      if(dose && dose.mc && dose.mc.lim) add({id:"dose", rec:"Children swallowing soil", path:"Hand-to-mouth soil ingestion", sev:3, row:dose, lim:dose.mc.lim / 10, limName:"10% of the health reference (the share allotted to soil)", med:null, t:0, ttxt:"exposure happens now"});
+    } else if(I.land === "agri"){ const sl = soilLimLow(m, "agri"); if(sl) add(Object.assign({}, L0, {id:"crops", rec:"Food and fodder crops", sev:2, lim:sl.v, limName:sl.name})); }
+    else if(LIM.guide[m]) add(Object.assign({}, L0, {id:"soillife", rec:"Soil life and fertility", sev:1, lim:LIM.guide[m], limName:"VBBo guide value"}));
+  }
+  const rv = row("rivE") || row("rivD");
+  if(rv){
+    const g = LIM.gschv[m];
+    add({id:"river", rec:"Stream life", path:rv.id === "rivE" ? "Eroded soil reaching the river" : "Release to the river", sev:2, row:rv, lim:g || (m === "As" ? 10 : null), limName:g ? "GSchV value (dissolved)" : "drinking-water limit (no GSchV value for As)", med:"river", field:rv.id === "rivE" ? "riverE" : "riverD", t:0, ttxt:"the river carries it now"});
+  }
+  const airC = row("airC");
+  if(airC) add({id:"air", rec:"People breathing nearby", path:"Fine dust at the most exposed point", sev:3, row:airC, lim:AIR_LIM[m] ? AIR_LIM[m].v : null, limName:AIR_LIM[m] ? AIR_LIM[m].txt.split(":")[0] : "no air limit", med:"air", t:0, ttxt:"annual mean while the release runs"});
+  const dep = row("dep");
+  if(dep && !isPulse(I)) add({id:"dep", rec:"Soil and crops around the stack", path:"Dust deposition at the most exposed point", sev:2, row:dep, lim:LIM.lrvDep[m] || null, limName:"LRV deposition limit", med:"dep", t:0, ttxt:"annual mean while the release runs"});
+  const me = row("methyl");
+  if(me) add({id:"fish", rec:"People eating fish", path:"Methylmercury in lakes downstream", sev:I.fish !== "none" ? 3 : 2, row:me, lim:null, statusOnly:true, limName:"methylation index", med:null, t:0, ttxt:"methylation runs where water is oxygen-poor"});
+  // measured values, stress test and the suggested category
+  links.forEach(L => {
+    L.meas = L.med ? measFor(I, m, L.med) : null;
+    L.stress = L.field && L.lim > 0 && L.v <= L.lim ? stressOf(I, m, L.field, L.lim) : [];
+    L.tc = tCol(L.t);
+    Object.assign(L, prioCat(L));
+  });
+  return links.sort((a, b) => PRIO_CAT[a.cat].rank - PRIO_CAT[b.cat].rank || b.sev - a.sev || a.tc - b.tc);
+}
+// the rule set, in order; the first rule that applies decides
+function prioCat(L){
+  if(L.statusOnly){
+    const s = L.row.status;
+    return s === "crit" ? {cat:"measure", why:"High methylation potential: measure methylmercury in fish and sediment before acting"} : s === "warn" ? {cat:"monitor", why:"Moderate methylation potential"} : {cat:"record", why:"Low methylation potential"};
+  }
+  if(!(L.lim > 0)) return {cat:"record", why:"No Swiss value to compare with: record the result and compare with measurements"};
+  const M = L.meas, pex = L.pex == null ? (L.ratio > 1 ? 1 : 0) : L.pex;
+  if(M && !M.allNd && M.max > L.lim) return {cat:"act", why:`Measured ${fmt(M.max)} ${M.unit} is above the ${L.limName} (${fmt(L.lim)})`};
+  if(M && pex >= 0.5 && M.max <= L.lim) return {cat:"measure", why:`The model says above, but your ${M.n} measured value${M.n > 1 ? "s are" : " is"} below the ${L.limName}: resolve the disagreement before acting`};
+  if(pex >= 0.9){
+    if(L.sev === 1) return {cat:"measure", why:"Above the soil guide value: confirm it and find the cause (VBBo)"};
+    if(L.tc <= 1) return {cat:"act", why:`At least 90% of the runs are above the ${L.limName}, and the impact is ${L.tc ? "within 5 years" : "already happening"}`};
+    if(L.slowTiming) return {cat:"measure", why:"Above, but only later by slow matrix flow; the validation shows real arrival can be decades sooner, so test for fast paths now"};
+    return {cat:"monitor", why:`Above, but expected ${L.tc === 2 ? "in 5–25 years" : "later than 25 years"}: monitor and plan`};
+  }
+  if(pex >= 0.1) return {cat:"measure", why:`${fmt(pex * 100)}% of the runs are above the ${L.limName}: the outcome is open, and a measurement can decide it`};
+  if(L.stress.length) return {cat:"monitor", why:`Below today, but above with ${L.stress.join(" or ")}`};
+  if(L.ratio >= 0.5) return {cat:"monitor", why:`Below, but within a factor of 2 of the ${L.limName}`};
+  return {cat:"record", why:`Below the ${L.limName} in more than 90% of the runs${M ? ", and in your measurements" : ""}`};
+}
+const prioEff = L => { const o = (INP.prio || {})[L.id]; return o && PRIO_CAT[o.cat] ? o.cat : L.cat; };
+// cheap measures that help in every scenario
+function noRegret(I, m, links){
+  const out = [], has = c => links.some(L => prioEff(L) === c), any = has("act") || has("measure") || has("monitor");
+  if(!any) return out;
+  out.push("Stop or reduce the source first: every other measure works better once no new metal arrives.");
+  if(soilLike(I) && RES && RES.o0 && RES.o0.kE > RES.o0.kL) out.push("Keep the soil covered (vegetation, mulch, buffer strips): erosion is the main way the metal leaves this soil.");
+  if(soilLike(I) && I.pH < 6 && ["Cd", "Zn", "Ni", "Pb", "Cu"].includes(m)) out.push("Lime the soil towards pH 6.5–7: it lowers mobility and crop uptake of this metal.");
+  if(I.land === "garden" && links.some(L => (L.id === "child" || L.id === "dose") && prioEff(L) !== "record")) out.push("Until results are in: no vegetables on bare affected soil, cover play areas with clean soil or turf, wash hands and vegetables.");
+  if(links.some(L => L.id === "gw" && prioEff(L) !== "record") && I.drink === "yes") out.push("Tell the water supplier and add the metal to the routine analysis of the nearest wells and springs.");
+  if(m === "Cr" && formOf().sp === "VI") out.push("Avoid adding oxidants or manganese-rich material; keep the soil moist and rich in organic matter, which reduces Cr(VI).");
+  if(m === "As" && I.drain !== "well") out.push("Avoid waterlogging and phosphate fertiliser on this soil: both release arsenic.");
+  return out;
+}
+
+/* ================= WHAT TO MEASURE NEXT (0.15.0) ================= */
+// direct measurements of the exposed medium, by link
+const MP = {
+  gw:{what:"Groundwater: dissolved and total metal", where:"At least one well or spring upgradient (background) and two downgradient of the source, with water levels in all of them (they also give the flow direction)", how:"Filter on site (0.45 µm) for the dissolved metal; field O₂, pH, conductivity, temperature and Eh; in the lab Fe²⁺, Mn²⁺, nitrate and sulfate", when:"At high and at low groundwater level (spring and autumn); in karst also within days after heavy rain"},
+  seep:{what:"Seepage water or an eluate test", where:"Topsoil from the most affected part of the source; suction cups below the root zone for field values", how:"Eluate test with the method used for AltlV assessments; filtered suction-cup samples", when:"Eluates any time; suction cups in spring and after wet periods"},
+  soil:{what:"Topsoil and a depth profile", where:"Composite samples (0–20 cm) on a grid over the source area, two reference samples outside it, and one profile (0–20, 20–40, 40–80 cm) at the most affected spot", how:"Total content as used for the VBBo values; also pH, organic carbon, oxalate iron and texture", when:"Any time; before tillage or earthworks"},
+  child:{what:"Play areas, beds and garden produce", where:"0–5 cm where children play, 0–20 cm in beds; leafy and root vegetables", how:"Total content; an in-vitro bioaccessibility test to replace the 100% default", when:"Soil any time; vegetables at harvest"},
+  crops:{what:"Crops and the soluble soil fraction", where:"Edible parts of the main crops on the affected field and on a reference field", how:"Total content in the crops; NaNO₃-extractable metal in the soil (VBBo soluble values exist for Cd, Cu, Ni and Zn)", when:"At harvest"},
+  river:{what:"River water: dissolved and total, with suspended sediment", where:"Upstream and downstream of the inflow or the eroding field", how:"Filtered (0.45 µm) and unfiltered samples, suspended sediment and DOC; discharge from the nearest FOEN station (Import data tab)", when:"At base flow and during at least one storm, ideally the first flush after a dry spell"},
+  air:{what:"Dust deposition and fine dust", where:"At the most exposed point (see the deposition zone on the spread map) and at a reference site", how:"Bulk deposition gauges (Bergerhoff) for a full year; PM10 filters if the air value is near the limit; moss samples to map the pattern", when:"A full year: the Swiss values are annual means"},
+  fish:{what:"Methylmercury in fish and sediment, and bottom-water oxygen", where:"Predatory fish and surface sediment downstream; the deepest point of the lake", how:"Total mercury and methylmercury; an oxygen profile", when:"Fish any time; oxygen in late summer"},
+  fast:{what:"A test for fast paths to groundwater", where:"At the most affected spot of the source", how:"A depth profile of the metal (0–20, 20–40, 40–80 cm, deeper if possible) or a dye-tracer infiltration test. Metal already below 40 cm means matrix flow describes this site too slowly", when:"Any time"},
+  dir:{what:"Groundwater flow direction", where:"Water levels in at least three wells or piezometers around the source, or the canton's groundwater map", how:"Level the well heads and measure the depth to water on the same day; the direction is down the slope of the water table", when:"Once; repeat at high and low water if the wells are near a river"}
+};
+const MP_MED = {gw:"gw", seep:"seep", sb:"seep", child:"child", dose:"child", crops:"crops", soillife:"soil", river:"river", air:"air", dep:"air", fish:"fish"};
+const MP_DONE = {gw:"gw", seep:"seep", soil:"soil", child:"soil", crops:"soil", river:"river", air:"air"};
+// metal-specific additions, only for the measurements they concern
+const MP_METAL = {
+  As:{keys:["gw", "seep", "river"], txt:"speciate As(III) and As(V)"},
+  Cr:{keys:["gw", "seep", "river", "soil", "child", "crops"], txt:"measure Cr(VI) separately (soil: EN 15192; water: ion chromatography): the Swiss site values refer to it"},
+  Hg:{keys:["gw", "seep", "river"], txt:"add methylmercury where the water is oxygen-poor"},
+  Cd:{keys:["crops", "child"], txt:"include the NaNO₃-soluble cadmium"},
+  Cu:{keys:["gw", "seep", "river"], txt:"add DOC: it binds most dissolved copper"},
+  Zn:{keys:["gw"], txt:"avoid galvanised sampling equipment and well fittings"},
+  Ni:{keys:["soil", "gw"], txt:"check the geology: serpentinite gives natural nickel and chromium"}
+};
+function planOf(I, m, R, links){
+  const tasks = new Map(), put = (key, base, L, why) => {
+    if(!tasks.has(key)) tasks.set(key, Object.assign({key, links:[], why:[], cat:prioEff(L)}, base));
+    const t = tasks.get(key);
+    if(!t.links.includes(L.rec)) t.links.push(L.rec);
+    if(why && !t.why.includes(why)) t.why.push(why);
+    if(PRIO_CAT[prioEff(L)].rank < PRIO_CAT[t.cat].rank) t.cat = prioEff(L);
+  };
+  links.filter(L => prioEff(L) !== "record").forEach(L => {
+    const c = prioEff(L), mk = MP_MED[L.id];
+    if(mk){
+      const why = c === "measure" ? "decides an open outcome" : c === "act" ? "confirms the exceedance and sets the baseline for measures" : "tracks a result close to the limit";
+      put(mk, MP[mk], L, why);
+    }
+    if(L.slowTiming && L.pex >= 0.1) put("fast", MP.fast, L, "arrival time rests on slow matrix flow");
+    const it = R.sens.find(x => x.id === L.row.id);
+    if(it) sensitivity(it, R).filter(x => Math.abs(x.rho) >= 0.3 && x.f.k !== "floods").slice(0, 2).forEach(x => { put("f-" + x.f.k, {what:x.f.label, where:"On site", how:x.f.meas, when:"Before the next model run", spread:[]}, L, null); const t = tasks.get("f-" + x.f.k); if(!t.spread.includes(L.row.label)) t.spread.push(L.row.label); });
+  });
+  if(links.some(L => L.id === "gw" && prioEff(L) !== "record") && INP.gwDir === "" && !riverLike(I)) put("dir", MP.dir, links.find(L => L.id === "gw"), "the spread map needs it");
+  const out = [...tasks.values()];
+  out.forEach(t => {
+    if(t.spread && t.spread.length) t.why.push(`the largest source of uncertainty in ${t.spread.map(x => `“${x}”`).join(t.spread.length > 2 ? ", " : " and ").replace(/, ([^,]*)$/, " and $1")}`);
+    const dk = MP_DONE[t.key];
+    t.done = dk ? (I.meas || []).filter(x => x.metal === m && x.med === (dk === "child" || dk === "crops" ? "soil" : dk)).length : 0;
+    if(MP_METAL[m] && MP_METAL[m].keys.includes(t.key)) t.how += `; ${MP_METAL[m].txt}`;
+  });
+  return out.sort((a, b) => PRIO_CAT[a.cat].rank - PRIO_CAT[b.cat].rank || (a.key.startsWith("f-") ? 1 : 0) - (b.key.startsWith("f-") ? 1 : 0));
+}
+
+function renderPrio(){
+  const box = $("#prioBody"); if(!box || !RES) return;
+  const links = RES.prio || [], m = S.metal;
+  if(!links.length){ box.innerHTML = `<p class="sp-note">No result to rate in this scenario.</p>`; $("#prioNoRegret").innerHTML = ""; return; }
+  const chip = L => { const c = prioEff(L); return `<span class="pchip ${PRIO_CAT[c].pill}" title="${esc(L.rec)}: ${esc(PRIO_CAT[c].label)}">${esc(L.rec)}</span>`; };
+  const grid = `<div class="pmx" role="table" aria-label="Screening priority by consequence and time to impact">
+    <div class="pmx-row pmx-hd" role="row"><span role="columnheader">Consequence ↓ · time to impact →</span>${PRIO_TCOL.map(c => `<span role="columnheader">${c.label}</span>`).join("")}</div>
+    ${[3, 2, 1].map(sv => `<div class="pmx-row" role="row"><span class="pmx-sev" role="rowheader">${esc(PRIO_SEV[sv])}</span>${PRIO_TCOL.map(c => `<span class="pmx-cell" role="cell">${links.filter(L => L.sev === sv && L.tc === c.k).map(chip).join("")}</span>`).join("")}</div>`).join("")}
+  </div>`;
+  const val = L => L.statusOnly ? `${fmt(L.v)} / 10` : `${fmt(L.v)} ${esc(L.row.unit)}${L.lim > 0 ? ` <small>(${esc(L.limName)} ${fmt(L.lim)})</small>` : ""}`;
+  const rows = links.map(L => {
+    const eff = prioEff(L), ov = (INP.prio || {})[L.id];
+    return `<div class="prow">
+      <div class="prow-h"><span class="pill ${PRIO_CAT[eff].pill}">${PRIO_CAT[eff].label}</span><b>${esc(L.rec)}</b><small>${esc(L.path)}</small></div>
+      <div class="prow-b">
+        <span><i>Value</i>${val(L)}</span>
+        <span><i>Runs above</i>${L.pex == null ? "–" : fmtPct(L.pex)}</span>
+        <span><i>Measured</i>${L.meas ? `${L.meas.allNd ? "below detection" : "max " + fmt(L.meas.max) + " " + esc(L.meas.unit)} (${L.meas.n})` : "none yet"}</span>
+        <span><i>Time to impact</i>${esc(L.ttxt)}</span>
+      </div>
+      <p class="prow-why"><b>Why:</b> ${esc(L.why)}.${L.stress.length && L.cat !== "monitor" ? ` Above with ${esc(L.stress.join(" or "))}.` : ""}${ov ? ` <b>You set ${esc(PRIO_CAT[ov.cat].label)}</b>${ov.why ? `: ${esc(ov.why)}` : ""} (suggested: ${PRIO_CAT[L.cat].label}).` : ""}</p>
+      <div class="prow-ov"><label class="mini" for="pov-${L.id}">Your decision</label>
+        <select id="pov-${L.id}" data-pov="${L.id}"><option value="">Use the suggestion (${PRIO_CAT[L.cat].label})</option>${Object.entries(PRIO_CAT).map(([k, c]) => `<option value="${k}"${ov && ov.cat === k ? " selected" : ""}>${c.label}</option>`).join("")}</select>
+        <input type="text" data-povw="${L.id}" placeholder="Reason (goes into the report)" value="${ov ? esc(ov.why || "") : ""}" ${ov ? "" : "hidden"} maxlength="200"></div>
+    </div>`;
+  }).join("");
+  box.innerHTML = grid + `<div class="prows">${rows}</div>`;
+  const nr = noRegret(INP, m, links);
+  $("#prioNoRegret").innerHTML = nr.length ? `<h4>No-regret measures</h4><ul class="trap">${nr.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : "";
+}
+function renderPlan(){
+  const box = $("#planBody"); if(!box || !RES) return;
+  const plan = RES.plan || [];
+  if(!plan.length){ box.innerHTML = `<p class="sp-note">Nothing to measure first at screening level: every result is far below the Swiss values. A few reference samples still confirm the background.</p>`; return; }
+  box.innerHTML = `<ol class="plan-list">${plan.map(t => `<li>
+    <div class="plan-h"><span class="pill ${PRIO_CAT[t.cat].pill}">${PRIO_CAT[t.cat].label}</span><b>${esc(t.what)}</b>${t.done ? `<span class="pill ok">${t.done} value${t.done > 1 ? "s" : ""} imported</span>` : ""}</div>
+    <dl><dt>Why</dt><dd>${esc(t.why.join("; "))} (${esc(t.links.join(", "))})</dd><dt>Where</dt><dd>${esc(t.where)}</dd><dt>How</dt><dd>${esc(t.how)}</dd><dt>When</dt><dd>${esc(t.when)}</dd></dl></li>`).join("")}</ol>`;
+}
+function prioReport(L0){
+  const links = (RES && RES.prio) || [];
+  if(!links.length) return;
+  L0.push("Where to act first (screening priority, not a legal classification)");
+  links.forEach(L => { const eff = prioEff(L), ov = (INP.prio || {})[L.id];
+    L0.push(`- ${PRIO_CAT[eff].label}: ${L.rec} (${L.path}). ${L.why}.${ov ? ` Set by the user${ov.why ? `: ${ov.why}` : ""}; suggested ${PRIO_CAT[L.cat].label}.` : ""}`); });
+  const nr = noRegret(INP, S.metal, links); if(nr.length){ L0.push("No-regret measures:"); nr.forEach(x => L0.push(`- ${x}`)); }
+  L0.push("");
+  const plan = RES.plan || [];
+  if(plan.length){ L0.push("What to measure next"); plan.forEach((t, i) => L0.push(`${i + 1}. ${t.what} [${PRIO_CAT[t.cat].label}] – ${t.why.join("; ")}. Where: ${t.where}. How: ${t.how}. When: ${t.when}.${t.done ? ` ${t.done} values imported.` : ""}`)); L0.push(""); }
+}
+document.addEventListener("change", e => {
+  const s = e.target.closest && e.target.closest("[data-pov]"); if(!s || !INP) return;
+  INP.prio = INP.prio || {}; const k = s.dataset.pov;
+  if(s.value){ INP.prio[k] = {cat:s.value, why:(INP.prio[k] && INP.prio[k].why) || ""}; } else delete INP.prio[k];
+  saveAdv(); RES.plan = planOf(INP, S.metal, RES, RES.prio); renderPrio(); renderPlan();
+  const w = document.querySelector(`[data-povw="${k}"]`); if(w && s.value) w.focus();
+});
+document.addEventListener("input", e => {
+  const w = e.target.closest && e.target.closest("[data-povw]"); if(!w || !INP || !INP.prio) return;
+  const o = INP.prio[w.dataset.povw]; if(o){ o.why = w.value.slice(0, 200); saveAdv(); }
+});
+
+/* ================= IMPORT DATA (0.15.0) =================
+   Reads CSV or text files in the browser: FOEN hydrological stations (discharge, water and groundwater levels,
+   water temperature), FOEN and cantonal water-quality tables (NAQUA, NADUF/NAWA or own lab results), NABEL,
+   and MeteoSwiss open station data. Layouts vary, so columns are recognised by name and content, and you can
+   correct what each column is. Nothing leaves the browser. */
+const IMP = {name:"", res:null, msg:""};
+const IMP_KIND = {
+  q:{label:"Discharge", unit:"m³/s"}, ql:{label:"Discharge", unit:"l/s"}, wl:{label:"Water level (river or lake)", unit:"m a.s.l."},
+  gwl:{label:"Groundwater level", unit:"m a.s.l."}, gwd:{label:"Depth to groundwater", unit:"m"}, wt:{label:"Water temperature", unit:"°C"},
+  pr:{label:"Precipitation", unit:"mm"}, at:{label:"Air temperature", unit:"°C"}, conc:{label:"Concentration (choose metal)", unit:""}, skip:{label:"Ignore", unit:""}
+};
+const IMP_METALS = [
+  ["Cr", /chromat|chrom\w*\s*[(-]?\s*vi\b|\bcr\s*[(-]?\s*(vi|6)\b|cr6|hexaval/i, "VI"],
+  ["As", /arsen|arsénic|arsenic/i], ["Hg", /quecksilber|mercure|mercury|mercurio/i], ["Pb", /\bblei|plomb|\blead\b|piombo/i],
+  ["Cd", /cadmi/i], ["Cu", /kupfer|cuivre|copper|\brame\b/i], ["Zn", /\bzink|\bzinc|zinco/i], ["Ni", /nickel|nichel/i], ["Cr", /\bchrom|chromium|cromo/i]
+];
+const IMP_SYM = /(^|[^A-Za-z])(As|Hg|Pb|Cd|Cu|Zn|Ni|Cr)(?![a-z])/;
+function impMetal(name){
+  const s = String(name || "");
+  for(const [m, re, sp] of IMP_METALS) if(re.test(s)) return {m, sp:sp || null};
+  const k = s.match(IMP_SYM); return k ? {m:k[2], sp:/vi|6/i.test(s.slice(k.index + k[0].length, k.index + k[0].length + 6)) && k[2] === "Cr" ? "VI" : null} : null;
+}
+function impKindOf(name, unit){
+  const s = (String(name) + " " + String(unit || "")).toLowerCase();
+  if(/station_abbr/.test(s)) return null;
+  if(/^rre|niederschlag|précipitation|precipitation|precip|regen|pluie|rain/.test(s)) return "pr";
+  if(/^tre|lufttemp|air temp|température de l.air|temperatura dell.aria/.test(s)) return "at";
+  if(/abfluss|débit|debit|discharge|portata|\bq\b|m3\/s|m³\/s/.test(s)) return /l\/s/.test(s) ? "ql" : "q";
+  if(/grundwasser|eaux souterraines|groundwater|falda|piezo/.test(s)) return /tiefe|depth|profondeur|flurabstand|m u\. ?t|m u\.g/.test(s) ? "gwd" : "gwl";
+  if(/pegel|wasserstand|niveau|water level|livello/.test(s)) return "wl";
+  if(/wassertemp|température de l.eau|water temp|temperatur|température|temperature/.test(s)) return "wt";
+  return null;
+}
+// numbers: Swiss thousands ' and spaces, decimal comma, detection limits "< 0.5"
+function impNum(x, decComma){
+  let s = String(x == null ? "" : x).trim().replace(/^"|"$/g, "");
+  if(!s) return null;
+  const nd = /^[<≤]/.test(s) || /^(n\.?\s?n\.?|n\.?d\.?|bdl|<bg|< ?ng)$/i.test(s);
+  if(/^(n\.?\s?n\.?|n\.?d\.?|bdl|-|–|na|nan|null)$/i.test(s)) return nd ? {v:0, nd:true} : null;
+  s = s.replace(/^[<≤>]\s*/, "").replace(/['’\s](?=\d{3}\b)/g, "");
+  if(decComma || (/^-?\d+,\d+$/.test(s))) s = s.replace(",", ".");
+  if(!/^[-+]?\d*\.?\d+(e[-+]?\d+)?$/i.test(s)) return null;
+  const v = Number(s); return isFinite(v) ? {v, nd} : null;
+}
+function impDate(x, yearCol){
+  const s = String(x == null ? "" : x).trim().replace(/^"|"$/g, "");
+  let k;
+  if((k = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})(?:[T ](\d{1,2}):(\d{2})(?::(\d{2}))?)?/))) return Date.UTC(+k[1], k[2] - 1, +k[3], +(k[4] || 0), +(k[5] || 0));
+  if((k = s.match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})(?:\s+(\d{1,2}):(\d{2})(?::(\d{2}))?)?$/))) return Date.UTC(+k[3], k[2] - 1, +k[1], +(k[4] || 0), +(k[5] || 0));
+  if((k = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:\s+(\d{1,2}):(\d{2}))?$/))) return Date.UTC(+k[3], k[2] - 1, +k[1], +(k[4] || 0), +(k[5] || 0));
+  if((k = s.match(/^(\d{4})(\d{2})(\d{2})(\d{2})?(\d{2})?$/)) && +k[2] >= 1 && +k[2] <= 12) return Date.UTC(+k[1], k[2] - 1, +k[3], +(k[4] || 0), +(k[5] || 0));
+  if((k = s.match(/^(\d{4})-(\d{1,2})$/)) || (k = s.match(/^(\d{1,2})\.(\d{4})$/))) return k[1].length === 4 ? Date.UTC(+k[1], k[2] - 1, 1) : Date.UTC(+k[2], k[1] - 1, 1);
+  if(yearCol && (k = s.match(/^(1[89]\d\d|20\d\d)$/))) return Date.UTC(+k[1], 0, 1);
+  return null;
+}
+function impSplit(line, d){
+  if(line.indexOf('"') < 0) return line.split(d).map(x => x.trim());
+  const out = []; let cur = "", q = false;
+  for(let i = 0; i < line.length; i++){ const c = line[i];
+    if(c === '"'){ if(q && line[i + 1] === '"'){ cur += '"'; i++; } else q = !q; }
+    else if(c === d && !q){ out.push(cur.trim()); cur = ""; } else cur += c; }
+  out.push(cur.trim()); return out;
+}
+function impUnitOf(s){
+  const t = String(s || "").replace(/μ/g, "µ").replace(/\s/g, "").toLowerCase();
+  const k = t.match(/\[([^\]]+)\]|\(([^)]+)\)/); const u = k ? (k[1] || k[2]) : t;
+  if(/ng\/l/.test(u)) return "ng/L"; if(/[µu]g\/l/.test(u)) return "µg/L"; if(/mg\/l/.test(u)) return "mg/L";
+  if(/mg\/kg|ppm|µg\/g|ug\/g/.test(u)) return "mg/kg"; if(/[µu]g\/kg/.test(u)) return "µg/kg";
+  if(/ng\/m3|ng\/m³/.test(u)) return "ng/m³"; if(/[µu]g\/m3|[µu]g\/m³/.test(u)) return "µg/m³";
+  if(/[µu]g\/\(?m2|[µu]g\/\(?m²/.test(u)) return "µg/(m²·d)"; if(/mg\/\(?m2|mg\/\(?m²/.test(u)) return "mg/(m²·d)";
+  if(/m3\/s|m³\/s/.test(u)) return "m³/s"; if(/l\/s/.test(u)) return "l/s"; if(/°c|degc/.test(u)) return "°C"; if(/^mm$|\bmm\b/.test(u)) return "mm";
+  if(/m\s*ü|m\.?ü\.?m|m a\.?s\.?l|masl|m s\.?m|m\.?s\.?m/.test(String(s).toLowerCase())) return "m a.s.l.";
+  return "";
+}
+// to the units used by the model; null if the unit cannot go to that medium
+function impConv(v, unit, med){
+  const w = {"µg/L":1, "ng/L":1e-3, "mg/L":1e3}, so = {"mg/kg":1, "µg/kg":1e-3}, ai = {"ng/m³":1, "µg/m³":1e3}, de = {"µg/(m²·d)":1, "mg/(m²·d)":1e3};
+  const f = (med === "soil" ? so : med === "air" ? ai : med === "dep" ? de : w)[unit];
+  return f ? v * f : null;
+}
+function impMedGuess(unit, ctx){
+  if(unit === "mg/kg" || unit === "µg/kg") return "soil";
+  if(unit === "ng/m³" || unit === "µg/m³") return "air";
+  if(/m²/.test(unit)) return "dep";
+  const c = String(ctx || "").toLowerCase();
+  if(/naduf|nawa|fluss|rivière|riviere|river|bach|see\b|lac\b|lake|oberflächen/.test(c)) return "river";
+  if(/eluat|éluat|eluate|sickerwasser|seepage|lysimet|saugkerz/.test(c)) return "seep";
+  return "gw";
+}
+function impParse(text, name){
+  const lines = text.replace(/^﻿/, "").split(/\r?\n/).map(l => l.replace(/\s+$/, "")).filter(l => l.trim() !== "");
+  if(lines.length < 2) return {err:"The file has fewer than two lines."};
+  // delimiter: the one that splits most lines into the same number of fields (more than one)
+  let best = null;
+  for(const d of [";", "\t", ",", "|"]){
+    const cnt = {}; lines.slice(0, 400).forEach(l => { const n = impSplit(l, d).length; if(n > 1) cnt[n] = (cnt[n] || 0) + 1; });
+    const top = Object.entries(cnt).sort((a, b) => b[1] - a[1] || b[0] - a[0])[0];
+    if(top && (!best || top[1] > best.n)) best = {d, nf:+top[0], n:top[1]};
+  }
+  if(!best) return {err:"No columns found. Save the table as CSV (semicolon or comma) or paste it from a spreadsheet."};
+  const rowsAll = lines.map(l => impSplit(l, best.d));
+  // header: first row with the common field count whose cells are mostly text, followed by data rows
+  const nMin = Math.max(2, best.nf - 1), fits = r => r.length >= nMin && r.length <= best.nf + 1;
+  let h = rowsAll.findIndex((r, i) => fits(r) && r.filter(c => c && impNum(c) == null && impDate(c) == null).length >= Math.max(1, Math.ceil(r.length / 2)) && rowsAll[i + 1] && rowsAll[i + 1].length >= nMin);
+  let noHead = false;
+  if(h < 0 || rowsAll.slice(h + 1).filter(fits).length < rowsAll.filter(fits).length / 2){
+    // no header row: the table starts at the first row with the common field count; lines before it are metadata
+    const f = rowsAll.findIndex(fits);
+    h = f; noHead = true;
+  }
+  const meta = {};
+  rowsAll.slice(0, h).forEach(r => { const kv = r.length >= 2 ? [r[0], r.slice(1).filter(Boolean).join(" ")] : String(r[0]).split(/:\s*/); if(kv[0] && kv[1]) meta[kv[0].replace(/[:#]/g, "").trim().toLowerCase()] = kv[1].trim(); });
+  lines.slice(0, h).forEach(l => { const k = l.match(/^\s*#?\s*([^:;=]+)[:=]\s*(.+)$/); if(k && !meta[k[1].trim().toLowerCase()]) meta[k[1].trim().toLowerCase()] = k[2].replace(/;+$/, "").trim(); });
+  const head = noHead ? rowsAll[h].map((c, i) => `Column ${i + 1}`) : rowsAll[h].map((c, i) => c || `Column ${i + 1}`), data = rowsAll.slice(noHead ? h : h + 1).filter(r => r.length >= Math.max(2, head.length - 1));
+  const decComma = best.d !== "," && data.slice(0, 200).some(r => r.some(c => /^-?\d+,\d+$/.test(c)));
+  const n = head.length, sample = data.slice(0, 300);
+  const colInfo = head.map((hn, j) => {
+    const vals = sample.map(r => r[j]).filter(x => x != null && x !== "");
+    const yearish = /jahr|year|année|anno|^yyyy$/i.test(hn);
+    const pd = vals.filter(x => impDate(x, yearish) != null).length, pn = vals.filter(x => impNum(x, decComma) != null).length;
+    return {j, name:hn, unit:impUnitOf(hn), date:vals.length ? pd / vals.length : 0, num:vals.length ? pn / vals.length : 0, yearish, n:vals.length};
+  });
+  const lower = head.map(x => x.toLowerCase());
+  const find = re => lower.findIndex(x => re.test(x));
+  const iParam = find(/^(parameter|paramètre|parametro|stoff|substanz|substance|element|analyt|analyte|komponente|messgr(ö|oe)sse|grandeur|determinand)/);
+  const iVal = find(/^(wert|value|valeur|valore|resultat|résultat|result|messwert|konzentration|concentration|gehalt|teneur)/);
+  const iUnit = find(/^(einheit|parametereinheit|unit|unité|unite|unità|dimension)/);
+  const iSite = find(/^(messstelle|stationsname|station|site|standort|stelle|probenahmestelle|lieu|ort|location|sample|probe)/);
+  const dateCols = colInfo.filter(c => c.date >= 0.8 && !(c.num >= 0.99 && !c.yearish && !/dat|zeit|time|timestamp|tag|jour/i.test(c.name)));
+  let iDate = dateCols.length ? dateCols[0].j : -1;
+  const iTime = iDate >= 0 ? lower.findIndex((x, j) => j !== iDate && /^(zeit|time|heure|uhrzeit)$/.test(x)) : -1;
+  const ctx = [name, JSON.stringify(meta)].join(" ");
+  const res = {name, delim:best.d === "\t" ? "tab" : best.d, decComma, meta, head, nRows:data.length, cols:[], series:[], conc:[], kind:"table"};
+  const tOf = r => { if(iDate < 0) return null; let t = impDate(r[iDate], colInfo[iDate].yearish); if(t != null && iTime >= 0){ const k = String(r[iTime] || "").match(/(\d{1,2}):(\d{2})/); if(k) t += (+k[1] * 60 + +k[2]) * 60000; } return t; };
+  // long format: one row per measurement with a parameter column
+  if(iParam >= 0 && iVal >= 0){
+    const groups = new Map();
+    data.forEach(r => {
+      const p = r[iParam], x = impNum(r[iVal], decComma); if(!p || !x) return;
+      const unit = iUnit >= 0 ? impUnitOf(r[iUnit]) || impUnitOf(p) : impUnitOf(p) || impUnitOf(head[iVal]) || impUnitOf(meta.einheit || meta.unit || meta.parametereinheit);
+      const mt = impMetal(p), kd = mt ? null : impKindOf(p, unit);
+      const key = mt ? "m:" + mt.m + (mt.sp || "") + "|" + unit + "|" + (/gelöst|dissous|dissolved|filtr/i.test(p) ? "d" : "t") : kd ? "k:" + kd + "|" + unit : null;
+      if(!key) return;
+      if(!groups.has(key)) groups.set(key, {mt, kd, unit, param:p, frac:/gelöst|dissous|dissolved|filtr/i.test(p) ? "dissolved" : "total", pts:[]});
+      groups.get(key).pts.push({t:tOf(r), v:x.v, nd:x.nd, site:iSite >= 0 ? r[iSite] : (meta.stationsname || meta.station || "")});
+    });
+    groups.forEach(g => { if(g.mt) res.conc.push({metal:g.mt.m, sp:g.mt.sp, unit:g.unit, param:g.param, frac:g.frac, pts:g.pts, med:impMedGuess(g.unit, ctx)}); else res.series.push({kind:g.kd, unit:g.unit, name:g.param, pts:g.pts.filter(p => p.t != null)}); });
+    res.conc = impBySite(res.conc);
+    res.kind = res.conc.length ? "quality" : "series";
+    res.cols = [];
+    return res;
+  }
+  // wide format: a date column (or none) and value columns; recognise each column by its name and unit
+  const metaKind = impKindOf((meta.parameter || meta["paramètre"] || "") + " " + (meta.einheit || meta.parametereinheit || meta.unit || ""), meta.einheit || meta.parametereinheit || meta.unit);
+  colInfo.forEach(c => {
+    if(c.j === iDate || c.j === iTime || c.j === iSite || c.num < 0.6 || /nummer|number|numéro|numero|^nr\.?$|^id$|^code$|stationsnr/i.test(c.name)) return;
+    const mt = impMetal(c.name), unit = c.unit || impUnitOf(meta.einheit || meta.parametereinheit || meta.unit || "");
+    let kind = mt ? "conc" : impKindOf(c.name, unit) || (/^(wert|value|valeur|valore|messwert)$/i.test(c.name) ? metaKind : null);
+    if(!kind && colInfo.filter(x => x.num >= 0.6 && x.j !== iDate).length === 1 && iDate >= 0) kind = metaKind || null;
+    res.cols.push({j:c.j, name:c.name, unit, kind:kind || "skip", metal:mt ? mt.m : "", sp:mt ? mt.sp : null, frac:/gelöst|dissous|dissolved|filtr/i.test(c.name) ? "dissolved" : "total", guessed:!!kind});
+  });
+  // MeteoSwiss open data: known parameter codes
+  // (rre150*0: precipitation total; tre200*0: mean air temperature at 2 m; the other codes are left out)
+  if(lower.includes("reference_timestamp")) res.cols.forEach(c => { const k = c.name.toLowerCase(); if(/^rre150[hdmy]0$/.test(k)){ c.kind = "pr"; c.unit = "mm"; c.guessed = true; } else if(/^tre200[hdmy]0$/.test(k)){ c.kind = "at"; c.unit = "°C"; c.guessed = true; } else { c.kind = "skip"; c.guessed = false; } });
+  res.iDate = iDate; res.iTime = iTime; res.iSite = iSite; res.data = data; res.colInfo = colInfo; res.ctx = ctx; res.tOf = tOf;
+  impBuild(res);
+  return res;
+}
+// turn the (possibly user-corrected) column meanings into series and concentration groups
+function impBuild(res){
+  if(!res.data) return res;
+  res.series = []; res.conc = [];
+  res.cols.forEach(c => {
+    if(c.kind === "skip") return;
+    const pts = res.data.map(r => { const x = impNum(r[c.j], res.decComma); return x ? {t:res.tOf(r), v:x.v, nd:x.nd, site:res.iSite >= 0 ? r[res.iSite] : ""} : null; }).filter(Boolean);
+    if(c.kind === "conc"){ if(c.metal) res.conc.push({metal:c.metal, sp:c.sp, unit:c.unit, param:c.name, frac:c.frac, pts, med:impMedGuess(c.unit, res.ctx)}); }
+    else res.series.push({kind:c.kind, unit:c.unit || IMP_KIND[c.kind].unit, name:c.name, pts:pts.filter(p => p.t != null)});
+  });
+  res.conc = impBySite(res.conc);
+  res.kind = res.conc.length && !res.series.length ? "quality" : res.series.length ? "series" : "unknown";
+  return res;
+}
+function impBySite(groups){
+  const out = [];
+  groups.forEach(g => {
+    const sites = [...new Set(g.pts.map(p => p.site).filter(Boolean))];
+    if(sites.length < 2 || sites.length > 12){ out.push(g); return; }
+    sites.forEach(st => out.push(Object.assign({}, g, {pts:g.pts.filter(p => p.site === st), site:st, med:g.med, pos:/ref|referenz|référence|background|hintergrund|upstream|oberstrom|amont/i.test(st) ? "ref" : g.pos})));
+  });
+  return out;
+}
+const DAY = 86400000;
+function impStats(s){
+  const pts = s.pts.filter(p => isFinite(p.v) && p.t != null).sort((a, b) => a.t - b.t);
+  if(pts.length < 2) return {n:pts.length};
+  const dts = []; for(let i = 1; i < Math.min(pts.length, 2000); i++) dts.push(pts[i].t - pts[i - 1].t);
+  dts.sort((a, b) => a - b); const dt = dts[Math.floor(dts.length / 2)];
+  const step = dt < 0.5 * DAY ? "sub" : dt < 1.5 * DAY ? "day" : dt < 40 * DAY ? "month" : "year";
+  // daily means from finer data
+  let ser = pts;
+  if(step === "sub"){ const by = new Map(); pts.forEach(p => { const d = Math.floor(p.t / DAY); const a = by.get(d) || [0, 0]; a[0] += p.v; a[1]++; by.set(d, a); }); ser = [...by.entries()].map(([d, a]) => ({t:d * DAY, v:s.kind === "pr" ? a[0] : a[0] / a[1]})); }
+  const vals = ser.map(p => p.v), mean = vals.reduce((a, b) => a + b, 0) / vals.length, sorted = vals.slice().sort((a, b) => a - b);
+  const q = p => sorted[Math.min(sorted.length - 1, Math.max(0, Math.round(p * (sorted.length - 1))))];
+  const st = {n:pts.length, step:step === "sub" ? "day" : step, t0:pts[0].t, t1:pts[pts.length - 1].t, mean, min:sorted[0], max:sorted[sorted.length - 1]};
+  const yr = t => new Date(t).getUTCFullYear();
+  if(s.kind === "q" || s.kind === "ql"){ const f = s.kind === "ql" ? 1e-3 : 1; st.meanQ = mean * f; st.maxQ = st.max * f; if(st.step === "day") st.q347 = q(18 / 365) * f; }
+  if(s.kind === "pr"){
+    const need = {day:330, month:12, year:1}[st.step], byY = new Map(), cnt = new Map();
+    ser.forEach(p => { const y = yr(p.t); byY.set(y, (byY.get(y) || 0) + p.v); cnt.set(y, (cnt.get(y) || 0) + 1); });
+    const full = [...byY.entries()].filter(([y]) => cnt.get(y) >= need).sort((a, b) => a[0] - b[0]);
+    if(full.length){
+      st.years = full.length; st.annual = full.reduce((a, [, v]) => a + v, 0) / full.length;
+      const w = full.reduce((a, b) => b[1] > a[1] ? b : a); st.wettest = {y:w[0], v:w[1]};
+      const last = full.slice(-10); st.last10 = last.reduce((a, [, v]) => a + v, 0) / last.length;
+      if(st.step === "day") st.maxDay = st.max;
+    }
+  }
+  const elev = INP ? num(INP.elev) : 0;
+  if(s.kind === "gwl" && elev > 0){ st.depthHigh = Math.max(0, elev - st.max); st.depthMean = Math.max(0, elev - mean); }
+  if(s.kind === "gwd"){ st.depthHigh = st.min; st.depthMean = mean; }
+  return st;
+}
+const fmtD = t => t == null ? "–" : new Date(t).toISOString().slice(0, 10);
+function impConcGroups(res){
+  return res.conc.map((g, i) => {
+    const det = g.pts.filter(p => !p.nd), vals = det.map(p => p.v).sort((a, b) => a - b);
+    return Object.assign({}, g, {i, n:g.pts.length, nDet:det.length, max:vals.length ? vals[vals.length - 1] : null, median:vals.length ? vals[Math.floor(vals.length / 2)] : null,
+      t0:Math.min(...g.pts.map(p => p.t).filter(t => t != null)), t1:Math.max(...g.pts.map(p => p.t).filter(t => t != null)), sites:[...new Set(g.pts.map(p => p.site).filter(Boolean))]});
+  });
+}
+function renderImport(){
+  const box = document.getElementById("impBox"); if(!box) return;
+  const r = IMP.res, m = S.metal;
+  const meas = INP.meas || [];
+  const grp = new Map(); meas.forEach(x => { const k = [x.metal, x.med, x.pos, x.src].join("|"); const g = grp.get(k) || {metal:x.metal, med:x.med, pos:x.pos, src:x.src, v:[], nd:0}; if(x.nd) g.nd++; else g.v.push(x.v); grp.set(k, g); });
+  const measTbl = grp.size ? `<div class="tbl-wrap"><table class="imp-tbl"><thead><tr><th>Metal</th><th>Medium</th><th>Where</th><th>Values</th><th>Median · max</th><th>From</th><th></th></tr></thead><tbody>${[...grp.entries()].map(([k, g]) => {
+      const v = g.v.sort((a, b) => a - b); return `<tr${g.metal === m ? "" : ' class="dim"'}><td>${g.metal}</td><td>${esc(MEAS_MED[g.med])}</td><td>${esc(MEAS_POS[g.pos])}</td><td>${v.length + g.nd}${g.nd ? ` (${g.nd} below detection)` : ""}</td><td>${v.length ? `${fmt(v[Math.floor(v.length / 2)])} · ${fmt(v[v.length - 1])} ${esc(MEAS_UNIT[g.med])}` : "–"}</td><td>${esc(g.src)}</td><td><button class="btn ghost sm" data-imp-del="${esc(k)}">Remove</button></td></tr>`; }).join("")}</tbody></table></div>`
+    : `<p class="mini">No measured values yet. They appear here after you add them from a file, and the priority rating and the measurement plan use them.</p>`;
+  let parsed = "";
+  if(r && r.err) parsed = `<p class="fx-warn">${esc(r.err)}</p>`;
+  else if(r){
+    const metaTxt = Object.entries(r.meta).slice(0, 6).map(([k, v]) => `${esc(k)}: ${esc(v)}`).join(" · ");
+    const colRow = (c, i) => `<tr><td>${esc(c.name)}</td>
+        <td><select data-imp-col="${i}" data-f="kind" aria-label="What column ${esc(c.name)} is">${Object.entries(IMP_KIND).map(([k, d]) => `<option value="${k}"${c.kind === k ? " selected" : ""}>${esc(d.label)}</option>`).join("")}</select>${c.guessed ? "" : ' <small class="mini">not recognised</small>'}</td>
+        <td>${c.kind === "conc" ? `<select data-imp-col="${i}" data-f="metal" aria-label="Metal in column ${esc(c.name)}"><option value="">–</option>${MLIST.map(x => `<option${c.metal === x ? " selected" : ""}>${x}</option>`).join("")}</select>` : ""}</td>
+        <td>${c.kind === "conc" ? `<select data-imp-col="${i}" data-f="unit" aria-label="Unit of column ${esc(c.name)}">${["µg/L", "ng/L", "mg/L", "mg/kg", "µg/kg", "ng/m³", "µg/m³", "µg/(m²·d)", "mg/(m²·d)"].map(u => `<option${c.unit === u ? " selected" : ""}>${u}</option>`).join("")}</select>` : esc(c.unit || (IMP_KIND[c.kind] || {}).unit || "")}</td></tr>`;
+    // long tables of columns (MeteoSwiss files have about 40): show the recognised ones, fold away the ignored ones
+    const used = (r.cols || []).map((c, i) => [c, i]).filter(([c]) => c.kind !== "skip"), rest = (r.cols || []).map((c, i) => [c, i]).filter(([c]) => c.kind === "skip");
+    const thead = `<thead><tr><th>Column</th><th>What it is</th><th>Metal</th><th>Unit</th></tr></thead>`;
+    const colTbl = r.cols && r.cols.length ? (used.length || rest.length <= 6 ? `<div class="tbl-wrap"><table class="imp-tbl">${thead}<tbody>${(used.length && rest.length > 6 ? used : used.concat(rest)).map(([c, i]) => colRow(c, i)).join("")}</tbody></table></div>` : "")
+      + (rest.length > 6 ? `<details class="imp-more"><summary>${used.length ? `${rest.length} other columns are ignored` : `${rest.length} columns not recognised`}: show them to set what they are</summary><div class="tbl-wrap"><table class="imp-tbl">${thead}<tbody>${rest.map(([c, i]) => colRow(c, i)).join("")}</tbody></table></div></details>` : "") : "";
+    const ser = r.series.map((s, i) => {
+      const st = impStats(s), k = IMP_KIND[s.kind] || {label:s.kind};
+      if(!(st.n >= 2)) return `<div class="imp-card"><b>${esc(k.label)}</b> <span class="mini">(${esc(s.name)})</span><p class="mini">Too few dated values to summarise.</p></div>`;
+      const per = `${fmtD(st.t0)} to ${fmtD(st.t1)}, ${st.n.toLocaleString("en")} values (${({day:"daily", month:"monthly", year:"yearly"})[st.step]})`;
+      const btns = [];
+      let body = "";
+      if(st.meanQ != null){
+        body = `Mean ${fmt(st.meanQ)} m³/s · highest ${st.step === "day" ? "daily mean" : "value"} ${fmt(st.maxQ)} m³/s` + (st.q347 != null ? ` · Q347 (low flow, reached or exceeded on 347 days a year) ${fmt(st.q347)} m³/s` + ((st.t1 - st.t0) / (365.25 * DAY) < 9.5 ? ` (the legal Q347 is averaged over ten years; this file covers ${fmt((st.t1 - st.t0) / (365.25 * DAY))})` : "") : " · Q347 needs daily values");
+        btns.push(`<button class="btn sm" data-imp-use="Q" data-v="${st.meanQ}" data-s="${i}">Use the mean for the river (${fmt(st.meanQ)} m³/s)</button>`);
+        if(st.q347 != null) btns.push(`<button class="btn ghost sm" data-imp-use="q347" data-v="${st.q347}" data-s="${i}">Use Q347 for the low-flow check</button>`);
+      } else if(s.kind === "pr" && st.annual != null){
+        body = `Mean ${fmt(st.annual)} mm/yr over ${st.years} full year${st.years > 1 ? "s" : ""} · last ${Math.min(10, st.years)} years ${fmt(st.last10)} mm/yr · wettest ${st.wettest.y} (${fmt(st.wettest.v)} mm)` + (st.maxDay != null ? ` · wettest day ${fmt(st.maxDay)} mm` : "");
+        btns.push(`<button class="btn sm" data-imp-use="precip" data-v="${Math.round(st.annual)}" data-s="${i}">Use ${fmt(st.annual)} mm/yr as precipitation</button>`);
+        if(st.years >= 10 && Math.abs(st.last10 / st.annual - 1) > 0.05) btns.push(`<button class="btn ghost sm" data-imp-use="precip" data-v="${Math.round(st.last10)}" data-s="${i}">Use the last 10 years (${fmt(st.last10)} mm/yr)</button>`);
+      } else if(s.kind === "pr") body = "Needs at least one complete year to give an annual total.";
+      else if(s.kind === "gwl" || s.kind === "gwd"){
+        body = s.kind === "gwl" ? `Mean ${fmt(st.mean)} m a.s.l., highest ${fmt(st.max)} m a.s.l.` : `Mean depth ${fmt(st.mean)} m, shallowest ${fmt(st.min)} m`;
+        if(st.depthHigh != null){ body += ` · depth to water at the highest level about ${fmt(st.depthHigh)} m`; btns.push(`<button class="btn sm" data-imp-use="wt" data-v="${Math.max(0.5, st.depthHigh).toFixed(1)}" data-s="${i}">Use ${fmt(Math.max(0.5, st.depthHigh))} m as depth to the water table (cautious)</button>`); }
+        else body += " · set the site elevation (Site & climate tab, or pick the site on the map) to turn levels into a depth";
+      } else if(s.kind === "wt"){ body = `Mean ${fmt(st.mean)} °C, range ${fmt(st.min)}–${fmt(st.max)} °C`; btns.push(`<button class="btn ghost sm" data-imp-use="wcT" data-v="${st.mean.toFixed(1)}" data-s="${i}">Use the mean in the PHREEQC file</button>`); }
+      else body = `Mean ${fmt(st.mean)} ${esc(s.unit)}, range ${fmt(st.min)}–${fmt(st.max)}`;
+      return `<div class="imp-card"><b>${esc(k.label)}</b> <span class="mini">(${esc(s.name)})</span><p>${body}</p><p class="mini">${per}</p><div class="imp-btns">${btns.join("")}</div></div>`;
+    }).join("");
+    const cg = impConcGroups(r).map(g => `<div class="imp-card"><b>${g.metal}${g.sp === "VI" ? " (Cr(VI))" : ""}${g.site ? ` · ${esc(g.site)}` : ""}</b> <span class="mini">(${esc(g.param)}, ${esc(g.frac)}${g.unit ? ", " + esc(g.unit) : ", unit not found"})</span>
+        <p>${g.n} value${g.n > 1 ? "s" : ""}${g.n - g.nDet ? `, ${g.n - g.nDet} below detection` : ""}${g.max != null ? ` · median ${fmt(g.median)} · max ${fmt(g.max)} ${esc(g.unit)}` : ""}${isFinite(g.t0) ? ` · ${fmtD(g.t0)} to ${fmtD(g.t1)}` : ""}${g.sites.length ? ` · ${g.sites.length} site${g.sites.length > 1 ? "s" : ""}: ${esc(g.sites.slice(0, 3).join(", "))}${g.sites.length > 3 ? "…" : ""}` : ""}</p>
+        <div class="imp-btns"><label class="mini">Medium <select data-imp-g="${g.i}" data-f="med">${Object.entries(MEAS_MED).map(([k, l]) => `<option value="${k}"${g.med === k ? " selected" : ""}>${esc(l)}</option>`).join("")}</select></label>
+        <label class="mini">Where <select data-imp-g="${g.i}" data-f="pos">${Object.entries(MEAS_POS).map(([k, l]) => `<option value="${k}"${(g.pos || "src") === k ? " selected" : ""}>${esc(l)}</option>`).join("")}</select></label>
+        <button class="btn sm" data-imp-add="${g.i}">Add to measured values</button>${(g.pos === "ref") ? `<button class="btn ghost sm" data-imp-bg="${g.i}">Use the median as background ${g.metal}</button>` : ""}</div></div>`).join("");
+    parsed = `<div class="imp-res"><p><b>${esc(r.name)}</b>: ${r.nRows.toLocaleString("en")} rows, columns separated by ${r.delim === "tab" ? "tabs" : `“${esc(r.delim)}”`}${r.decComma ? ", decimal comma" : ""}.${metaTxt ? ` <span class="mini">${metaTxt}</span>` : ""}</p>
+      ${colTbl}${ser}${cg}${!ser && !cg ? `<p class="fx-warn">No time series or metal concentrations recognised. Set what each column is above.</p>` : ""}</div>`;
+  }
+  box.innerHTML = `<p class="tabnote">Read data files into CHemTrace: FOEN (BAFU) hydrological stations (discharge, water and groundwater levels, water temperature), FOEN and cantonal water-quality data (NAQUA, NADUF, NAWA) or your own laboratory results, NABEL air data and MeteoSwiss station data. Save the table as CSV or text (Excel: File → Save as → CSV), or copy it from the spreadsheet and paste it below. The file is read in your browser and is not uploaded.</p>
+    <div class="imp-in"><label class="btn ghost" for="impFile">Choose a file…</label><input type="file" id="impFile" accept=".csv,.txt,.tsv,.dat,.prn,text/csv,text/plain" hidden>
+      <details class="imp-paste"><summary>…or paste a table</summary><textarea id="impTxt" rows="5" spellcheck="false" placeholder="Paste rows from a spreadsheet, including the header row"></textarea><button class="btn sm" id="impTxtGo">Read the pasted table</button></details>
+      <span class="mini" role="status" id="impMsg">${esc(IMP.msg)}</span></div>
+    ${parsed}
+    <h4 class="imp-h">Measured values used by the priority rating and the measurement plan</h4>${measTbl}
+    <details class="imp-where"><summary>Where to get the data</summary><ul class="plain">
+      <li><b>River and lake discharge, water levels, water temperature (FOEN):</b> <a href="https://www.hydrodaten.admin.ch/" target="_blank" rel="noopener">hydrodaten.admin.ch</a> for recent data; longer series from the FOEN hydrological data service (<a href="https://www.bafu.admin.ch/de/messwerte-zum-thema-wasser-beziehen" target="_blank" rel="noopener">how to order</a>).</li>
+      <li><b>Groundwater quality and levels (NAQUA):</b> values for single stations on request from FOEN (same page).</li>
+      <li><b>River chemistry (NADUF, NAWA):</b> <a href="https://opendata.eawag.ch/" target="_blank" rel="noopener">Eawag open data</a>.</li>
+      <li><b>Air (NABEL):</b> the <a href="https://www.bafu.admin.ch/en/data-query-nabel" target="_blank" rel="noopener">NABEL data query</a>.</li>
+      <li><b>Precipitation and temperature (MeteoSwiss):</b> station files from <a href="https://opendatadocs.meteoswiss.ch" target="_blank" rel="noopener">MeteoSwiss open data</a>, for example ogd-smn_ber_m.csv (monthly) or …_d_historical.csv (daily).</li>
+      <li><b>Your own samples:</b> one row per sample with columns such as Date, Site, Parameter, Value, Unit, or one column per metal (for example “Pb [µg/L]”).</li></ul>
+      <p class="mini">FOEN files come in several layouts. If a column is not recognised, set what it is in the table that appears after reading.</p></details>`;
+}
+function impRead(text, name){
+  IMP.name = name; IMP.res = impParse(text, name); IMP.msg = IMP.res.err ? "" : "File read.";
+  renderImport();
+}
+function impFile(f){
+  if(!f) return;
+  if(f.size > 30e6){ IMP.msg = "The file is larger than 30 MB: cut it to the period you need."; renderImport(); return; }
+  const rd = new FileReader();
+  rd.onload = () => {
+    const buf = new Uint8Array(rd.result); let text;
+    try{ text = new TextDecoder("utf-8", {fatal:true}).decode(buf); } catch(e){ text = new TextDecoder("windows-1252").decode(buf); }   // older Swiss files are often Latin-1
+    impRead(text, f.name);
+  };
+  rd.readAsArrayBuffer(f);
+}
+document.addEventListener("change", e => {
+  if(e.target.id === "impFile"){ impFile(e.target.files[0]); return; }
+  const c = e.target.closest && e.target.closest("[data-imp-col]");
+  if(c && IMP.res && IMP.res.cols){ const col = IMP.res.cols[+c.dataset.impCol]; col[c.dataset.f] = c.value; col.guessed = true; if(c.dataset.f === "kind" && c.value === "conc" && !col.metal) col.metal = S.metal; if(c.dataset.f === "kind" && c.value === "conc" && !col.unit) col.unit = "µg/L"; impBuild(IMP.res); renderImport(); return; }
+  const g = e.target.closest && e.target.closest("[data-imp-g]");
+  if(g && IMP.res){ IMP.res.conc[+g.dataset.impG][g.dataset.f] = g.value; renderImport(); }
+});
+document.addEventListener("click", e => {
+  const b = e.target.closest && e.target.closest("button"); if(!b || !INP) return;
+  if(b.id === "impTxtGo"){ const t = $("#impTxt").value; if(t.trim()) impRead(t, "pasted table"); return; }
+  if(b.dataset.impUse){
+    const k = b.dataset.impUse, v = Number(b.dataset.v); if(!isFinite(v)) return;
+    INP[k] = k === "precip" ? Math.round(v) : Number(v.toPrecision(3));
+    IMP.msg = k === "Q" ? `River discharge set to ${fmt(v)} m³/s (River & lake tab).` : k === "q347" ? `Q347 of ${fmt(v)} m³/s is used for the low-flow check in the priority rating.` : k === "precip" ? `Precipitation set to ${fmt(v)} mm/yr (Site & climate tab).` : k === "wt" ? `Depth to the water table set to ${fmt(v)} m (Groundwater tab).` : `Water temperature ${fmt(v)} °C goes into the PHREEQC file.`;
+    INP.impSrc = Object.assign({}, INP.impSrc || {}, {[k]:IMP.name});
+    renderForm(); refreshAll(); saveAdv(); return;
+  }
+  if(b.dataset.impAdd != null && IMP.res){
+    const g = impConcGroups(IMP.res)[+b.dataset.impAdd], med = g.med || "gw", pos = g.pos || "src", out = [];
+    let bad = 0;
+    g.pts.forEach(p => { const v = impConv(p.v, g.unit, med); if(v == null){ bad++; return; } out.push({metal:g.metal, med, pos, v:Number(v.toPrecision(4)), nd:!!p.nd, t:p.t != null ? fmtD(p.t) : "", site:String(p.site || "").slice(0, 60), src:String(IMP.name).slice(0, 60), frac:g.frac}); });
+    INP.meas = (INP.meas || []).concat(out).slice(-1500);
+    IMP.msg = out.length ? `${out.length} ${g.metal} value${out.length > 1 ? "s" : ""} added as ${MEAS_MED[med].toLowerCase()}.` + (bad ? ` ${bad} skipped: the unit ${g.unit || "(none)"} does not fit this medium.` : "") : `Nothing added: the unit ${g.unit || "(none)"} does not fit ${MEAS_MED[med].toLowerCase()}.`;
+    refreshAll(); saveAdv(); renderImport(); return;
+  }
+  if(b.dataset.impBg != null && IMP.res){
+    const g = impConcGroups(IMP.res)[+b.dataset.impBg], med = g.med || "gw", v = g.median != null ? impConv(g.median, g.unit, med) : null;
+    const key = med === "soil" ? "bg" : med === "river" ? "bgRiv" : med === "gw" || med === "seep" ? "bgGw" : null;
+    if(v == null || !key){ IMP.msg = "This medium has no background input."; renderImport(); return; }
+    INP[key][g.metal] = Number(v.toPrecision(2)); IMP.msg = `Background ${g.metal} set to ${fmt(v)} ${MEAS_UNIT[med]} from the reference samples.`;
+    renderForm(); refreshAll(); saveAdv(); return;
+  }
+  if(b.dataset.impDel){
+    const [metal, med, pos, src] = b.dataset.impDel.split("|");
+    INP.meas = (INP.meas || []).filter(x => !(x.metal === metal && x.med === med && x.pos === pos && x.src === src));
+    refreshAll(); saveAdv(); renderImport();
+  }
+});
+function measSanitize(a){
+  if(!Array.isArray(a)) return [];
+  return a.filter(x => x && MLIST.includes(x.metal) && MEAS_MED[x.med] && MEAS_POS[x.pos] && typeof x.v === "number" && isFinite(x.v) && x.v >= 0).slice(-1500)
+    .map(x => ({metal:x.metal, med:x.med, pos:x.pos, v:x.v, nd:!!x.nd, t:String(x.t || "").slice(0, 10), site:String(x.site || "").slice(0, 60), src:String(x.src || "").slice(0, 60), frac:x.frac === "dissolved" ? "dissolved" : "total"}));
+}
+function prioSanitize(o){
+  const out = {}; if(!o || typeof o !== "object") return out;
+  Object.entries(o).forEach(([k, v]) => { if(/^[a-z]{2,10}$/.test(k) && v && PRIO_CAT[v.cat]) out[k] = {cat:v.cat, why:String(v.why || "").slice(0, 200)}; });
+  return out;
+}
+
 /* ================= SCRIPTING API (for reproducible runs from the browser console) ================= */
 window.SMP = window.CHemTrace = Object.freeze({
   _spread(){ const c = spreadSetup(); if(!c || !c.ok) return c && c.why; const f = spreadFrame(c, FRAMES[SP.frame]); const xs = []; for(let jj = 0; jj < f.ny; jj++) for(let ii = 0; ii < f.nx; ii++) if(f.best[jj * f.nx + ii]) xs.push([f.x0 + (ii + 0.5) * f.dx, -f.Wh + (jj + 0.5) * f.dy]); const [E, N] = c.world(xs.length ? xs[0][0] : 0, 0); return {dir:c.dir, n:xs.length, xmin:Math.min(...xs.map(v => v[0])), xmax:Math.max(...xs.map(v => v[0])), ymin:Math.min(...xs.map(v => v[1])), ymax:Math.max(...xs.map(v => v[1])), dx:f.dx, dy:f.dy, x0:f.x0, Y:c.Y, zB:f.zB, zP:f.zP}; },
@@ -3809,6 +4454,28 @@ window.SMP = window.CHemTrace = Object.freeze({
       setup("As", {preset:"plateau", medium:"soil", rlOn:"on", docIn:1, orgType:"leachate", orgCod:1200, budT:1}); const eCod = redoxLadder(INP).e.org;
       ok("Redox ladder steps down as electron donors rise, natural or from contamination", [cls, fuel].every(a => a.every((c, i) => i === 0 || ORD.indexOf(c) >= ORD.indexOf(a[i - 1]))) && cls[0] === "oxic" && cls[3] === "sulfidic" && fuel[0] === "oxic" && fuel[3] === "sulfidic" && Math.abs(eCod - 150) < 1e-9,
         `organic carbon 1, 5, 10, 500 mg C/L: ${cls.join(", ")}; fuel 0, 5, 50, 500 mg/L: ${fuel.join(", ")}; 1,200 mg O₂/L COD = ${fmt(eCod)} mmol e⁻/L`);
+      // data import: MeteoSwiss, FOEN-style hydrology, laboratory tables (long and wide), decimal comma, detection limits
+      const days = n => Array.from({length:n}, (_, i) => new Date(Date.UTC(2021, 0, 1) + i * 86400000));
+      const ms = "station_abbr;reference_timestamp;tre200m0;rre150m0\n" + [2021, 2022].flatMap(y => Array.from({length:12}, (_, k) => `BER;01.${String(k + 1).padStart(2, "0")}.${y} 00:00;${k};${y === 2021 ? 100 : 50}`)).join("\n");
+      const q = days(730).map((d, i) => `Aare - Bern;2135;Abfluss;Tagesmittel;m3/s;Aare;${d.toISOString().slice(0, 10)};;${i % 100 + 1};Freigegeben`);
+      const foen = "Stationsname;Stationsnummer;Parameter;Zeitreihe;Parametereinheit;Gewässer;Zeitstempel;Zeitpunkt_des_Auftretens;Wert;Freigabestatus\n" + q.join("\n");
+      const meta = "Station: Emme - Emmenmatt\nParameter: Abfluss\nEinheit: m3/s\n" + days(400).map((d, i) => `${String(d.getUTCDate()).padStart(2, "0")}.${String(d.getUTCMonth() + 1).padStart(2, "0")}.${d.getUTCFullYear()};${(i % 10 + 1) + ",5"}`).join("\n");
+      const lab = "Datum;Messstelle;Parameter;Wert;Einheit\n12.03.2025;P1;Blei;<0,5;µg/l\n12.03.2025;P2;Blei;3,2;µg/l\n12.03.2025;P2;Chrom (VI);12;µg/l\n12.03.2025;P2;Zink;0,08;mg/l";
+      const wide = "Date\tSite\tPb [µg/L]\tCd (ng/l)\n2025-04-01\tW1\t2.5\t40\n2025-05-01\tW1\t<1\t30";
+      const a = SMP.readData(ms, "ogd-smn_ber_m.csv"), iB = SMP.readData(foen, "foen.csv"), iC = SMP.readData(meta, "emme.txt"), iD = SMP.readData(lab, "lab.csv"), iE = SMP.readData(wide, "pasted");
+      const pr = a.series.find(x => x.kind === "Precipitation"), qq = iB.series[0], qm = iC.series[0];
+      const sortedQ = Array.from({length:730}, (_, i) => i % 100 + 1).sort((x, y) => x - y), q347 = sortedQ[Math.round(18 / 365 * 729)];
+      const pbs = iD.metals.filter(x => x.metal === "Pb"), pb = pbs.length ? {n:pbs.reduce((a, x) => a + x.n, 0), belowDetection:pbs.reduce((a, x) => a + x.belowDetection, 0), max:Math.max(...pbs.map(x => x.max || 0)), sites:pbs.length} : null, cr = iD.metals.find(x => x.metal === "Cr"), zn = iD.metals.find(x => x.metal === "Zn"), cdw = iE.metals.find(x => x.metal === "Cd");
+      ok("Data import reads MeteoSwiss, FOEN-style hydrology and laboratory tables", pr && Math.abs(pr.summary.annual - 900) < 1e-9 && qq && qq.kind === "Discharge" && qq.summary.q347 === q347 && qm && qm.kind === "Discharge" && Math.abs(qm.summary.mean - 6) < 0.1
+        && pb && pb.n === 2 && pb.belowDetection === 1 && pb.max === 3.2 && pb.sites === 2 && cr && cr.species === "VI" && zn && zn.unit === "mg/L" && cdw && cdw.unit === "ng/L" && iE.metals.find(x => x.metal === "Pb").belowDetection === 1,
+        `precipitation ${pr ? fmt(pr.summary.annual) : "–"} mm/yr; Q347 ${qq ? fmt(qq.summary.q347) : "–"} (expected ${q347}); metadata-header series mean ${qm ? fmt(qm.summary.mean) : "–"}; lab: Pb ${pb ? pb.n : 0} values at ${pb ? pb.sites : 0} sites, Cr(VI) ${cr ? "found" : "missing"}, Zn in ${zn ? zn.unit : "–"}`);
+      // screening priority: the rules give the documented category
+      const P0 = {lim:10, limName:"limit", sev:3, tc:0, stress:[], meas:null, pex:0, ratio:0.1};
+      const cat = x => prioCat(Object.assign({}, P0, x)).cat;
+      const pc = [cat({meas:{n:2, max:12, allNd:false, unit:"µg/L"}}), cat({pex:0.95, ratio:2}), cat({pex:0.5, ratio:1.1}), cat({pex:0.95, ratio:2, tc:2}), cat({pex:0.95, ratio:2, tc:3, slowTiming:true}),
+        cat({pex:0.95, ratio:2, meas:{n:3, max:4, allNd:false, unit:"µg/L"}}), cat({stress:["storm runoff"]}), cat({ratio:0.6}), cat({}), cat({lim:null}), cat({pex:0.95, ratio:3, sev:1})];
+      const want = ["act", "act", "measure", "monitor", "measure", "measure", "monitor", "monitor", "record", "record", "measure"];
+      ok("Screening priority follows its rules", pc.every((x, i) => x === want[i]), pc.join(", "));
     }catch(err){ ok("Checks ran without errors", false, String(err)); }
     finally{ S.metal = keepM; INP = keepI; S.water = keepW; }
     const passed = out.filter(r => r.pass).length;
@@ -3824,6 +4491,14 @@ window.SMP = window.CHemTrace = Object.freeze({
       const sh = airShares(INP, metal, 1);
       return (xs || [100, 200, 500, 1000, 2000, 5000]).map(x => { const p = airPoint(INP, sh, x, true); return {x, dep:p.dep * INP.amount * 1e9 / 365, air:(p.cPM + p.cGas) * INP.amount}; });
     } finally { S.metal = keepM; INP = keepI; }
+  },
+  // read a data table (CSV or text) as the Import data tab does: returns the recognised series with summaries and metal values
+  readData(text, name){
+    const r = impParse(String(text), name || "table");
+    if(r.err) return {error:r.err};
+    return {rows:r.nRows, delimiter:r.delim, decimalComma:r.decComma, metadata:r.meta,
+      series:r.series.map(x => ({kind:(IMP_KIND[x.kind] || {}).label || x.kind, column:x.name, unit:x.unit, summary:impStats(x)})),
+      metals:impConcGroups(r).map(g => ({metal:g.metal, species:g.sp, site:g.site || null, unit:g.unit, fraction:g.frac, medium:MEAS_MED[g.med], n:g.n, belowDetection:g.n - g.nDet, median:g.median, max:g.max}))};
   },
   // text of an export file for the current Advanced inputs, or for given ones: kind = phreeqc, hydrus, modflow or json
   exportFile(kind, metal, inputs){
@@ -3855,6 +4530,9 @@ window.SMP = window.CHemTrace = Object.freeze({
         forms: R.forms.map(r => ({scenario:r.sc.label, changed:r.sc.what, sameAsToday:r.same, years:r.T, releasedKg:r.rel, harvestKg:r.harvest,
           phases:Object.fromEntries(PHASES.map(p => [p.k, {kg:r.tot[p.k], forms:Object.fromEntries(Object.entries(r.F[p.k]).map(([k, v]) => [formLabel(metal, k, r.origLabel), v]))}]))})),
         drivers: R.sens.map(it => ({id:it.id, label:it.label, ranking:sensitivity(it, R).map(x => ({input:x.f.label, rho:x.rho}))})),
+        priority: R.prio.map(L => ({id:L.id, receptor:L.rec, pathway:L.path, category:PRIO_CAT[prioEff(L)].label, suggested:PRIO_CAT[L.cat].label, why:L.why, value:L.v, unit:L.row.unit, limit:L.lim, limitName:L.limName,
+          shareOfRunsAbove:L.pex, measured:L.meas, timeToImpact:L.ttxt, aboveUnderStress:L.stress})),
+        measurementPlan: R.plan.map(t => ({what:t.what, priority:PRIO_CAT[t.cat].label, why:t.why, forReceptors:t.links, where:t.where, how:t.how, when:t.when, valuesImported:t.done})),
         internals: {Kd:o.Kd, kLeach:o.kL, kErosion:o.kE, kOther:o.kO, halfLife:o.half, travelToWaterTable:o.tArr, DAF:o.D ? o.D.daf : null, dissolvedShareRiver:o.fd, seepage:o.cw, seepageAdded:o.cwAdd, topsoilPeak:o.Ctot, sb:o.sb || null},
         ladder: lad ? {predominantTEAP:TEAP_LBL[lad.teap], redox:lad.cls, drain:lad.drain, pe:lad.pe, electrons:lad.e, oxideStock:lad.cap, yearsToUseUpMnOxides:isFinite(lad.tMn) ? lad.tMn : null, yearsToUseUpOxides:isFinite(lad.tEx) ? lad.tEx : null} : null,
         inputs: clone(INP)

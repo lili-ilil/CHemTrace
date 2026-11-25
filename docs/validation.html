@@ -368,7 +368,7 @@ try{ var m = localStorage.getItem("smp-metal"); if(m === "Hg" || m === "Pb" || m
 
       <section id="checks">
         <h2>Code checks</h2>
-        <p class="lead">Validation asks whether the model matches reality. Code checks ask whether the code does what the equations say. Version 0.14.0 passes all 22 automated checks.</p>
+        <p class="lead">Validation asks whether the model matches reality. Code checks ask whether the code does what the equations say. Version 0.15.0 passes all 24 automated checks.</p>
         <div class="tbl-wrap"><table>
           <thead><tr><th>Check</th><th>Result</th></tr></thead>
           <tbody>
@@ -380,6 +380,8 @@ try{ var m = localStorage.getItem("smp-metal"); if(m === "Hg" || m === "Pb" || m
             <tr><td>Chromium: Kd rises as Cr(VI) is reduced (oxic 3.3, anoxic 66, Cr(III) 320 L/kg), and dissolved Cr(III) stays at or below the Cr(OH)₃ solubility</td><td><span class="pill ok">Pass</span></td></tr>
             <tr><td>A single event applies only to releases to soil and air; a groundwater release set to single event gives the continuous result</td><td><span class="pill ok">Pass</span></td></tr>
             <tr><td>Every metal has data for every compartment, pathway, chemical form, limit and export</td><td><span class="pill ok">Pass</span> 8 metals</td></tr>
+            <tr><td>The data import reads MeteoSwiss station files, FOEN-style hydrological tables (with and without a header row), and laboratory tables in long and wide layout, with decimal commas and detection limits; Q347 and the annual precipitation match their definitions</td><td><span class="pill ok">Pass</span></td></tr>
+            <tr><td>The screening priority gives the documented rating for each of its rules</td><td><span class="pill ok">Pass</span> 11 cases</td></tr>
             <tr><td>Topsoil follows its analytical solution S(t) = J/k·(1 − e<sup>−kt</sup>)</td><td><span class="pill ok">Pass</span></td></tr>
             <tr><td>The mass budget conserves mass in 288 cases (8 metals × 4 release routes × 3 flood settings × 3 times)</td><td><span class="pill ok">Pass</span> largest error 3 × 10⁻¹⁴</td></tr>
             <tr><td>Forms by phase add up to the released mass in all five scenarios</td><td><span class="pill ok">Pass</span></td></tr>
@@ -439,7 +441,7 @@ SMP.run("Hg", {preset:"visp", medium:"soil", form:"hgsed", pattern:"pulse",
     </main>
   </div>
 
-  <footer>CHemTrace · screening estimates for contaminants in Switzerland (now As, Hg, Pb, Cd, Cu, Zn, Ni and Cr). Benchmarks quoted from the sources listed; model runs from the platform's own engine.<span class="copy">© 2026 Li-Ling T. ETH Zürich · Version 0.14.0, 25 November 2026 · Contact: <a href="mailto:litail@ethz.ch">litail@ethz.ch</a></span></footer>
+  <footer>CHemTrace · screening estimates for contaminants in Switzerland (now As, Hg, Pb, Cd, Cu, Zn, Ni and Cr). Benchmarks quoted from the sources listed; model runs from the platform's own engine.<span class="copy">© 2026 Li-Ling T. ETH Zürich · Version 0.15.0, 25 November 2026 · Contact: <a href="mailto:litail@ethz.ch">litail@ethz.ch</a></span></footer>
 </div>
 </body>
 </html>

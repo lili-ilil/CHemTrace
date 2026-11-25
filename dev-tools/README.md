@@ -21,12 +21,15 @@ node dev-tools/tests/self_test.js
 
 | File | What it checks |
 |---|---|
-| `self_test.js` | Runs `SMP.selfTest()`: 22 checks in version 0.14.0 (mass balance, Kd relations, plume, air, redox ladder, completeness of every metal) |
+| `self_test.js` | Runs `SMP.selfTest()`: 24 checks in version 0.15.0 (mass balance, Kd relations, plume, air, redox ladder, completeness of every metal, data import, priority rules) |
 | `all_metals.js` | Every metal × release route × release pattern runs without NaN or undefined; prints key results; writes PHREEQC test files to `tests/out/pqi/` |
 | `exports.js` | PHREEQC, HYDRUS, MODFLOW and JSON exports for every metal and route |
 | `ui.js` | Explore panels for every metal, every Advanced example, the release-pattern menu |
 | `layout.js` | All pages at desktop and phone width: no sideways scrolling, no broken in-page links |
 | `maps.js` | Site lookup backgrounds and the Map / Aerial image switch |
+| `import.js` | Reads data files as the Import data tab does and prints what was recognised. Without arguments it reads `tests/samples`; pass your own files to check them, e.g. `node dev-tools/tests/import.js my_foen_file.csv` |
+
+`tests/samples` holds one real MeteoSwiss excerpt (Bern-Zollikofen, monthly 2015–2024, Source: MeteoSwiss) and synthetic files in FOEN-style and laboratory layouts. The FOEN-style layouts are examples, not official templates: FOEN publishes no file format, so check real FOEN files with `import.js` and report any that are not read.
 
 Each script exits with code 1 if something fails. Screenshots and files go to `tests/out/` (not uploaded). To test the published site instead, set `CHEMTRACE_URL`, for example `CHEMTRACE_URL=https://<user>.github.io/<repository> node dev-tools/tests/self_test.js`.
 
@@ -38,5 +41,5 @@ Each script exits with code 1 if something fails. Screenshots and files go to `t
 
 ## generators/ (Python)
 
-- `assumptions.py`: writes `docs/assumptions.html` (97 assumptions in 0.14.0) from the table inside the script, using the page header of `docs/validation.html`. Edit the table there, then run `python dev-tools/generators/assumptions.py`.
+- `assumptions.py`: writes `docs/assumptions.html` (110 assumptions in 0.15.0) from the table inside the script, using the page header of `docs/validation.html`. Edit the table there, then run `python dev-tools/generators/assumptions.py`.
 - `atlas_percentiles.py`: prints the soil-atlas percentiles for Cd, Cr, Cu, Ni and Zn used in `ATLAS_PCT` in `docs/assets/js/app.js`.

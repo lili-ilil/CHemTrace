@@ -1,0 +1,25 @@
+Datum;Messstelle;Parameter;Wert;Einheit
+15.05.2019;GW-1;Chrom (VI);16,8;µg/l
+15.05.2019;GW-1;Blei;<0,5;µg/l
+15.05.2019;GW-1;Nickel;4,4;µg/l
+15.05.2019;REF-1;Chrom (VI);1,0;µg/l
+15.05.2020;GW-1;Chrom (VI);11,6;µg/l
+15.05.2020;GW-1;Blei;<0,5;µg/l
+15.05.2020;GW-1;Nickel;2,6;µg/l
+15.05.2020;REF-1;Chrom (VI);0,8;µg/l
+15.05.2021;GW-1;Chrom (VI);11,6;µg/l
+15.05.2021;GW-1;Blei;<0,5;µg/l
+15.05.2021;GW-1;Nickel;4,5;µg/l
+15.05.2021;REF-1;Chrom (VI);0,8;µg/l
+15.05.2022;GW-1;Chrom (VI);15,1;µg/l
+15.05.2022;GW-1;Blei;<0,5;µg/l
+15.05.2022;GW-1;Nickel;5,2;µg/l
+15.05.2022;REF-1;Chrom (VI);1,4;µg/l
+15.05.2023;GW-1;Chrom (VI);16,3;µg/l
+15.05.2023;GW-1;Blei;<0,5;µg/l
+15.05.2023;GW-1;Nickel;2,4;µg/l
+15.05.2023;REF-1;Chrom (VI);1,1;µg/l
+15.05.2024;GW-1;Chrom (VI);21,5;µg/l
+15.05.2024;GW-1;Blei;<0,5;µg/l
+15.05.2024;GW-1;Nickel;3,6;µg/l
+15.05.2024;REF-1;Chrom (VI);1,4;µg/l

@@ -593,3 +593,52 @@ footer .copy{display:block; margin-top:6px; color:var(--ink-2)}
 .fx .btn:disabled{opacity:.45; cursor:not-allowed}
 .fx-file{font:12px/1.3 var(--f-mono); color:var(--ink-3); overflow-wrap:anywhere}
 .fx-warn{margin:0; border-left:4px solid var(--warn); padding:6px 10px; font-size:13px; background:var(--chip); border-radius:3px}
+
+/* 0.15.0: screening priority, measurement plan, data import */
+.prio, .plan{margin-top:28px}
+.pmx{display:grid; gap:4px; margin:10px 0 16px; font-size:13px}
+.pmx-row{display:grid; grid-template-columns:minmax(150px, 1.3fr) repeat(4, minmax(0, 1fr)); gap:4px}
+.pmx-hd span{font-family:var(--f-mono); font-size:11px; color:var(--ink-3); text-transform:uppercase; letter-spacing:.04em; padding:2px 6px}
+.pmx-sev{font-size:12.5px; color:var(--ink-2); padding:6px}
+.pmx-cell{background:var(--surface); border:1px solid var(--rule); border-radius:4px; min-height:42px; padding:5px; display:flex; flex-wrap:wrap; gap:4px; align-content:flex-start}
+.pchip{font-size:12px; line-height:1.3; padding:3px 7px; border-radius:3px}
+.pchip.crit{background:var(--crit); color:var(--surface)}
+.pchip.check{border:1px dashed var(--warn); color:var(--ink)}
+.pchip.warn{background:color-mix(in srgb, var(--warn) 22%, transparent); color:var(--ink)}
+.pchip.info{background:var(--chip); color:var(--ink-3)}
+.prows{display:flex; flex-direction:column; gap:10px}
+.prow{background:var(--surface); border:1px solid var(--rule); border-radius:6px; padding:12px 14px}
+.prow-h{display:flex; flex-wrap:wrap; align-items:baseline; gap:6px 10px}
+.prow-h small{color:var(--ink-3); font-size:12.5px}
+.prow-b{display:grid; grid-template-columns:repeat(4, minmax(0, 1fr)); gap:6px 14px; margin:8px 0 4px; font-size:13.5px}
+.prow-b i{display:block; font-style:normal; font-family:var(--f-mono); font-size:10.5px; letter-spacing:.04em; text-transform:uppercase; color:var(--ink-3)}
+.prow-b small{color:var(--ink-3)}
+.prow-why{font-size:13.5px; margin:6px 0; color:var(--ink-2)}
+.prow-ov{display:flex; flex-wrap:wrap; align-items:center; gap:6px 10px}
+.prow-ov select, .prow-ov input{font:inherit; font-size:13px; padding:4px 6px; border:1px solid var(--rule); border-radius:4px; background:var(--paper); color:var(--ink)}
+.prow-ov input{flex:1 1 220px; min-width:0}
+#prioNoRegret h4{margin:16px 0 6px}
+.plan-list{display:flex; flex-direction:column; gap:10px; padding-left:22px; margin:10px 0}
+.plan-list li{background:var(--surface); border:1px solid var(--rule); border-radius:6px; padding:10px 14px}
+.plan-h{display:flex; flex-wrap:wrap; align-items:baseline; gap:6px 10px}
+.plan-list dl{display:grid; grid-template-columns:70px minmax(0, 1fr); gap:4px 12px; margin:8px 0 0; font-size:13.5px}
+.plan-list dt{font-weight:600; color:var(--ink-2)}
+.plan-list dd{margin:0}
+.imp-panel{padding:6px 0 14px}
+.imp-in{display:flex; flex-wrap:wrap; align-items:flex-start; gap:8px 14px; margin:8px 0}
+.imp-paste{flex:1 1 320px}
+.imp-paste textarea{width:100%; font-family:var(--f-mono); font-size:12px; margin:6px 0; background:var(--paper); color:var(--ink); border:1px solid var(--rule); border-radius:4px; padding:6px}
+.imp-res{margin:10px 0}
+.imp-card{background:var(--surface); border:1px solid var(--rule); border-left:4px solid var(--metal); border-radius:4px; padding:10px 14px; margin:8px 0; font-size:14px}
+.imp-card p{margin:4px 0}
+.imp-btns{display:flex; flex-wrap:wrap; gap:6px 10px; align-items:center; margin-top:6px}
+.imp-btns select{font:inherit; font-size:13px; padding:3px 5px; border:1px solid var(--rule); border-radius:4px; background:var(--paper); color:var(--ink)}
+.imp-tbl{font-size:13px}
+.imp-tbl select{font:inherit; font-size:12.5px; padding:2px 4px; border:1px solid var(--rule); border-radius:4px; background:var(--paper); color:var(--ink)}
+.imp-tbl tr.dim td{color:var(--ink-3)}
+.imp-h{margin:18px 0 6px}
+.imp-where{margin-top:14px; font-size:14px}
+.btn.sm{font-size:12.5px; padding:5px 10px}
+.sp-hint{font-weight:600; color:var(--warn)}
+@media (max-width: 860px){ .pmx-row{grid-template-columns:repeat(4, minmax(0, 1fr))} .pmx-sev{grid-column:1 / -1; padding:6px 2px 0} .pmx-hd span:first-child{display:none} .prow-b{grid-template-columns:repeat(2, minmax(0, 1fr))} }
+@media (max-width: 520px){ .pmx-hd span{font-size:9.5px; padding:2px} .prow-b{grid-template-columns:minmax(0, 1fr)} .plan-list{padding-left:18px} .plan-list dl{grid-template-columns:minmax(0, 1fr)} }

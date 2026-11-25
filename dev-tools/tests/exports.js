@@ -4,7 +4,7 @@ const {chromium} = require('playwright'), {URL, METALS} = require('./_base');
   await p.goto(URL + '/index.html'); await p.waitForTimeout(800);
   const r = await p.evaluate(M => { const out = [];
     for(const m of M) for(const md of ["soil", "gw", "river", "air"]) for(const k of ["phreeqc", "hydrus", "modflow", "json"]){
-      try{ const f = CHemTrace.exportFile(k, m, {preset:"plateau", medium:md}); out.push([/undefined|NaN/.test(f.text) ? "BAD" : "ok", m, md, k, f.name].join(" ")); }
+      try{ const f = CHemTrace.exportFile(k, m, {preset:"plateau", medium:md}); out.push([/undefined|\bNaN\b/.test(f.text) ? "BAD" : "ok", m, md, k, f.name].join(" ")); }
       catch(e){ out.push(["n/a", m, md, k, e.message].join(" ")); } }
     return out; }, METALS);
   console.log(r.filter(x => x.startsWith("ok")).length, "files written; problems:", r.filter(x => x.startsWith("BAD")));
